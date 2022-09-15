@@ -1,11 +1,24 @@
 <template>
   <div class="flex flex-col absolute w-64 h-auto pin-r pin-b bg-grey-darkest text-white rounded mr-2 mb-2 z-10">
     <div class="p-2 mt-1">
-      Controls
+      Control Panel
     </div>
     <div class="bg-grey-dark h-full p-3 rounded-b flex flex-col border border-grey-darkest">
-      <div class="border-b border-grey-darkest mb-2 pb-2">
-        <p class="mb-1 text-grey-light font-bold">
+      <div class="border-b border-grey-darkest mb-2 pb-2 w-100">
+        <p class="flex items-center justify-between mb-1">
+          A Chain
+          <input class="w-32" type="text" name="a" id="chain_a" @change="updateChain" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
+          B Chain
+          <input class="w-32" type="text" name="b" id="chain_b" @change="updateChain" />
+        </p>
+        <p class="flex items-center">
+          <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
+            Generate peptides
+          </button>
+        </p>
+        <!-- <p class="mb-1 text-grey-light font-bold">
           Scenery
         </p>
         <p class="flex items-center justify-between mb-1">
@@ -16,9 +29,9 @@
           Axis Lines
           <input type="checkbox" name="axis-lines" id="axis-lines" v-model="axisLinesVisible"
             @click="toggleAxisLines" />
-        </p>
+        </p> -->
       </div>
-      <div v-if="CAMERA_POSITION" class="border-b border-grey-darkest mb-2 pb-2">
+      <!-- <div v-if="CAMERA_POSITION" class="border-b border-grey-darkest mb-2 pb-2">
         <p class="mb-1 text-grey-light font-bold">
           Camera Position
         </p>
@@ -36,15 +49,15 @@
             Reset Camera
           </button>
         </p>
-      </div>
-      <div class="flex justify-around">
+      </div> -->
+      <!-- <div class="flex justify-around">
         <a href="https://threejs.org/examples/?q=controls#misc_controls_trackball" target="_blank"
           class="text-grey-light no-underline hover:text-grey-lighter">Original &#8599;
         </a>
         <a href="https://github.com/SRLabs/Vue-Three-Demo" target="_blank"
           class="text-grey-light no-underline hover:text-grey-lighter">Github &#8599;
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -54,15 +67,20 @@ import { mapGetters, mapMutations } from "vuex";
 export default {
   data() {
     return {
+      chains: {},
       axisLinesVisible: true,
       pyramidsVisible: true
     };
   },
   computed: {
-    ...mapGetters(["CAMERA_POSITION"])
+    ...mapGetters([
+      "CAMERA_POSITION",
+      "CHAINS"
+    ])
   },
   methods: {
     ...mapMutations([
+      'SET_CHAINS',
       "SET_CAMERA_POSITION",
       "RESET_CAMERA_ROTATION",
       "HIDE_AXIS_LINES",
@@ -70,6 +88,16 @@ export default {
       "HIDE_PYRAMIDS",
       "SHOW_PYRAMIDS"
     ]),
+    updateChain(e) {
+      this.chains[e.target.name] = e.target.value
+      this.SET_CHAINS(this.chains)
+    },
+    generatePeptides() {
+      if (!this.chains.a || !this.chains.b) {
+        alert('Please input the correct string.')
+        return
+      }
+    },
     resetCameraPosition() {
       this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 });
       this.RESET_CAMERA_ROTATION();

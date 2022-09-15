@@ -35,8 +35,14 @@ export default new Vuex.Store({
     CAMERA_POSITION: (state) => {
       return state.camera ? state.camera.position : null;
     },
+    CHAINS: (state) => {
+      return state.chains || {};
+    },
   },
   mutations: {
+    SET_CHAINS(state, chains) {
+      state.chains = chains;
+    },
     SET_VIEWPORT_SIZE(state, { width, height }) {
       state.width = width;
       state.height = height;
