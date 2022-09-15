@@ -7,14 +7,18 @@
       <div class="border-b border-grey-darkest mb-2 pb-2 w-100">
         <p class="flex items-center justify-between mb-1">
           A Chain
-          <input class="w-32" type="text" name="a" id="chain_a" @change="updateChain" />
+          <input class="w-32" type="text" name="a" @change="updateChain" />
         </p>
         <p class="flex items-center justify-between mb-1">
           B Chain
-          <input class="w-32" type="text" name="b" id="chain_b" @change="updateChain" />
+          <input class="w-32" type="text" name="b" @change="updateChain" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
+          Joint Length
+          <input class="w-32" type="number" name="joint_length" @input="updateJointLength" />
         </p>
         <p class="flex items-center">
-          <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
+          <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="this.GENERATE_PEPTIDES">
             Generate peptides
           </button>
         </p>
@@ -64,10 +68,12 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex"
+import { getFloat } from '../common'
 export default {
   data() {
     return {
       chains: {},
+      joint_length: 0,
       axisLinesVisible: true,
       pyramidsVisible: true,
     }
@@ -80,6 +86,7 @@ export default {
   methods: {
     ...mapMutations([
       'SET_CHAINS',
+      'SET_JOINT_LENGTH',
       "SET_CAMERA_POSITION",
       "RESET_CAMERA_ROTATION",
       "HIDE_AXIS_LINES",
@@ -91,13 +98,9 @@ export default {
     updateChain(e) {
       this.chains[e.target.name] = e.target.value
       this.SET_CHAINS(this.chains)
-      this.GENERATE_PEPTIDES()
     },
-    generatePeptides() {
-      if (!this.chains.a || !this.chains.b) {
-        alert('Please enter a valid string.')
-        return
-      }
+    updateJointLength(e) {
+      this.SET_JOINT_LENGTH(getFloat(e.target.value))
     },
     resetCameraPosition() {
       this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })

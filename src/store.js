@@ -40,6 +40,9 @@ export default new Vuex.Store({
     SET_CHAINS(state, chains) {
       state.chains = chains;
     },
+    SET_JOINT_LENGTH(state, length) {
+      state.joint_length = length;
+    },
     SET_VIEWPORT_SIZE(state, { width, height }) {
       state.width = width;
       state.height = height;
@@ -133,7 +136,13 @@ export default new Vuex.Store({
 
       state.scene.add(...state.axisLines);
     },
-    GENERATE_PEPTIDES(state) {},
+    GENERATE_PEPTIDES(state) {
+      if (!state.chains.a || !state.chains.b || state.joint_length <= 0) {
+        alert("Please enter valid data.");
+        return;
+      }
+      console.log(state);
+    },
     RESIZE(state, { width, height }) {
       state.width = width;
       state.height = height;
