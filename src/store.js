@@ -35,9 +35,6 @@ export default new Vuex.Store({
     CAMERA_POSITION: (state) => {
       return state.camera ? state.camera.position : null;
     },
-    CHAINS: (state) => {
-      return state.chains || {};
-    },
   },
   mutations: {
     SET_CHAINS(state, chains) {
@@ -80,28 +77,25 @@ export default new Vuex.Store({
       state.controls.dynamicDampingFactor = 0.3;
       state.controls.keys = [65, 83, 68];
     },
-    UPDATE_CONTROLS(state) {
-      state.controls.update();
-    },
     INITIALIZE_SCENE(state) {
       state.scene = new Scene();
       state.scene.background = new Color(0xcccccc);
       state.scene.fog = new FogExp2(0xcccccc, 0.002);
-      var geometry = new CylinderBufferGeometry(0, 10, 30, 4, 1);
-      var material = new MeshPhongMaterial({
-        color: 0xffffff,
-        flatShading: true,
-      });
-      for (var i = 0; i < 500; i++) {
-        var mesh = new Mesh(geometry, material);
-        mesh.position.x = (Math.random() - 0.5) * 1000;
-        mesh.position.y = (Math.random() - 0.5) * 1000;
-        mesh.position.z = (Math.random() - 0.5) * 1000;
-        mesh.updateMatrix();
-        mesh.matrixAutoUpdate = false;
-        state.pyramids.push(mesh);
-      }
-      state.scene.add(...state.pyramids);
+      // var geometry = new CylinderBufferGeometry(0, 10, 30, 4, 1);
+      // var material = new MeshPhongMaterial({
+      //   color: 0xffffff,
+      //   flatShading: true,
+      // });
+      // for (var i = 0; i < 500; i++) {
+      //   var mesh = new Mesh(geometry, material);
+      //   mesh.position.x = (Math.random() - 0.5) * 1000;
+      //   mesh.position.y = (Math.random() - 0.5) * 1000;
+      //   mesh.position.z = (Math.random() - 0.5) * 1000;
+      //   mesh.updateMatrix();
+      //   mesh.matrixAutoUpdate = false;
+      //   state.pyramids.push(mesh);
+      // }
+      // state.scene.add(...state.pyramids);
 
       // lights
       var lightA = new DirectionalLight(0xffffff);
@@ -129,7 +123,7 @@ export default new Vuex.Store({
       var lineB = new Line(geometryC, materialC);
       state.axisLines.push(lineB);
 
-      // Axis 3
+      // Axis Line 3
       var materialD = new LineBasicMaterial({ color: 0xff0000 });
       var geometryD = new Geometry();
       geometryD.vertices.push(new Vector3(0, 0, 0));
@@ -139,6 +133,7 @@ export default new Vuex.Store({
 
       state.scene.add(...state.axisLines);
     },
+    GENERATE_PEPTIDES(state) {},
     RESIZE(state, { width, height }) {
       state.width = width;
       state.height = height;

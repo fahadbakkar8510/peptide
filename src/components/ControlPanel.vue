@@ -63,19 +63,18 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations } from "vuex"
 export default {
   data() {
     return {
       chains: {},
       axisLinesVisible: true,
-      pyramidsVisible: true
-    };
+      pyramidsVisible: true,
+    }
   },
   computed: {
     ...mapGetters([
       "CAMERA_POSITION",
-      "CHAINS"
     ])
   },
   methods: {
@@ -86,11 +85,13 @@ export default {
       "HIDE_AXIS_LINES",
       "SHOW_AXIS_LINES",
       "HIDE_PYRAMIDS",
-      "SHOW_PYRAMIDS"
+      "SHOW_PYRAMIDS",
+      "GENERATE_PEPTIDES",
     ]),
     updateChain(e) {
       this.chains[e.target.name] = e.target.value
       this.SET_CHAINS(this.chains)
+      this.GENERATE_PEPTIDES()
     },
     generatePeptides() {
       if (!this.chains.a || !this.chains.b) {
@@ -99,27 +100,27 @@ export default {
       }
     },
     resetCameraPosition() {
-      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 });
-      this.RESET_CAMERA_ROTATION();
+      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })
+      this.RESET_CAMERA_ROTATION()
     },
     toggleAxisLines() {
       if (this.axisLinesVisible) {
-        this.HIDE_AXIS_LINES();
-        this.axisLinesVisible = false;
+        this.HIDE_AXIS_LINES()
+        this.axisLinesVisible = false
       } else {
-        this.SHOW_AXIS_LINES();
-        this.axisLinesVisible = true;
+        this.SHOW_AXIS_LINES()
+        this.axisLinesVisible = true
       }
     },
     togglePyramids() {
       if (this.pyramidsVisible) {
-        this.HIDE_PYRAMIDS();
-        this.pyramidsVisible = false;
+        this.HIDE_PYRAMIDS()
+        this.pyramidsVisible = false
       } else {
-        this.SHOW_PYRAMIDS();
-        this.pyramidsVisible = true;
+        this.SHOW_PYRAMIDS()
+        this.pyramidsVisible = true
       }
-    }
+    },
   }
-};
+}
 </script>

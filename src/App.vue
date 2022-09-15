@@ -6,15 +6,15 @@
 </template>
 
 <script>
-import ViewPort from "@/components/ViewPort.vue";
-import ControlPanel from "@/components/ControlPanel.vue";
+import ViewPort from "@/components/ViewPort.vue"
+import ControlPanel from "@/components/ControlPanel.vue"
 
 export default {
   components: {
     viewport: ViewPort,
     panel: ControlPanel
   }
-};
+}
 </script>
 
 <style>
