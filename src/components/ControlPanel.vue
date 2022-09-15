@@ -94,7 +94,7 @@ export default {
     },
     generatePeptides() {
       if (!this.chains.a || !this.chains.b) {
-        alert('Please input the correct string.')
+        alert('Please enter a valid string.')
         return
       }
     },
