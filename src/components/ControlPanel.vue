@@ -7,18 +7,26 @@
       <div class="border-b border-grey-darkest mb-2 pb-2 w-100">
         <p class="flex items-center justify-between mb-1">
           A Chain
-          <input class="w-32" type="text" name="a" @change="updateChain" />
+          <input class="w-32" type="text" v-model="chains.a" />
         </p>
         <p class="flex items-center justify-between mb-1">
           B Chain
-          <input class="w-32" type="text" name="b" @change="updateChain" />
+          <input class="w-32" type="text" v-model="chains.b" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Joint Length
-          <input class="w-32" type="number" name="joint_length" @input="updateJointLength" />
+          <input class="w-32" type="number" v-model="jointLength" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
+          Distance
+          <input class="w-32" type="number" v-model="distance" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
+          Amino Acid Radius
+          <input class="w-32" type="number" v-model="aminoAcidRadius" />
         </p>
         <p class="flex items-center">
-          <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="this.GENERATE_PEPTIDES">
+          <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
             Generate peptides
           </button>
         </p>
@@ -35,7 +43,7 @@
             @click="toggleAxisLines" />
         </p> -->
       </div>
-      <!-- <div v-if="CAMERA_POSITION" class="border-b border-grey-darkest mb-2 pb-2">
+      <div v-if="CAMERA_POSITION" class="border-b border-grey-darkest mb-2 pb-2">
         <p class="mb-1 text-grey-light font-bold">
           Camera Position
         </p>
@@ -53,7 +61,7 @@
             Reset Camera
           </button>
         </p>
-      </div> -->
+      </div>
       <!-- <div class="flex justify-around">
         <a href="https://threejs.org/examples/?q=controls#misc_controls_trackball" target="_blank"
           class="text-grey-light no-underline hover:text-grey-lighter">Original &#8599;
@@ -68,14 +76,15 @@
 
 <script>
 import { mapGetters, mapMutations } from "vuex"
-import { getFloat } from '../common'
 export default {
   data() {
     return {
-      chains: {},
-      joint_length: 0,
-      axisLinesVisible: true,
-      pyramidsVisible: true,
+      chains: { a: 'TIDY', b: 'CODE' },
+      jointLength: 1,
+      distance: 3,
+      aminoAcidRadius: 0.5,
+      // axisLinesVisible: true,
+      // pyramidsVisible: true,
     }
   },
   computed: {
@@ -85,45 +94,39 @@ export default {
   },
   methods: {
     ...mapMutations([
-      'SET_CHAINS',
-      'SET_JOINT_LENGTH',
       "SET_CAMERA_POSITION",
       "RESET_CAMERA_ROTATION",
-      "HIDE_AXIS_LINES",
-      "SHOW_AXIS_LINES",
-      "HIDE_PYRAMIDS",
-      "SHOW_PYRAMIDS",
+      // "HIDE_AXIS_LINES",
+      // "SHOW_AXIS_LINES",
+      // "HIDE_PYRAMIDS",
+      // "SHOW_PYRAMIDS",
       "GENERATE_PEPTIDES",
     ]),
-    updateChain(e) {
-      this.chains[e.target.name] = e.target.value
-      this.SET_CHAINS(this.chains)
-    },
-    updateJointLength(e) {
-      this.SET_JOINT_LENGTH(getFloat(e.target.value))
+    generatePeptides() {
+      console.log('generatePeptides')
     },
     resetCameraPosition() {
       this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })
       this.RESET_CAMERA_ROTATION()
     },
-    toggleAxisLines() {
-      if (this.axisLinesVisible) {
-        this.HIDE_AXIS_LINES()
-        this.axisLinesVisible = false
-      } else {
-        this.SHOW_AXIS_LINES()
-        this.axisLinesVisible = true
-      }
-    },
-    togglePyramids() {
-      if (this.pyramidsVisible) {
-        this.HIDE_PYRAMIDS()
-        this.pyramidsVisible = false
-      } else {
-        this.SHOW_PYRAMIDS()
-        this.pyramidsVisible = true
-      }
-    },
+    // toggleAxisLines() {
+    //   if (this.axisLinesVisible) {
+    //     this.HIDE_AXIS_LINES()
+    //     this.axisLinesVisible = false
+    //   } else {
+    //     this.SHOW_AXIS_LINES()
+    //     this.axisLinesVisible = true
+    //   }
+    // },
+    // togglePyramids() {
+    //   if (this.pyramidsVisible) {
+    //     this.HIDE_PYRAMIDS()
+    //     this.pyramidsVisible = false
+    //   } else {
+    //     this.SHOW_PYRAMIDS()
+    //     this.pyramidsVisible = true
+    //   }
+    // },
   }
 }
 </script>

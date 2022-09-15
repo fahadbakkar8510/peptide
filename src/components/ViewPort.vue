@@ -13,10 +13,10 @@ export default {
   },
   methods: {
     ...mapMutations(["RESIZE"]),
-    ...mapActions(["INIT", "ANIMATE"]),
+    ...mapActions(["INIT_SCENE", "ANIMATE"]),
   },
   mounted() {
-    this.INIT({
+    this.INIT_SCENE({
       width: this.$el.offsetWidth,
       height: this.$el.offsetHeight,
       el: this.$el,

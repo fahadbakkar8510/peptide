@@ -29,11 +29,16 @@ export default new Vuex.Store({
     scene: null,
     renderer: null,
     axisLines: [],
-    pyramids: [],
+    // pyramids: [],
+    controlInfo: {},
+    chainObjects: {},
   },
   getters: {
     CAMERA_POSITION: (state) => {
       return state.camera ? state.camera.position : null;
+    },
+    JOINT_LENGTH: (state) => {
+      return 3;
     },
   },
   mutations: {
@@ -42,6 +47,12 @@ export default new Vuex.Store({
     },
     SET_JOINT_LENGTH(state, length) {
       state.joint_length = length;
+    },
+    SET_DISTANCE(state, distance) {
+      state.distance = distance;
+    },
+    SET_AMINO_ACID_RADIUS(state, aminoAcidRadius) {
+      state.amino_acid_radius = aminoAcidRadius;
     },
     SET_VIEWPORT_SIZE(state, { width, height }) {
       state.width = width;
@@ -84,6 +95,7 @@ export default new Vuex.Store({
       state.scene = new Scene();
       state.scene.background = new Color(0xcccccc);
       state.scene.fog = new FogExp2(0xcccccc, 0.002);
+
       // var geometry = new CylinderBufferGeometry(0, 10, 30, 4, 1);
       // var material = new MeshPhongMaterial({
       //   color: 0xffffff,
@@ -137,11 +149,12 @@ export default new Vuex.Store({
       state.scene.add(...state.axisLines);
     },
     GENERATE_PEPTIDES(state) {
-      if (!state.chains.a || !state.chains.b || state.joint_length <= 0) {
-        alert("Please enter valid data.");
-        return;
-      }
+      // if (!state.chains.a || !state.chains.b || state.joint_length <= 0) {
+      //   alert("Please enter valid data.");
+      //   return;
+      // }
       console.log(state);
+      state.chains.a.split("").forEach((char) => {});
     },
     RESIZE(state, { width, height }) {
       state.width = width;
@@ -173,17 +186,17 @@ export default new Vuex.Store({
       state.scene.add(...state.axisLines);
       state.renderer.render(state.scene, state.camera);
     },
-    HIDE_PYRAMIDS(state) {
-      state.scene.remove(...state.pyramids);
-      state.renderer.render(state.scene, state.camera);
-    },
-    SHOW_PYRAMIDS(state) {
-      state.scene.add(...state.pyramids);
-      state.renderer.render(state.scene, state.camera);
-    },
+    // HIDE_PYRAMIDS(state) {
+    //   state.scene.remove(...state.pyramids);
+    //   state.renderer.render(state.scene, state.camera);
+    // },
+    // SHOW_PYRAMIDS(state) {
+    //   state.scene.add(...state.pyramids);
+    //   state.renderer.render(state.scene, state.camera);
+    // },
   },
   actions: {
-    INIT({ state, commit }, { width, height, el }) {
+    INIT_SCENE({ state, commit }, { width, height, el }) {
       return new Promise((resolve) => {
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);

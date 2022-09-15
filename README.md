@@ -19,3 +19,7 @@ npm run serve
 ```
 npm run build
 ```
+
+# Information
+
+Unit: cm
