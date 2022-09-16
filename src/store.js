@@ -18,6 +18,7 @@ import {
   Vector3,
   Line,
   SphereBufferGeometry,
+  AxesHelper,
 } from "three-full";
 
 Vue.use(Vuex);
@@ -31,7 +32,7 @@ export default new Vuex.Store({
     scene: null,
     renderer: null,
     axisLines: [],
-    // pyramids: [],
+    pyramids: [],
     controlInfo: {},
     chainObjects: {},
   },
@@ -124,54 +125,55 @@ export default new Vuex.Store({
       var lightC = new AmbientLight(0x222222);
       state.scene.add(lightC);
 
-      // Axis Line 1
-      var materialB = new LineBasicMaterial({ color: 0x0000ff });
-      var geometryB = new Geometry();
-      geometryB.vertices.push(new Vector3(0, 0, 0));
-      geometryB.vertices.push(new Vector3(0, 1000, 0));
-      var lineA = new Line(geometryB, materialB);
-      state.axisLines.push(lineA);
-
-      // Axis Line 2
-      var materialC = new LineBasicMaterial({ color: 0x00ff00 });
-      var geometryC = new Geometry();
-      geometryC.vertices.push(new Vector3(0, 0, 0));
-      geometryC.vertices.push(new Vector3(1000, 0, 0));
-      var lineB = new Line(geometryC, materialC);
-      state.axisLines.push(lineB);
-
-      // Axis Line 3
-      var materialD = new LineBasicMaterial({ color: 0xff0000 });
-      var geometryD = new Geometry();
-      geometryD.vertices.push(new Vector3(0, 0, 0));
-      geometryD.vertices.push(new Vector3(0, 0, 1000));
-      var lineC = new Line(geometryD, materialD);
-      state.axisLines.push(lineC);
-
-      state.scene.add(...state.axisLines);
+      // AxesHelper
+      state.scene.add(new AxesHelper(1000));
     },
     GENERATE_PEPTIDES(state) {
-      let geometry = new SphereBufferGeometry(
-        Dimensioning.cmToMeasureRaw({
-          cm: state.controlInfo.amino_acid_radius,
-        }),
-        30,
-        30
-      );
+      const aminoAcidRadius = Dimensioning.cmToMeasureRaw({
+        cm: state.controlInfo.amino_acid_radius,
+      });
+      const jointLength = Dimensioning.cmToMeasureRaw({
+        cm: state.controlInfo.joint_length,
+      });
+      const distance = Dimensioning.cmToMeasureRaw({
+        cm: state.controlInfo.distance,
+      });
+      const height = Dimensioning.cmToMeasureRaw({
+        cm: 50,
+      });
+      let geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
       let material = new MeshPhongMaterial({
         color: 0xff0000,
         flatShading: true,
       });
-      let mesh = new Mesh(geometry, material);
-      // mesh.position.x = (Math.random() - 0.5) * 100;
-      // mesh.position.y = (Math.random() - 0.5) * 100;
-      // mesh.position.z = (Math.random() - 0.5) * 100;
-      mesh.updateMatrix();
-      mesh.matrixAutoUpdate = false;
+
+      // let mesh = new Mesh(geometry, material);
+      // // mesh.position.x = (Math.random() - 0.5) * 100;
+      // // mesh.position.y = (Math.random() - 0.5) * 100;
+      // // mesh.position.z = (Math.random() - 0.5) * 100;
+      // mesh.updateMatrix();
+      // mesh.matrixAutoUpdate = false;
+      // state.chainObjects.a = [];
+      // state.chainObjects.a.push(mesh);
+      // state.scene.add(...state.chainObjects.a);
+
+      const chainAAcids = state.controlInfo.chains.a.split("");
+      const chainALength =
+        (aminoAcidRadius * 2 + jointLength) * (chainAAcids.length - 1);
       state.chainObjects.a = [];
-      state.chainObjects.a.push(mesh);
+
+      chainAAcids.forEach((char, index) => {
+        const mesh = new Mesh(geometry, material);
+        mesh.position.x =
+          -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
+        mesh.position.y = height;
+        mesh.position.z = distance / 2;
+        mesh.updateMatrix();
+        mesh.matrixAutoUpdate = false;
+        state.chainObjects.a.push(mesh);
+      });
+
       state.scene.add(...state.chainObjects.a);
-      state.controlInfo.chains.a.split("").forEach((char) => {});
       state.renderer.render(state.scene, state.camera);
     },
     RESIZE(state, { width, height }) {
