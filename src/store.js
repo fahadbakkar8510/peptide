@@ -22,6 +22,7 @@ import {
   CatmullRomCurve3,
   TubeBufferGeometry,
 } from "three-full";
+import { AmmoPhysics } from "./ammo/ammo";
 
 Vue.use(Vuex);
 
@@ -100,22 +101,6 @@ export default new Vuex.Store({
       state.scene = new Scene();
       state.scene.background = new Color(0xcccccc);
       state.scene.fog = new FogExp2(0xcccccc, 0.002);
-
-      // var geometry = new CylinderBufferGeometry(0, 10, 30, 4, 1);
-      // var material = new MeshPhongMaterial({
-      //   color: 0xffffff,
-      //   flatShading: true,
-      // });
-      // for (var i = 0; i < 500; i++) {
-      //   var mesh = new Mesh(geometry, material);
-      //   mesh.position.x = (Math.random() - 0.5) * 1000;
-      //   mesh.position.y = (Math.random() - 0.5) * 1000;
-      //   mesh.position.z = (Math.random() - 0.5) * 1000;
-      //   mesh.updateMatrix();
-      //   mesh.matrixAutoUpdate = false;
-      //   state.pyramids.push(mesh);
-      // }
-      // state.scene.add(...state.pyramids);
 
       // lights
       var lightA = new DirectionalLight(0xffffff);
@@ -273,12 +258,15 @@ export default new Vuex.Store({
   },
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
-      return new Promise((resolve) => {
+      return new Promise(async (resolve) => {
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);
         commit("INITIALIZE_CAMERA");
         commit("INITIALIZE_CONTROLS");
         commit("INITIALIZE_SCENE");
+
+        // AmmoPhysics
+        state.ammoPhysics = await AmmoPhysics();
 
         // Initial scene rendering
         state.renderer.render(state.scene, state.camera);
