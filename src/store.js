@@ -19,6 +19,7 @@ import {
   Line,
   SphereBufferGeometry,
   AxesHelper,
+  TubeBufferGeometry,
 } from "three-full";
 
 Vue.use(Vuex);
@@ -143,18 +144,18 @@ export default new Vuex.Store({
       });
       const geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
 
-      // Add chain A.
-      const aMaterial = new MeshPhongMaterial({
+      // Add chain A acids.
+      const aAcidMaterial = new MeshPhongMaterial({
         color: 0xff0000,
         flatShading: true,
       });
-      const chainAAcids = state.controlInfo.chains.a.split("");
+      const aAcids = state.controlInfo.chains.a.split("");
       const chainALength =
-        (aminoAcidRadius * 2 + jointLength) * (chainAAcids.length - 1);
+        (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
       state.chainObjects.a = [];
 
-      chainAAcids.forEach((char, index) => {
-        const mesh = new Mesh(geometry, aMaterial);
+      aAcids.forEach((char, index) => {
+        const mesh = new Mesh(geometry, aAcidMaterial);
         mesh.position.x =
           -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
         mesh.position.y = height;
@@ -166,17 +167,19 @@ export default new Vuex.Store({
 
       state.scene.add(...state.chainObjects.a);
 
-      // Add chain B.
-      const bMaterial = new MeshPhongMaterial({
+      // Add chain A joints.
+
+      // Add chain B acids.
+      const bAcidMaterial = new MeshPhongMaterial({
         color: 0xffff00,
         flatShading: true,
       });
-      const chainBAcids = state.controlInfo.chains.b.split("");
+      const bAcids = state.controlInfo.chains.b.split("");
       const chainBLength =
-        (aminoAcidRadius * 2 + jointLength) * (chainBAcids.length - 1);
+        (aminoAcidRadius * 2 + jointLength) * (bAcids.length - 1);
       state.chainObjects.b = [];
-      chainBAcids.forEach((char, index) => {
-        const mesh = new Mesh(geometry, bMaterial);
+      bAcids.forEach((char, index) => {
+        const mesh = new Mesh(geometry, bAcidMaterial);
         mesh.position.x =
           -chainBLength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
         mesh.position.y = height;
