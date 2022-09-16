@@ -21,8 +21,10 @@ import {
   AxesHelper,
   CatmullRomCurve3,
   TubeBufferGeometry,
+  BoxBufferGeometry,
+  ShadowMaterial,
 } from "three-full";
-import { AmmoPhysics } from "./ammo/ammo";
+import { AmmoPhysics } from "./AmmoPhysics";
 
 Vue.use(Vuex);
 
@@ -99,18 +101,28 @@ export default new Vuex.Store({
     },
     INITIALIZE_SCENE(state) {
       state.scene = new Scene();
-      state.scene.background = new Color(0xcccccc);
+      state.scene.background = new Color(0x666666);
       state.scene.fog = new FogExp2(0xcccccc, 0.002);
 
       // lights
-      var lightA = new DirectionalLight(0xffffff);
+      const lightA = new DirectionalLight(0xffffff);
       lightA.position.set(1, 1, 1);
       state.scene.add(lightA);
-      var lightB = new DirectionalLight(0x002288);
+      const lightB = new DirectionalLight(0x002288);
       lightB.position.set(-1, -1, -1);
       state.scene.add(lightB);
-      var lightC = new AmbientLight(0x222222);
+      const lightC = new AmbientLight(0x222222);
       state.scene.add(lightC);
+
+      // Floor
+      const floor = new Mesh(
+        new BoxBufferGeometry(100, 5, 100),
+        new ShadowMaterial({ color: 0x111111 })
+      );
+      floor.position.y = -5;
+      floor.receiveShadow = true;
+      state.scene.add(floor);
+      state.ammoPhysics.addMesh(floor);
 
       // AxesHelper
       state.scene.add(new AxesHelper(1000));
@@ -259,14 +271,15 @@ export default new Vuex.Store({
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
       return new Promise(async (resolve) => {
+        // AmmoPhysics
+        state.ammoPhysics = await AmmoPhysics();
+        console.log("test: ", state.ammoPhysics);
+
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);
         commit("INITIALIZE_CAMERA");
         commit("INITIALIZE_CONTROLS");
         commit("INITIALIZE_SCENE");
-
-        // AmmoPhysics
-        state.ammoPhysics = await AmmoPhysics();
 
         // Initial scene rendering
         state.renderer.render(state.scene, state.camera);
