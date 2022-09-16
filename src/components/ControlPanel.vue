@@ -18,6 +18,10 @@
           <input class="w-32" ref="joint_length" type="number" v-model="jointLength" />
         </p>
         <p class="flex items-center justify-between mb-1">
+          Joint Radius
+          <input class="w-32" ref="joint_radius" type="number" v-model="jointRadius" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
           Distance
           <input class="w-32" ref="distance" type="number" v-model="distance" />
         </p>
@@ -81,6 +85,7 @@ export default {
     return {
       chains: { a: 'KEEP', b: 'QUALITY' },
       jointLength: 5,
+      jointRadius: 1,
       distance: 60,
       aminoAcidRadius: 15,
       // axisLinesVisible: true,
@@ -116,19 +121,24 @@ export default {
         this.$refs.joint_length.focus()
         return
       }
+      if (this.jointRadius <= 0) {
+        this.$refs.joint_radius.focus()
+        return
+      }
       if (this.distance <= 0) {
         this.$refs.distance.focus()
         return
       }
       if (this.aminoAcidRadius <= 0) {
-        this.$refs.aminoAcidRadius.focus()
+        this.$refs.amino_acid_radius.focus()
         return
       }
       this.SET_CONTROL_INFO({
         chains: this.chains,
         joint_length: this.jointLength,
         distance: this.distance,
-        amino_acid_radius: this.aminoAcidRadius
+        amino_acid_radius: this.aminoAcidRadius,
+        joint_radius: this.jointRadius,
       })
       this.GENERATE_PEPTIDES()
     },

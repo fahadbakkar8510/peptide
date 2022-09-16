@@ -19,6 +19,7 @@ import {
   Line,
   SphereBufferGeometry,
   AxesHelper,
+  CatmullRomCurve3,
   TubeBufferGeometry,
 } from "three-full";
 
@@ -136,6 +137,9 @@ export default new Vuex.Store({
       const jointLength = Dimensioning.cmToMeasureRaw({
         cm: state.controlInfo.joint_length,
       });
+      const jointRadius = Dimensioning.cmToMeasureRaw({
+        cm: state.controlInfo.joint_radius,
+      });
       const distance = Dimensioning.cmToMeasureRaw({
         cm: state.controlInfo.distance,
       });
@@ -168,10 +172,27 @@ export default new Vuex.Store({
       state.scene.add(...state.chainObjects.a);
 
       // Add chain A joints.
+      const aJointSpline = new CatmullRomCurve3([
+        new Vector3(-chainALength / 2, height, distance / 2),
+        new Vector3(chainALength / 2, height, distance / 2),
+      ]);
+      const aJointGeometry = new TubeBufferGeometry(
+        aJointSpline,
+        30,
+        jointRadius
+      );
+      const aJointMaterial = new MeshPhongMaterial({
+        color: 0xff0000,
+        flatShading: true,
+      });
+      const aJointMesh = new Mesh(aJointGeometry, aJointMaterial);
+      // aJointMesh.updateMatrix();
+      // aJointMesh.matrixAutoUpdate = false;
+      state.scene.add(aJointMesh);
 
       // Add chain B acids.
       const bAcidMaterial = new MeshPhongMaterial({
-        color: 0xffff00,
+        color: 0x00ff00,
         flatShading: true,
       });
       const bAcids = state.controlInfo.chains.b.split("");
@@ -189,6 +210,25 @@ export default new Vuex.Store({
         state.chainObjects.b.push(mesh);
       });
       state.scene.add(...state.chainObjects.b);
+
+      // Add chain B joints.
+      const bJointSpline = new CatmullRomCurve3([
+        new Vector3(-chainBLength / 2, height, -distance / 2),
+        new Vector3(chainBLength / 2, height, -distance / 2),
+      ]);
+      const bJointGeometry = new TubeBufferGeometry(
+        bJointSpline,
+        30,
+        jointRadius
+      );
+      const bJointMaterial = new MeshPhongMaterial({
+        color: 0x00ff00,
+        flatShading: true,
+      });
+      const bJointMesh = new Mesh(bJointGeometry, bJointMaterial);
+      // bJointMesh.updateMatrix();
+      // bJointMesh.matrixAutoUpdate = false;
+      state.scene.add(bJointMesh);
 
       state.renderer.render(state.scene, state.camera);
     },
