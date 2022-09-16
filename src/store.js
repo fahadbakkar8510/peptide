@@ -3,7 +3,6 @@ import Vuex from "vuex";
 import { Dimensioning } from "./dimensioning";
 import {
   Scene,
-  TrackballControls,
   PerspectiveCamera,
   WebGLRenderer,
   Color,
@@ -13,14 +12,15 @@ import {
   DirectionalLight,
   AmbientLight,
   Vector3,
-  SphereBufferGeometry,
+  SphereGeometry,
   AxesHelper,
   CatmullRomCurve3,
-  TubeBufferGeometry,
-  BoxBufferGeometry,
+  TubeGeometry,
+  BoxGeometry,
   ShadowMaterial,
-} from "three-full";
+} from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
+import { OrbitControls } from "./OrbitControls";
 
 Vue.use(Vuex);
 
@@ -82,18 +82,15 @@ export default new Vuex.Store({
       state.camera.position.z = 500;
     },
     INITIALIZE_CONTROLS(state) {
-      state.controls = new TrackballControls(
+      state.controls = new OrbitControls(
         state.camera,
         state.renderer.domElement
       );
       state.controls.rotateSpeed = 1.0;
       state.controls.zoomSpeed = 1.2;
       state.controls.panSpeed = 0.8;
-      state.controls.noZoom = false;
-      state.controls.noPan = false;
-      state.controls.staticMoving = true;
-      state.controls.dynamicDampingFactor = 0.3;
-      state.controls.keys = [65, 83, 68];
+      state.controls.enableZoom = true;
+      state.controls.enablePan = true;
     },
     INITIALIZE_SCENE(state) {
       state.scene = new Scene();
@@ -112,7 +109,7 @@ export default new Vuex.Store({
 
       // Floor
       const floor = new Mesh(
-        new BoxBufferGeometry(100, 5, 100),
+        new BoxGeometry(100, 5, 100),
         new ShadowMaterial({ color: 0x111111 })
       );
       floor.position.y = -2.5;
@@ -140,7 +137,7 @@ export default new Vuex.Store({
         cm: 100,
       });
 
-      const geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
+      const geometry = new SphereGeometry(aminoAcidRadius, 30, 30);
 
       // Add chain A acids.
       const aAcidMaterial = new MeshPhongMaterial({
@@ -170,11 +167,7 @@ export default new Vuex.Store({
         new Vector3(-chainALength / 2, height, distance / 2),
         new Vector3(chainALength / 2, height, distance / 2),
       ]);
-      const aJointGeometry = new TubeBufferGeometry(
-        aJointSpline,
-        30,
-        jointRadius
-      );
+      const aJointGeometry = new TubeGeometry(aJointSpline, 30, jointRadius);
       const aJointMaterial = new MeshPhongMaterial({
         color: 0xff0000,
         flatShading: true,
@@ -210,11 +203,7 @@ export default new Vuex.Store({
         new Vector3(-chainBLength / 2, height, -distance / 2),
         new Vector3(chainBLength / 2, height, -distance / 2),
       ]);
-      const bJointGeometry = new TubeBufferGeometry(
-        bJointSpline,
-        30,
-        jointRadius
-      );
+      const bJointGeometry = new TubeGeometry(bJointSpline, 30, jointRadius);
       const bJointMaterial = new MeshPhongMaterial({
         color: 0x00ff00,
         flatShading: true,
@@ -232,7 +221,6 @@ export default new Vuex.Store({
       state.camera.aspect = width / height;
       state.camera.updateProjectionMatrix();
       state.renderer.setSize(width, height);
-      state.controls.handleResize();
       state.renderer.render(state.scene, state.camera);
     },
     SET_CAMERA_POSITION(state, { x, y, z }) {
