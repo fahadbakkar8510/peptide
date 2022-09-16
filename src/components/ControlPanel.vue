@@ -80,9 +80,9 @@ export default {
   data() {
     return {
       chains: { a: 'TIDY', b: 'CODE' },
-      jointLength: 1,
-      distance: 3,
-      aminoAcidRadius: 0.5,
+      jointLength: 5,
+      distance: 60,
+      aminoAcidRadius: 15,
       // axisLinesVisible: true,
       // pyramidsVisible: true,
     }
@@ -126,9 +126,9 @@ export default {
       }
       this.SET_CONTROL_INFO({
         chains: this.chains,
-        jointLength: this.jointLength,
+        joint_length: this.jointLength,
         distance: this.distance,
-        aminoAcidRadius: this.aminoAcidRadius
+        amino_acid_radius: this.aminoAcidRadius
       })
       this.GENERATE_PEPTIDES()
     },
@@ -158,9 +158,9 @@ export default {
   mounted() {
     this.SET_CONTROL_INFO({
       chains: this.chains,
-      jointLength: this.jointLength,
+      joint_length: this.jointLength,
       distance: this.distance,
-      aminoAcidRadius: this.aminoAcidRadius
+      amino_acid_radius: this.aminoAcidRadius
     })
   },
 }

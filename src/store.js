@@ -151,11 +151,12 @@ export default new Vuex.Store({
       state.scene.add(...state.axisLines);
     },
     GENERATE_PEPTIDES(state) {
-      console.log(state.controlInfo);
       let geometry = new SphereBufferGeometry(
-        Dimensioning.cmToMeasureRaw({ cm: 10 }),
-        Dimensioning.cmToMeasureRaw({ cm: 100 }),
-        Dimensioning.cmToMeasureRaw({ cm: 100 })
+        Dimensioning.cmToMeasureRaw({
+          cm: state.controlInfo.amino_acid_radius,
+        }),
+        30,
+        30
       );
       let material = new MeshPhongMaterial({
         color: 0xff0000,
@@ -170,7 +171,7 @@ export default new Vuex.Store({
       state.chainObjects.a = [];
       state.chainObjects.a.push(mesh);
       state.scene.add(...state.chainObjects.a);
-      state.controlInfo.chains.a.split("").forEach((char) => console.log(char));
+      state.controlInfo.chains.a.split("").forEach((char) => {});
       state.renderer.render(state.scene, state.camera);
     },
     RESIZE(state, { width, height }) {
