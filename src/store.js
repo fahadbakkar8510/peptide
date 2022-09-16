@@ -8,15 +8,11 @@ import {
   WebGLRenderer,
   Color,
   FogExp2,
-  CylinderBufferGeometry,
   MeshPhongMaterial,
   Mesh,
   DirectionalLight,
   AmbientLight,
-  LineBasicMaterial,
-  Geometry,
   Vector3,
-  Line,
   SphereBufferGeometry,
   AxesHelper,
   CatmullRomCurve3,
@@ -119,7 +115,7 @@ export default new Vuex.Store({
         new BoxBufferGeometry(100, 5, 100),
         new ShadowMaterial({ color: 0x111111 })
       );
-      floor.position.y = -5;
+      floor.position.y = -2.5;
       floor.receiveShadow = true;
       state.scene.add(floor);
       state.ammoPhysics.addMesh(floor);
@@ -143,6 +139,7 @@ export default new Vuex.Store({
       const height = Dimensioning.cmToMeasureRaw({
         cm: 100,
       });
+
       const geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
 
       // Add chain A acids.
@@ -273,7 +270,6 @@ export default new Vuex.Store({
       return new Promise(async (resolve) => {
         // AmmoPhysics
         state.ammoPhysics = await AmmoPhysics();
-        console.log("test: ", state.ammoPhysics);
 
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);
