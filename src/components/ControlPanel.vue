@@ -79,7 +79,7 @@ import { mapGetters, mapMutations } from "vuex"
 export default {
   data() {
     return {
-      chains: { a: 'TIDY', b: 'CODE' },
+      chains: { a: 'KEEP', b: 'QUALITY' },
       jointLength: 5,
       distance: 60,
       aminoAcidRadius: 15,

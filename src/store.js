@@ -139,31 +139,22 @@ export default new Vuex.Store({
         cm: state.controlInfo.distance,
       });
       const height = Dimensioning.cmToMeasureRaw({
-        cm: 50,
+        cm: 100,
       });
-      let geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
-      let material = new MeshPhongMaterial({
+      const geometry = new SphereBufferGeometry(aminoAcidRadius, 30, 30);
+
+      // Add chain A.
+      const aMaterial = new MeshPhongMaterial({
         color: 0xff0000,
         flatShading: true,
       });
-
-      // let mesh = new Mesh(geometry, material);
-      // // mesh.position.x = (Math.random() - 0.5) * 100;
-      // // mesh.position.y = (Math.random() - 0.5) * 100;
-      // // mesh.position.z = (Math.random() - 0.5) * 100;
-      // mesh.updateMatrix();
-      // mesh.matrixAutoUpdate = false;
-      // state.chainObjects.a = [];
-      // state.chainObjects.a.push(mesh);
-      // state.scene.add(...state.chainObjects.a);
-
       const chainAAcids = state.controlInfo.chains.a.split("");
       const chainALength =
         (aminoAcidRadius * 2 + jointLength) * (chainAAcids.length - 1);
       state.chainObjects.a = [];
 
       chainAAcids.forEach((char, index) => {
-        const mesh = new Mesh(geometry, material);
+        const mesh = new Mesh(geometry, aMaterial);
         mesh.position.x =
           -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
         mesh.position.y = height;
@@ -174,6 +165,28 @@ export default new Vuex.Store({
       });
 
       state.scene.add(...state.chainObjects.a);
+
+      // Add chain B.
+      const bMaterial = new MeshPhongMaterial({
+        color: 0xffff00,
+        flatShading: true,
+      });
+      const chainBAcids = state.controlInfo.chains.b.split("");
+      const chainBLength =
+        (aminoAcidRadius * 2 + jointLength) * (chainBAcids.length - 1);
+      state.chainObjects.b = [];
+      chainBAcids.forEach((char, index) => {
+        const mesh = new Mesh(geometry, bMaterial);
+        mesh.position.x =
+          -chainBLength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
+        mesh.position.y = height;
+        mesh.position.z = -distance / 2;
+        mesh.updateMatrix();
+        mesh.matrixAutoUpdate = false;
+        state.chainObjects.b.push(mesh);
+      });
+      state.scene.add(...state.chainObjects.b);
+
       state.renderer.render(state.scene, state.camera);
     },
     RESIZE(state, { width, height }) {
