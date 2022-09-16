@@ -6,8 +6,6 @@ import {
   dimCentiMeter,
   dimMilliMeter,
   decimals,
-  cmPerFoot,
-  pixelsPerFoot,
   cmPerPixel,
   pixelsPerCm,
 } from "./constants";

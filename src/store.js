@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import { Dimensioning } from "./dimensioning";
 import {
   Scene,
   TrackballControls,
@@ -151,7 +152,11 @@ export default new Vuex.Store({
     },
     GENERATE_PEPTIDES(state) {
       console.log(state.controlInfo);
-      let geometry = new SphereBufferGeometry(10, 100, 100);
+      let geometry = new SphereBufferGeometry(
+        Dimensioning.cmToMeasureRaw({ cm: 10 }),
+        Dimensioning.cmToMeasureRaw({ cm: 100 }),
+        Dimensioning.cmToMeasureRaw({ cm: 100 })
+      );
       let material = new MeshPhongMaterial({
         color: 0xff0000,
         flatShading: true,
