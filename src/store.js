@@ -149,12 +149,7 @@ export default new Vuex.Store({
       state.scene.add(...state.axisLines);
     },
     GENERATE_PEPTIDES(state) {
-      // if (!state.chains.a || !state.chains.b || state.joint_length <= 0) {
-      //   alert("Please enter valid data.");
-      //   return;
-      // }
-      console.log(state);
-      state.chains.a.split("").forEach((char) => {});
+      console.log(state.controlInfo);
     },
     RESIZE(state, { width, height }) {
       state.width = width;

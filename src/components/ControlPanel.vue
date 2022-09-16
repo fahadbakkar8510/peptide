@@ -112,19 +112,25 @@ export default {
         this.$refs.chain_b.focus()
         return
       }
-      if (!this.jointLength) {
+      if (this.jointLength <= 0) {
         this.$refs.joint_length.focus()
         return
       }
-      if (!this.distance) {
+      if (this.distance <= 0) {
         this.$refs.distance.focus()
         return
       }
-      if (!this.aminoAcidRadius) {
+      if (this.aminoAcidRadius <= 0) {
         this.$refs.aminoAcidRadius.focus()
         return
       }
-      console.log('generatePeptides')
+      this.SET_CONTROL_INFO({
+        chains: this.chains,
+        jointLength: this.jointLength,
+        distance: this.distance,
+        aminoAcidRadius: this.aminoAcidRadius
+      })
+      this.GENERATE_PEPTIDES()
     },
     resetCameraPosition() {
       this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })
