@@ -16,6 +16,7 @@ import {
   Geometry,
   Vector3,
   Line,
+  SphereBufferGeometry,
 } from "three-full";
 
 Vue.use(Vuex);
@@ -150,6 +151,22 @@ export default new Vuex.Store({
     },
     GENERATE_PEPTIDES(state) {
       console.log(state.controlInfo);
+      let geometry = new SphereBufferGeometry(10, 100, 100);
+      let material = new MeshPhongMaterial({
+        color: 0xff0000,
+        flatShading: true,
+      });
+      let mesh = new Mesh(geometry, material);
+      // mesh.position.x = (Math.random() - 0.5) * 100;
+      // mesh.position.y = (Math.random() - 0.5) * 100;
+      // mesh.position.z = (Math.random() - 0.5) * 100;
+      mesh.updateMatrix();
+      mesh.matrixAutoUpdate = false;
+      state.chainObjects.a = [];
+      state.chainObjects.a.push(mesh);
+      state.scene.add(...state.chainObjects.a);
+      state.controlInfo.chains.a.split("").forEach((char) => console.log(char));
+      state.renderer.render(state.scene, state.camera);
     },
     RESIZE(state, { width, height }) {
       state.width = width;
