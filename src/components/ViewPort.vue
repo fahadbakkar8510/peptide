@@ -33,7 +33,7 @@ export default {
         true
       )
     })
-  }
+  },
 }
 </script>
 

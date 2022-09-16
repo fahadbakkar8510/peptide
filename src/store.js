@@ -37,9 +37,6 @@ export default new Vuex.Store({
     CAMERA_POSITION: (state) => {
       return state.camera ? state.camera.position : null;
     },
-    JOINT_LENGTH: (state) => {
-      return 3;
-    },
   },
   mutations: {
     SET_CHAINS(state, chains) {
@@ -57,6 +54,9 @@ export default new Vuex.Store({
     SET_VIEWPORT_SIZE(state, { width, height }) {
       state.width = width;
       state.height = height;
+    },
+    SET_CONTROL_INFO(state, controlInfo) {
+      state.controlInfo = controlInfo;
     },
     INITIALIZE_RENDERER(state, el) {
       state.renderer = new WebGLRenderer({ antialias: true });

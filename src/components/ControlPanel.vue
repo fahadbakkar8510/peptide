@@ -7,23 +7,23 @@
       <div class="border-b border-grey-darkest mb-2 pb-2 w-100">
         <p class="flex items-center justify-between mb-1">
           A Chain
-          <input class="w-32" type="text" v-model="chains.a" />
+          <input class="w-32" ref="chain_a" type="text" v-model="chains.a" />
         </p>
         <p class="flex items-center justify-between mb-1">
           B Chain
-          <input class="w-32" type="text" v-model="chains.b" />
+          <input class="w-32" ref="chain_b" type="text" v-model="chains.b" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Joint Length
-          <input class="w-32" type="number" v-model="jointLength" />
+          <input class="w-32" ref="joint_length" type="number" v-model="jointLength" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Distance
-          <input class="w-32" type="number" v-model="distance" />
+          <input class="w-32" ref="distance" type="number" v-model="distance" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Amino Acid Radius
-          <input class="w-32" type="number" v-model="aminoAcidRadius" />
+          <input class="w-32" ref="amino_acid_radius" type="number" v-model="aminoAcidRadius" />
         </p>
         <p class="flex items-center">
           <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
@@ -96,13 +96,34 @@ export default {
     ...mapMutations([
       "SET_CAMERA_POSITION",
       "RESET_CAMERA_ROTATION",
+      "SET_CONTROL_INFO",
+      "GENERATE_PEPTIDES",
       // "HIDE_AXIS_LINES",
       // "SHOW_AXIS_LINES",
       // "HIDE_PYRAMIDS",
       // "SHOW_PYRAMIDS",
-      "GENERATE_PEPTIDES",
     ]),
     generatePeptides() {
+      if (!this.chains.a) {
+        this.$refs.chain_a.focus()
+        return
+      }
+      if (!this.chains.b) {
+        this.$refs.chain_b.focus()
+        return
+      }
+      if (!this.jointLength) {
+        this.$refs.joint_length.focus()
+        return
+      }
+      if (!this.distance) {
+        this.$refs.distance.focus()
+        return
+      }
+      if (!this.aminoAcidRadius) {
+        this.$refs.aminoAcidRadius.focus()
+        return
+      }
       console.log('generatePeptides')
     },
     resetCameraPosition() {
@@ -127,6 +148,14 @@ export default {
     //     this.pyramidsVisible = true
     //   }
     // },
-  }
+  },
+  mounted() {
+    this.SET_CONTROL_INFO({
+      chains: this.chains,
+      jointLength: this.jointLength,
+      distance: this.distance,
+      aminoAcidRadius: this.aminoAcidRadius
+    })
+  },
 }
 </script>
