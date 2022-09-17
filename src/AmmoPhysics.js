@@ -217,6 +217,25 @@ async function AmmoPhysics({ gravity }) {
         );
       }
     }
+
+    detectCollision();
+  }
+
+  function detectCollision() {
+    let dispatcher = physicsWorld.getDispatcher();
+    let numManifolds = dispatcher.getNumManifolds();
+
+    for (let i = 0; i < numManifolds; i++) {
+      let contactManifold = dispatcher.getManifoldByIndexInternal(i);
+      let numContacts = contactManifold.getNumContacts();
+
+      for (let j = 0; j < numContacts; j++) {
+        let contactPoint = contactManifold.getContactPoint(j);
+        let distance = contactPoint.getDistance();
+        // if (distance > 0) continue;
+        // console.log({ manifoldIndex: i, contactIndex: j, distance: distance });
+      }
+    }
   }
 
   // animate
