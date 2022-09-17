@@ -257,13 +257,22 @@ async function AmmoPhysics({ gravity }) {
     }
   }
 
+  function addPeptideConstraint({
+    acidBodies,
+    ballBodies,
+    socketBodies,
+    acidRadius,
+    jointLength,
+  }) {}
+
   // animate
 
   setInterval(step, 1000 / frameRate);
 
   return {
-    addMesh: addMesh,
-    setMeshPosition: setMeshPosition,
+    addMesh,
+    setMeshPosition,
+    addPeptideConstraint,
   };
 }
 

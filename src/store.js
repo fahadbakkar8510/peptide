@@ -236,6 +236,13 @@ export default new Vuex.Store({
       const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1);
       const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1);
       const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1);
+      state.ammoPhysics.addPeptideConstraint({
+        acidBodies: aAcidBodies,
+        ballBodies: aBallBodies,
+        socketBodies: aSocketBodies,
+        acidRadius: aminoAcidRadius,
+        jointLength,
+      });
     },
     RESIZE(state, { width, height }) {
       state.width = width;
