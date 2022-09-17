@@ -1,4 +1,4 @@
-async function AmmoPhysics() {
+async function AmmoPhysics({ gravity }) {
   if ("Ammo" in window === false) {
     console.error("AmmoPhysics: Couldn't find Ammo.js");
     return;
@@ -20,7 +20,7 @@ async function AmmoPhysics() {
     physicsSolver,
     collisionConfiguration
   );
-  physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.8, 0));
+  physicsWorld.setGravity(new AmmoLib.btVector3(0, -gravity, 0));
 
   function getShape(geometry) {
     const parameters = geometry.parameters;
