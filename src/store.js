@@ -22,6 +22,7 @@ import {
   DynamicDrawUsage,
   Matrix4,
   MeshLambertMaterial,
+  sRGBEncoding,
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
@@ -72,6 +73,8 @@ export default new Vuex.Store({
       state.renderer = new WebGLRenderer({ antialias: true });
       state.renderer.setPixelRatio(window.devicePixelRatio);
       state.renderer.setSize(state.width, state.height);
+      state.renderer.shadowMap.enabled = true;
+      state.renderer.outputEncoding = sRGBEncoding;
       el.appendChild(state.renderer.domElement);
     },
     INITIALIZE_CAMERA(state) {
@@ -85,7 +88,7 @@ export default new Vuex.Store({
         // 4. Far clipping plane
         1000
       );
-      state.camera.position.z = 500;
+      state.camera.position.z = Dimensioning.cmToMeasureRaw({ cm: 50 });
     },
     INITIALIZE_CONTROLS(state) {
       state.controls = new OrbitControls(
@@ -115,10 +118,11 @@ export default new Vuex.Store({
 
       // Floor
       const floor = new Mesh(
-        new BoxGeometry(100, 5, 100),
+        new BoxGeometry(1000, 5, 1000),
         new ShadowMaterial({ color: 0x111111 })
       );
       floor.position.y = -2.5;
+      // floor.rotateX(0.3);
       floor.receiveShadow = true;
       state.scene.add(floor);
       state.ammoPhysics.addMesh(floor);
@@ -140,7 +144,7 @@ export default new Vuex.Store({
         cm: state.controlInfo.distance,
       });
       const height = Dimensioning.cmToMeasureRaw({
-        cm: 100,
+        cm: 10,
       });
 
       const geometry = new SphereGeometry(aminoAcidRadius, 30, 30);
@@ -162,7 +166,6 @@ export default new Vuex.Store({
       state.scene.add(aAcidInstMesh);
 
       aAcids.forEach((char, index) => {
-        console.log(index);
         aAcidInstMesh.setMatrixAt(
           index,
           matrix.setPosition(
@@ -173,6 +176,8 @@ export default new Vuex.Store({
         );
         aAcidInstMesh.setColorAt(index, color.setHex(0xffff00));
       });
+
+      state.ammoPhysics.addMesh(aAcidInstMesh, 1);
 
       // // Add chain A joints.
       // const aJointSpline = new CatmullRomCurve3([
@@ -188,8 +193,6 @@ export default new Vuex.Store({
       // // aJointMesh.updateMatrix();
       // // aJointMesh.matrixAutoUpdate = false;
       // state.scene.add(aJointMesh);
-
-      state.renderer.render(state.scene, state.camera);
     },
     RESIZE(state, { width, height }) {
       state.width = width;
@@ -197,7 +200,6 @@ export default new Vuex.Store({
       state.camera.aspect = width / height;
       state.camera.updateProjectionMatrix();
       state.renderer.setSize(width, height);
-      state.renderer.render(state.scene, state.camera);
     },
     SET_CAMERA_POSITION(state, { x, y, z }) {
       if (state.camera) {
@@ -214,19 +216,15 @@ export default new Vuex.Store({
     },
     HIDE_AXIS_LINES(state) {
       state.scene.remove(...state.axisLines);
-      state.renderer.render(state.scene, state.camera);
     },
     SHOW_AXIS_LINES(state) {
       state.scene.add(...state.axisLines);
-      state.renderer.render(state.scene, state.camera);
     },
     // HIDE_PYRAMIDS(state) {
     //   state.scene.remove(...state.pyramids);
-    //   state.renderer.render(state.scene, state.camera);
     // },
     // SHOW_PYRAMIDS(state) {
     //   state.scene.add(...state.pyramids);
-    //   state.renderer.render(state.scene, state.camera);
     // },
   },
   actions: {
@@ -241,22 +239,13 @@ export default new Vuex.Store({
         commit("INITIALIZE_CONTROLS");
         commit("INITIALIZE_SCENE");
 
-        // Initial scene rendering
-        state.renderer.render(state.scene, state.camera);
-
-        // Add an event listener that will re-render
-        // the scene when the controls are changed
-        state.controls.addEventListener("change", () => {
-          state.renderer.render(state.scene, state.camera);
-        });
-
         resolve();
       });
     },
     ANIMATE({ state, dispatch }) {
       window.requestAnimationFrame(() => {
         dispatch("ANIMATE");
-        state.controls.update();
+        state.renderer.render(state.scene, state.camera);
       });
     },
   },

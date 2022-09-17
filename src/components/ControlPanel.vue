@@ -84,10 +84,10 @@ export default {
   data() {
     return {
       chains: { a: 'KEEP', b: 'QUALITY' },
-      jointLength: 5,
-      jointRadius: 1,
-      distance: 60,
-      aminoAcidRadius: 15,
+      jointLength: 0.5,
+      jointRadius: 0.1,
+      distance: 6,
+      aminoAcidRadius: 1,
       // axisLinesVisible: true,
       // pyramidsVisible: true,
     }
