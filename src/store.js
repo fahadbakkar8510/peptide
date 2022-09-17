@@ -42,7 +42,6 @@ export default new Vuex.Store({
     axisLines: [],
     pyramids: [],
     controlInfo: {},
-    chainObjects: {},
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -147,23 +146,35 @@ export default new Vuex.Store({
         cm: 10,
       });
 
-      const geometry = new SphereGeometry(aminoAcidRadius, 30, 30);
+      const acidGeometry = new SphereGeometry(aminoAcidRadius, 30, 30);
+      const ballGeometry = new SphereGeometry(aminoAcidRadius / 10, 3, 3);
 
-      // Add chain A acids.
-      const aAcidMaterial = new MeshLambertMaterial({});
+      // Add chain a acids.
       const aAcids = state.controlInfo.chains.a.split("");
       const chainALength =
         (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
+
+      const aAcidMaterial = new MeshLambertMaterial({});
       const aAcidInstMesh = new InstancedMesh(
-        geometry,
+        acidGeometry,
         aAcidMaterial,
         aAcids.length
       );
       aAcidInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
       aAcidInstMesh.castShadow = true;
       aAcidInstMesh.receiveShadow = true;
-      state.chainObjects.a = aAcidInstMesh;
       state.scene.add(aAcidInstMesh);
+
+      const aBallMaterial = new MeshLambertMaterial({});
+      const aBallInstMesh = new InstancedMesh(
+        ballGeometry,
+        aBallMaterial,
+        aAcids.length * 2
+      );
+      aBallInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      aBallInstMesh.castShadow = true;
+      aBallInstMesh.receiveShadow = true;
+      state.scene.add(aBallInstMesh);
 
       aAcids.forEach((char, index) => {
         aAcidInstMesh.setMatrixAt(
@@ -177,7 +188,8 @@ export default new Vuex.Store({
         aAcidInstMesh.setColorAt(index, color.setHex(0xffff00));
       });
 
-      state.ammoPhysics.addMesh(aAcidInstMesh, 1);
+      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1);
+      console.log("aAcidBodies: ", aAcidBodies);
 
       // // Add chain A joints.
       // const aJointSpline = new CatmullRomCurve3([

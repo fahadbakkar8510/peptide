@@ -57,9 +57,9 @@ async function AmmoPhysics({ gravity }) {
 
     if (shape !== null) {
       if (mesh.isInstancedMesh) {
-        handleInstancedMesh(mesh, mass, shape);
+        return handleInstancedMesh(mesh, mass, shape);
       } else if (mesh.isMesh) {
-        handleMesh(mesh, mass, shape);
+        return handleMesh(mesh, mass, shape);
       }
     }
   }
@@ -102,6 +102,8 @@ async function AmmoPhysics({ gravity }) {
       meshes.push(mesh);
       meshMap.set(mesh, body);
     }
+
+    return { body };
   }
 
   function handleInstancedMesh(mesh, mass, shape) {
@@ -136,6 +138,8 @@ async function AmmoPhysics({ gravity }) {
       meshes.push(mesh);
       meshMap.set(mesh, bodies);
     }
+
+    return { bodies };
   }
 
   function setMeshPosition(mesh, position, index = 0) {
