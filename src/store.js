@@ -18,11 +18,17 @@ import {
   TubeGeometry,
   BoxGeometry,
   ShadowMaterial,
+  InstancedMesh,
+  DynamicDrawUsage,
+  Matrix4,
+  MeshLambertMaterial,
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
 
 Vue.use(Vuex);
+const matrix = new Matrix4();
+const color = new Color();
 
 export default new Vuex.Store({
   state: {
@@ -140,78 +146,48 @@ export default new Vuex.Store({
       const geometry = new SphereGeometry(aminoAcidRadius, 30, 30);
 
       // Add chain A acids.
-      const aAcidMaterial = new MeshPhongMaterial({
-        color: 0xff0000,
-        flatShading: true,
-      });
+      const aAcidMaterial = new MeshLambertMaterial({});
       const aAcids = state.controlInfo.chains.a.split("");
       const chainALength =
         (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
-      state.chainObjects.a = [];
+      const aAcidInstMesh = new InstancedMesh(
+        geometry,
+        aAcidMaterial,
+        aAcids.length
+      );
+      aAcidInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      aAcidInstMesh.castShadow = true;
+      aAcidInstMesh.receiveShadow = true;
+      state.chainObjects.a = aAcidInstMesh;
+      state.scene.add(aAcidInstMesh);
 
       aAcids.forEach((char, index) => {
-        const mesh = new Mesh(geometry, aAcidMaterial);
-        mesh.position.x =
-          -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
-        mesh.position.y = height;
-        mesh.position.z = distance / 2;
-        mesh.updateMatrix();
-        mesh.matrixAutoUpdate = false;
-        state.chainObjects.a.push(mesh);
+        console.log(index);
+        aAcidInstMesh.setMatrixAt(
+          index,
+          matrix.setPosition(
+            -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index,
+            height,
+            distance / 2
+          )
+        );
+        aAcidInstMesh.setColorAt(index, color.setHex(0xffff00));
       });
 
-      state.scene.add(...state.chainObjects.a);
-
-      // Add chain A joints.
-      const aJointSpline = new CatmullRomCurve3([
-        new Vector3(-chainALength / 2, height, distance / 2),
-        new Vector3(chainALength / 2, height, distance / 2),
-      ]);
-      const aJointGeometry = new TubeGeometry(aJointSpline, 30, jointRadius);
-      const aJointMaterial = new MeshPhongMaterial({
-        color: 0xff0000,
-        flatShading: true,
-      });
-      const aJointMesh = new Mesh(aJointGeometry, aJointMaterial);
-      // aJointMesh.updateMatrix();
-      // aJointMesh.matrixAutoUpdate = false;
-      state.scene.add(aJointMesh);
-
-      // Add chain B acids.
-      const bAcidMaterial = new MeshPhongMaterial({
-        color: 0x00ff00,
-        flatShading: true,
-      });
-      const bAcids = state.controlInfo.chains.b.split("");
-      const chainBLength =
-        (aminoAcidRadius * 2 + jointLength) * (bAcids.length - 1);
-      state.chainObjects.b = [];
-      bAcids.forEach((char, index) => {
-        const mesh = new Mesh(geometry, bAcidMaterial);
-        mesh.position.x =
-          -chainBLength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
-        mesh.position.y = height;
-        mesh.position.z = -distance / 2;
-        mesh.updateMatrix();
-        mesh.matrixAutoUpdate = false;
-        state.chainObjects.b.push(mesh);
-      });
-      state.scene.add(...state.chainObjects.b);
-
-      // Add chain B joints.
-      const bJointSpline = new CatmullRomCurve3([
-        new Vector3(-chainBLength / 2, height, -distance / 2),
-        new Vector3(chainBLength / 2, height, -distance / 2),
-      ]);
-      const bJointGeometry = new TubeGeometry(bJointSpline, 30, jointRadius);
-      const bJointMaterial = new MeshPhongMaterial({
-        color: 0x00ff00,
-        flatShading: true,
-      });
-      const bJointMesh = new Mesh(bJointGeometry, bJointMaterial);
-      // bJointMesh.updateMatrix();
-      // bJointMesh.matrixAutoUpdate = false;
-      state.scene.add(bJointMesh);
+      // // Add chain A joints.
+      // const aJointSpline = new CatmullRomCurve3([
+      //   new Vector3(-chainALength / 2, height, distance / 2),
+      //   new Vector3(chainALength / 2, height, distance / 2),
+      // ]);
+      // const aJointGeometry = new TubeGeometry(aJointSpline, 30, jointRadius);
+      // const aJointMaterial = new MeshPhongMaterial({
+      //   color: 0xff0000,
+      //   flatShading: true,
+      // });
+      // const aJointMesh = new Mesh(aJointGeometry, aJointMaterial);
+      // // aJointMesh.updateMatrix();
+      // // aJointMesh.matrixAutoUpdate = false;
+      // state.scene.add(aJointMesh);
 
       state.renderer.render(state.scene, state.camera);
     },
