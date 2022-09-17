@@ -144,14 +144,14 @@ export default new Vuex.Store({
         cm: 10,
       });
 
+      // Prepare to draw peptides.
       const acidGeometry = new SphereGeometry(aminoAcidRadius, 30, 30);
-      const ballGeometry = new SphereGeometry(aminoAcidRadius / 10, 3, 3);
-
-      // Add chain a acids.
+      const ballGeometry = new SphereGeometry(aminoAcidRadius / 5, 6, 6);
       const aAcids = state.controlInfo.chains.a.split("");
       const chainALength =
         (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
 
+      // Add chain a acids.
       const aAcidMaterial = new MeshLambertMaterial({});
       const aAcidInstMesh = new InstancedMesh(
         acidGeometry,
@@ -163,46 +163,81 @@ export default new Vuex.Store({
       aAcidInstMesh.receiveShadow = true;
       state.scene.add(aAcidInstMesh);
 
+      // Add chain a balls.
       const aBallMaterial = new MeshLambertMaterial({});
       const aBallInstMesh = new InstancedMesh(
         ballGeometry,
         aBallMaterial,
-        aAcids.length * 2
+        (aAcids.length - 1) * 2
       );
       aBallInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
       aBallInstMesh.castShadow = true;
       aBallInstMesh.receiveShadow = true;
       state.scene.add(aBallInstMesh);
 
+      // Add chain a sockets.
+      const aSocketSpline = new CatmullRomCurve3([
+        new Vector3(-jointLength / 2, 0, 0),
+        new Vector3(jointLength / 2, 0, 0),
+      ]);
+      const aSocketGeometry = new TubeGeometry(
+        aSocketSpline,
+        3,
+        aminoAcidRadius / 10
+      );
+      const aSocketMaterial = new MeshLambertMaterial({});
+      const aSocketInstMesh = new InstancedMesh(
+        aSocketGeometry,
+        aSocketMaterial,
+        aAcids.length - 1
+      );
+      aSocketInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
+      aSocketInstMesh.castShadow = true;
+      aSocketInstMesh.receiveShadow = true;
+      state.scene.add(aSocketInstMesh);
+
+      // Set position of the elements.
       aAcids.forEach((char, index) => {
+        const acidPosX =
+          -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
+        const startBallIndex = index * 2 - 1;
+        const startBallPosX = acidPosX - aminoAcidRadius;
+        const endBallIndex = startBallIndex + 1;
+        const endBallPosX = acidPosX + aminoAcidRadius;
+        const jointPosX = acidPosX + aminoAcidRadius + jointLength / 2;
+
         aAcidInstMesh.setMatrixAt(
           index,
-          matrix.setPosition(
-            -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index,
-            height,
-            distance / 2
-          )
+          matrix.setPosition(acidPosX, height, distance / 2)
         );
-        aAcidInstMesh.setColorAt(index, color.setHex(0xffff00));
+        aAcidInstMesh.setColorAt(index, color.setHex(0xff0000));
+
+        if (index > 0) {
+          aBallInstMesh.setMatrixAt(
+            startBallIndex,
+            matrix.setPosition(startBallPosX, height, distance / 2)
+          );
+          aBallInstMesh.setColorAt(startBallIndex, color.setHex(0x50c878));
+        }
+
+        if (index < aAcids.length - 1) {
+          aBallInstMesh.setMatrixAt(
+            endBallIndex,
+            matrix.setPosition(endBallPosX, height, distance / 2)
+          );
+          aBallInstMesh.setColorAt(endBallIndex, color.setHex(0x50c878));
+
+          aSocketInstMesh.setMatrixAt(
+            index,
+            matrix.setPosition(jointPosX, height, distance / 2)
+          );
+          aSocketInstMesh.setColorAt(index, color.setHex(0x00ff00));
+        }
       });
 
       const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1);
-      console.log("aAcidBodies: ", aAcidBodies);
-
-      // // Add chain A joints.
-      // const aJointSpline = new CatmullRomCurve3([
-      //   new Vector3(-chainALength / 2, height, distance / 2),
-      //   new Vector3(chainALength / 2, height, distance / 2),
-      // ]);
-      // const aJointGeometry = new TubeGeometry(aJointSpline, 30, jointRadius);
-      // const aJointMaterial = new MeshPhongMaterial({
-      //   color: 0xff0000,
-      //   flatShading: true,
-      // });
-      // const aJointMesh = new Mesh(aJointGeometry, aJointMaterial);
-      // // aJointMesh.updateMatrix();
-      // // aJointMesh.matrixAutoUpdate = false;
-      // state.scene.add(aJointMesh);
+      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1);
+      const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1);
     },
     RESIZE(state, { width, height }) {
       state.width = width;

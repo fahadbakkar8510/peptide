@@ -64,7 +64,7 @@ export default {
   data() {
     return {
       chains: { a: 'KEEP', b: 'QUALITY' },
-      jointLength: 0.5,
+      jointLength: 1,
       jointRadius: 0.1,
       distance: 6,
       aminoAcidRadius: 1,
