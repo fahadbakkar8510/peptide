@@ -134,9 +134,6 @@ export default new Vuex.Store({
       const jointLength = Dimensioning.cmToMeasureRaw({
         cm: state.controlInfo.joint_length,
       });
-      const jointRadius = Dimensioning.cmToMeasureRaw({
-        cm: state.controlInfo.joint_radius,
-      });
       const distance = Dimensioning.cmToMeasureRaw({
         cm: state.controlInfo.distance,
       });

@@ -18,10 +18,6 @@
           <input class="w-32" ref="joint_length" type="number" v-model="jointLength" />
         </p>
         <p class="flex items-center justify-between mb-1">
-          Joint Radius
-          <input class="w-32" ref="joint_radius" type="number" v-model="jointRadius" />
-        </p>
-        <p class="flex items-center justify-between mb-1">
           Distance
           <input class="w-32" ref="distance" type="number" v-model="distance" />
         </p>
@@ -65,7 +61,6 @@ export default {
     return {
       chains: { a: 'KEEP', b: 'QUALITY' },
       jointLength: 1,
-      jointRadius: 0.1,
       distance: 6,
       aminoAcidRadius: 1,
     }
@@ -95,10 +90,6 @@ export default {
         this.$refs.joint_length.focus()
         return
       }
-      if (this.jointRadius <= 0) {
-        this.$refs.joint_radius.focus()
-        return
-      }
       if (this.distance <= 0) {
         this.$refs.distance.focus()
         return
@@ -112,12 +103,11 @@ export default {
         joint_length: this.jointLength,
         distance: this.distance,
         amino_acid_radius: this.aminoAcidRadius,
-        joint_radius: this.jointRadius,
       })
       this.GENERATE_PEPTIDES()
     },
     resetCameraPosition() {
-      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })
+      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 50 })
       this.RESET_CAMERA_ROTATION()
     },
   },
