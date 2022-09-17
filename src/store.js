@@ -10,11 +10,8 @@ import {
   Mesh,
   DirectionalLight,
   AmbientLight,
-  Vector3,
   SphereGeometry,
   AxesHelper,
-  CatmullRomCurve3,
-  TubeGeometry,
   BoxGeometry,
   ShadowMaterial,
   InstancedMesh,
@@ -22,13 +19,18 @@ import {
   Matrix4,
   MeshLambertMaterial,
   sRGBEncoding,
+  CylinderGeometry,
+  Vector3,
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
 
 Vue.use(Vuex);
-const matrix = new Matrix4();
+const matrix1 = new Matrix4();
 const color = new Color();
+const vecZ = new Vector3(0, 0, 1);
+const multiMatrix = new Matrix4();
+const matrix2 = new Matrix4();
 
 export default new Vuex.Store({
   state: {
@@ -173,14 +175,10 @@ export default new Vuex.Store({
       state.scene.add(aBallInstMesh);
 
       // Add chain a sockets.
-      const aSocketSpline = new CatmullRomCurve3([
-        new Vector3(-jointLength / 2, 0, 0),
-        new Vector3(jointLength / 2, 0, 0),
-      ]);
-      const aSocketGeometry = new TubeGeometry(
-        aSocketSpline,
-        3,
-        aminoAcidRadius / 10
+      const aSocketGeometry = new CylinderGeometry(
+        aminoAcidRadius / 10,
+        aminoAcidRadius / 10,
+        jointLength
       );
       const aSocketMaterial = new MeshLambertMaterial({});
       const aSocketInstMesh = new InstancedMesh(
@@ -205,14 +203,14 @@ export default new Vuex.Store({
 
         aAcidInstMesh.setMatrixAt(
           index,
-          matrix.setPosition(acidPosX, height, distance / 2)
+          matrix1.setPosition(acidPosX, height, distance / 2)
         );
         aAcidInstMesh.setColorAt(index, color.setHex(0xff0000));
 
         if (index > 0) {
           aBallInstMesh.setMatrixAt(
             startBallIndex,
-            matrix.setPosition(startBallPosX, height, distance / 2)
+            matrix1.setPosition(startBallPosX, height, distance / 2)
           );
           aBallInstMesh.setColorAt(startBallIndex, color.setHex(0x50c878));
         }
@@ -220,13 +218,16 @@ export default new Vuex.Store({
         if (index < aAcids.length - 1) {
           aBallInstMesh.setMatrixAt(
             endBallIndex,
-            matrix.setPosition(endBallPosX, height, distance / 2)
+            matrix1.setPosition(endBallPosX, height, distance / 2)
           );
           aBallInstMesh.setColorAt(endBallIndex, color.setHex(0x50c878));
 
           aSocketInstMesh.setMatrixAt(
             index,
-            matrix.setPosition(jointPosX, height, distance / 2)
+            multiMatrix.multiplyMatrices(
+              matrix1.setPosition(jointPosX, height, distance / 2),
+              matrix2.makeRotationAxis(vecZ, Math.PI / 2)
+            )
           );
           aSocketInstMesh.setColorAt(index, color.setHex(0x00ff00));
         }

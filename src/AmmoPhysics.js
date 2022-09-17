@@ -24,29 +24,44 @@ async function AmmoPhysics({ gravity }) {
 
   function getShape(geometry) {
     const parameters = geometry.parameters;
+    let shape = null,
+      radius,
+      radiusTop,
+      radiusBottom,
+      sx,
+      sy,
+      sz;
 
-    if (geometry.type === "BoxGeometry") {
-      const sx = parameters.width !== undefined ? parameters.width / 2 : 0.5;
-      const sy = parameters.height !== undefined ? parameters.height / 2 : 0.5;
-      const sz = parameters.depth !== undefined ? parameters.depth / 2 : 0.5;
+    switch (geometry.type) {
+      case "BoxGeometry":
+        sx = parameters.width !== undefined ? parameters.width / 2 : 0.5;
+        sy = parameters.height !== undefined ? parameters.height / 2 : 0.5;
+        sz = parameters.depth !== undefined ? parameters.depth / 2 : 0.5;
+        shape = new AmmoLib.btBoxShape(new AmmoLib.btVector3(sx, sy, sz));
+        shape.setMargin(0.05);
+        break;
 
-      const shape = new AmmoLib.btBoxShape(new AmmoLib.btVector3(sx, sy, sz));
-      shape.setMargin(0.05);
+      case "SphereGeometry":
+      case "IcosahedronGeometry":
+        radius = parameters.radius !== undefined ? parameters.radius : 1;
+        shape = new AmmoLib.btSphereShape(radius);
+        shape.setMargin(0.05);
+        break;
 
-      return shape;
-    } else if (
-      geometry.type === "SphereGeometry" ||
-      geometry.type === "IcosahedronGeometry"
-    ) {
-      const radius = parameters.radius !== undefined ? parameters.radius : 1;
-
-      const shape = new AmmoLib.btSphereShape(radius);
-      shape.setMargin(0.05);
-
-      return shape;
+      case "CylinderGeometry":
+        radiusTop =
+          parameters.radiusTop !== undefined ? parameters.radiusTop : 1;
+        radiusBottom =
+          parameters.radiusBottom !== undefined ? parameters.radiusBottom : 1;
+        sy = parameters.height !== undefined ? parameters.height / 2 : 0.5;
+        shape = new AmmoLib.btCylinderShape(
+          new AmmoLib.btVector3(radiusTop, radiusBottom, sy)
+        );
+        shape.setMargin(0.05);
+        break;
     }
 
-    return null;
+    return shape;
   }
 
   const meshes = [];
