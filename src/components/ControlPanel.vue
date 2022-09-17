@@ -31,7 +31,7 @@
         </p>
         <p class="flex items-center">
           <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
-            Generate peptides
+            Generate Peptides
           </button>
         </p>
         <!-- <p class="mb-1 text-grey-light font-bold">
@@ -143,7 +143,7 @@ export default {
       this.GENERATE_PEPTIDES()
     },
     resetCameraPosition() {
-      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 500 })
+      this.SET_CAMERA_POSITION({ x: 0, y: 0, z: 50 })
       this.RESET_CAMERA_ROTATION()
     },
     // toggleAxisLines() {

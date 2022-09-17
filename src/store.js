@@ -203,7 +203,11 @@ export default new Vuex.Store({
     },
     SET_CAMERA_POSITION(state, { x, y, z }) {
       if (state.camera) {
-        state.camera.position.set(x, y, z);
+        state.camera.position.set(
+          Dimensioning.cmToMeasureRaw({ cm: x }),
+          Dimensioning.cmToMeasureRaw({ cm: y }),
+          Dimensioning.cmToMeasureRaw({ cm: z })
+        );
       }
     },
     RESET_CAMERA_ROTATION(state) {
