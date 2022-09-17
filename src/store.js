@@ -7,7 +7,6 @@ import {
   WebGLRenderer,
   Color,
   FogExp2,
-  MeshPhongMaterial,
   Mesh,
   DirectionalLight,
   AmbientLight,
@@ -39,7 +38,6 @@ export default new Vuex.Store({
     controls: null,
     scene: null,
     renderer: null,
-    axisLines: [],
     pyramids: [],
     controlInfo: {},
   },
@@ -230,18 +228,6 @@ export default new Vuex.Store({
         state.controls.target.set(0, 0, 0);
       }
     },
-    HIDE_AXIS_LINES(state) {
-      state.scene.remove(...state.axisLines);
-    },
-    SHOW_AXIS_LINES(state) {
-      state.scene.add(...state.axisLines);
-    },
-    // HIDE_PYRAMIDS(state) {
-    //   state.scene.remove(...state.pyramids);
-    // },
-    // SHOW_PYRAMIDS(state) {
-    //   state.scene.add(...state.pyramids);
-    // },
   },
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
