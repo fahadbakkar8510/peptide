@@ -5,4 +5,15 @@ export const addPeptideConstraint = ({
   socketBodies,
   acidRadius,
   jointLength,
-}) => {};
+}) => {
+  console.log(
+    ammoPhysics,
+    acidBodies,
+    ballBodies,
+    socketBodies,
+    acidRadius,
+    jointLength
+  );
+
+  
+};

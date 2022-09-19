@@ -234,9 +234,10 @@ export default new Vuex.Store({
         }
       });
 
-      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1);
-      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1);
-      const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1);
+      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1).bodies;
+      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1).bodies;
+      const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1)
+        .bodies;
       addPeptideConstraint({
         ammoPhysics: state.ammoPhysics,
         acidBodies: aAcidBodies,
