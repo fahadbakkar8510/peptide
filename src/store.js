@@ -24,12 +24,13 @@ import {
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
+import { addPeptideConstraint } from "./constraint";
 
 Vue.use(Vuex);
-const matrix1 = new Matrix4();
 const color = new Color();
 const vecZ = new Vector3(0, 0, 1);
 const multiMatrix = new Matrix4();
+const matrix1 = new Matrix4();
 const matrix2 = new Matrix4();
 
 export default new Vuex.Store({
@@ -236,7 +237,8 @@ export default new Vuex.Store({
       const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1);
       const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1);
       const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1);
-      state.ammoPhysics.addPeptideConstraint({
+      addPeptideConstraint({
+        ammoPhysics: state.ammoPhysics,
         acidBodies: aAcidBodies,
         ballBodies: aBallBodies,
         socketBodies: aSocketBodies,
