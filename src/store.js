@@ -95,6 +95,61 @@ const formPeptide = ({
   });
 };
 
+const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
+  const socketRadius = acidRadius / 10;
+
+  // Add acids.
+  const acidInstMesh = getSphereInstMesh({
+    radius: acidRadius,
+    count: chars.length,
+  });
+  state.acidInstMeshes.push(acidInstMesh);
+  state.scene.add(acidInstMesh);
+
+  // Add balls.
+  const ballInstMesh = getSphereInstMesh({
+    radius: acidRadius / 5,
+    count: (chars.length - 1) * 2,
+  });
+  state.scene.add(ballInstMesh);
+
+  // Add sockets.
+  const socketInstMesh = getCylinderInstMesh({
+    topRadius: socketRadius,
+    bottomRadius: socketRadius,
+    height: jointLength,
+    count: chars.length - 1,
+  });
+  state.scene.add(socketInstMesh);
+
+  // Form peptide.
+  formPeptide({
+    chars,
+    acidRadius,
+    jointLength,
+    acidInstMesh,
+    ballInstMesh,
+    socketInstMesh,
+    y,
+    z,
+  });
+
+  // Add constraint.
+  const acidBodies = state.ammoPhysics.addMesh(acidInstMesh, acidMass).bodies;
+  const ballBodies = state.ammoPhysics.addMesh(ballInstMesh, ballMass).bodies;
+  const socketBodies = state.ammoPhysics.addMesh(socketInstMesh, socketMass)
+    .bodies;
+
+  addPeptideConstraint({
+    ammoPhysics: state.ammoPhysics,
+    acidBodies,
+    ballBodies,
+    socketBodies,
+    acidRadius,
+    jointLength,
+  });
+};
+
 export default new Vuex.Store({
   state: {
     width: 0,
@@ -208,63 +263,26 @@ export default new Vuex.Store({
         cm: 10,
       });
 
-      // Prepare to draw peptides.
+      // Generate a peptide.
       const aAcids = state.controlInfo.chains.a.split("");
-
-      // Add chain a acids.
-      const aAcidInstMesh = getSphereInstMesh({
-        radius: aminoAcidRadius,
-        count: aAcids.length,
-      });
-      state.acidInstMeshes.push(aAcidInstMesh);
-      state.scene.add(aAcidInstMesh);
-
-      // Add chain a balls.
-      const aBallInstMesh = getSphereInstMesh({
-        radius: aminoAcidRadius / 5,
-        count: (aAcids.length - 1) * 2,
-      });
-      state.scene.add(aBallInstMesh);
-
-      // Add chain a sockets.
-      const socketRadius = aminoAcidRadius / 10;
-      const aSocketInstMesh = getCylinderInstMesh({
-        topRadius: socketRadius,
-        bottomRadius: socketRadius,
-        height: jointLength,
-        count: aAcids.length - 1,
-      });
-      state.scene.add(aSocketInstMesh);
-
-      // Form peptide.
-      formPeptide({
+      generatePeptide({
+        state,
         chars: aAcids,
         acidRadius: aminoAcidRadius,
         jointLength,
-        acidInstMesh: aAcidInstMesh,
-        ballInstMesh: aBallInstMesh,
-        socketInstMesh: aSocketInstMesh,
         y: height,
         z: distance / 2,
       });
 
-      // Add constraint.
-      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, acidMass)
-        .bodies;
-      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, ballMass)
-        .bodies;
-      const aSocketBodies = state.ammoPhysics.addMesh(
-        aSocketInstMesh,
-        socketMass
-      ).bodies;
-
-      addPeptideConstraint({
-        ammoPhysics: state.ammoPhysics,
-        acidBodies: aAcidBodies,
-        ballBodies: aBallBodies,
-        socketBodies: aSocketBodies,
+      // Generate b peptide.
+      const bAcids = state.controlInfo.chains.b.split("");
+      generatePeptide({
+        state,
+        chars: bAcids,
         acidRadius: aminoAcidRadius,
         jointLength,
+        y: height,
+        z: -distance / 2,
       });
     },
     RESIZE(state, { width, height }) {
