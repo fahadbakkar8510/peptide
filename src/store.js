@@ -21,8 +21,8 @@ import {
   Vector2,
 } from "three";
 import { AmmoPhysics } from "./ammo.physics";
-import { OrbitControls } from "./OrbitControls";
-import { addPeptideConstraint } from "./constraint";
+import { OrbitControls } from "./orbit.controls";
+import { addPeptideConstraint } from "./constraints";
 import {
   acidHex,
   ballHex,
