@@ -41,7 +41,11 @@ import {
   ballMass,
   socketMass,
 } from "./constants";
-import { getCylinderInstMesh, getSphereInstMesh } from "./meshes";
+import {
+  getAcidInstMesh,
+  getCylinderInstMesh,
+  getSphereInstMesh,
+} from "./meshes";
 
 Vue.use(Vuex);
 
@@ -99,9 +103,9 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   const socketRadius = acidRadius / 10;
 
   // Add acids.
-  const acidInstMesh = getSphereInstMesh({
+  const acidInstMesh = getAcidInstMesh({
     radius: acidRadius,
-    count: chars.length,
+    chars,
   });
   state.acidInstMeshes.push(acidInstMesh);
   state.scene.add(acidInstMesh);
