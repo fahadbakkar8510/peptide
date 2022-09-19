@@ -262,6 +262,8 @@ async function AmmoPhysics({ gravity }) {
   setInterval(step, 1000 / frameRate);
 
   return {
+    AmmoLib,
+    physicsWorld,
     addMesh,
     setMeshPosition,
   };

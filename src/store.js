@@ -276,7 +276,7 @@ export default new Vuex.Store({
     INIT_SCENE({ state, commit }, { width, height, el }) {
       return new Promise(async (resolve) => {
         // AmmoPhysics
-        state.ammoPhysics = await AmmoPhysics({ gravity: 98 });
+        state.ammoPhysics = await AmmoPhysics({ gravity: 9.8 });
 
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);
