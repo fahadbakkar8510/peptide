@@ -21,10 +21,12 @@ import {
   sRGBEncoding,
   CylinderGeometry,
   Vector3,
+  Raycaster,
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
 import { addPeptideConstraint } from "./constraint";
+import { Vector2 } from "three-full";
 
 Vue.use(Vuex);
 const color = new Color();
@@ -32,6 +34,8 @@ const vecZ = new Vector3(0, 0, 1);
 const multiMatrix = new Matrix4();
 const matrix1 = new Matrix4();
 const matrix2 = new Matrix4();
+const raycaster = new Raycaster();
+const selColor = new Color(0x0000ff);
 
 export default new Vuex.Store({
   state: {
@@ -43,6 +47,8 @@ export default new Vuex.Store({
     renderer: null,
     pyramids: [],
     controlInfo: {},
+    pointer: new Vector2(),
+    acidInstMeshes: [],
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -161,6 +167,7 @@ export default new Vuex.Store({
       aAcidInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
       aAcidInstMesh.castShadow = true;
       aAcidInstMesh.receiveShadow = true;
+      state.acidInstMeshes.push(aAcidInstMesh);
       state.scene.add(aAcidInstMesh);
 
       // Add chain a balls.
@@ -271,6 +278,9 @@ export default new Vuex.Store({
         state.controls.target.set(0, 0, 0);
       }
     },
+    SET_POINTER(state, pointer) {
+      state.pointer = pointer;
+    },
   },
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
@@ -290,6 +300,26 @@ export default new Vuex.Store({
     ANIMATE({ state, dispatch }) {
       window.requestAnimationFrame(() => {
         dispatch("ANIMATE");
+
+        // Handle raycaster.
+        if (state.acidInstMeshes.length) {
+          // state.acidInstMeshes.forEach((acidInstMesh) => {
+          //   for (let i = 0; i < acidInstMesh.count; i++) {}
+          // });
+
+          raycaster.setFromCamera(state.pointer, state.camera);
+          const intersects = raycaster.intersectObjects(
+            state.acidInstMeshes,
+            true
+          );
+
+          if (intersects.length) {
+            console.log("intersect object: ", intersects[0]);
+            intersects[0].object.setColorAt(intersects[0].instanceId, selColor);
+            intersects[0].object.instanceColor.needsUpdate = true;
+          }
+        }
+
         state.renderer.render(state.scene, state.camera);
       });
     },

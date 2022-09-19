@@ -12,10 +12,13 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["RESIZE"]),
+    ...mapMutations(["RESIZE", "SET_POINTER"]),
     ...mapActions(["INIT_SCENE", "ANIMATE"]),
   },
   mounted() {
+    this.$el.addEventListener('pointermove', (event) => {
+      this.SET_POINTER({ x: (event.clientX / this.$el.offsetWidth) * 2 - 1, y: -(event.clientY / this.$el.offsetHeight) * 2 + 1 })
+    })
     this.INIT_SCENE({
       width: this.$el.offsetWidth,
       height: this.$el.offsetHeight,
