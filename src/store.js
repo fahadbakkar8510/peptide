@@ -5,7 +5,6 @@ import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  Color,
   FogExp2,
   Mesh,
   DirectionalLight,
@@ -16,15 +15,12 @@ import {
   ShadowMaterial,
   InstancedMesh,
   DynamicDrawUsage,
-  Matrix4,
   MeshLambertMaterial,
   sRGBEncoding,
   CylinderGeometry,
   Vector2,
-  Vector3,
-  Raycaster,
 } from "three";
-import { AmmoPhysics } from "./AmmoPhysics";
+import { AmmoPhysics } from "./ammo.physics";
 import { OrbitControls } from "./OrbitControls";
 import { addPeptideConstraint } from "./constraint";
 import {
@@ -46,6 +42,9 @@ import {
   tempMatrix1,
   tempMatrix2,
   raycaster,
+  acidMass,
+  ballMass,
+  socketMass,
 } from "./constants";
 
 Vue.use(Vuex);
@@ -254,10 +253,14 @@ export default new Vuex.Store({
         }
       });
 
-      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, 1).bodies;
-      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, 1).bodies;
-      const aSocketBodies = state.ammoPhysics.addMesh(aSocketInstMesh, 1)
+      const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, acidMass)
         .bodies;
+      const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, ballMass)
+        .bodies;
+      const aSocketBodies = state.ammoPhysics.addMesh(
+        aSocketInstMesh,
+        socketMass
+      ).bodies;
       addPeptideConstraint({
         ammoPhysics: state.ammoPhysics,
         acidBodies: aAcidBodies,
