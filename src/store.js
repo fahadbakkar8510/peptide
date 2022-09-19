@@ -9,15 +9,10 @@ import {
   Mesh,
   DirectionalLight,
   AmbientLight,
-  SphereGeometry,
   AxesHelper,
   BoxGeometry,
   ShadowMaterial,
-  InstancedMesh,
-  DynamicDrawUsage,
-  MeshLambertMaterial,
   sRGBEncoding,
-  CylinderGeometry,
   Vector2,
 } from "three";
 import { AmmoPhysics } from "./ammo.physics";
@@ -49,6 +44,56 @@ import {
 import { getCylinderInstMesh, getSphereInstMesh } from "./meshes";
 
 Vue.use(Vuex);
+
+const formPeptide = ({
+  chars,
+  acidRadius,
+  jointLength,
+  acidInstMesh,
+  ballInstMesh,
+  socketInstMesh,
+  y,
+  z,
+}) => {
+  const chainLength = (acidRadius * 2 + jointLength) * (chars.length - 1);
+
+  chars.forEach((char, index) => {
+    const acidPosX = -chainLength / 2 + (acidRadius * 2 + jointLength) * index;
+    const startBallIndex = index * 2 - 1;
+    const startBallPosX = acidPosX - acidRadius;
+    const endBallIndex = startBallIndex + 1;
+    const endBallPosX = acidPosX + acidRadius;
+    const jointPosX = acidPosX + acidRadius + jointLength / 2;
+
+    acidInstMesh.setMatrixAt(index, tempMatrix1.setPosition(acidPosX, y, z));
+    acidInstMesh.setColorAt(index, tempColor.setHex(acidHex));
+
+    if (index > 0) {
+      ballInstMesh.setMatrixAt(
+        startBallIndex,
+        tempMatrix1.setPosition(startBallPosX, y, z)
+      );
+      ballInstMesh.setColorAt(startBallIndex, tempColor.setHex(ballHex));
+    }
+
+    if (index < chars.length - 1) {
+      ballInstMesh.setMatrixAt(
+        endBallIndex,
+        tempMatrix1.setPosition(endBallPosX, y, z)
+      );
+      ballInstMesh.setColorAt(endBallIndex, tempColor.setHex(ballHex));
+
+      socketInstMesh.setMatrixAt(
+        index,
+        tempMultiMatrix.multiplyMatrices(
+          tempMatrix1.setPosition(jointPosX, y, z),
+          tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
+        )
+      );
+      socketInstMesh.setColorAt(index, tempColor.setHex(socketHex));
+    }
+  });
+};
 
 export default new Vuex.Store({
   state: {
@@ -165,8 +210,6 @@ export default new Vuex.Store({
 
       // Prepare to draw peptides.
       const aAcids = state.controlInfo.chains.a.split("");
-      const chainALength =
-        (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
 
       // Add chain a acids.
       const aAcidInstMesh = getSphereInstMesh({
@@ -193,48 +236,19 @@ export default new Vuex.Store({
       });
       state.scene.add(aSocketInstMesh);
 
-      // Set position of the elements.
-      aAcids.forEach((char, index) => {
-        const acidPosX =
-          -chainALength / 2 + (aminoAcidRadius * 2 + jointLength) * index;
-        const startBallIndex = index * 2 - 1;
-        const startBallPosX = acidPosX - aminoAcidRadius;
-        const endBallIndex = startBallIndex + 1;
-        const endBallPosX = acidPosX + aminoAcidRadius;
-        const jointPosX = acidPosX + aminoAcidRadius + jointLength / 2;
-
-        aAcidInstMesh.setMatrixAt(
-          index,
-          tempMatrix1.setPosition(acidPosX, height, distance / 2)
-        );
-        aAcidInstMesh.setColorAt(index, tempColor.setHex(acidHex));
-
-        if (index > 0) {
-          aBallInstMesh.setMatrixAt(
-            startBallIndex,
-            tempMatrix1.setPosition(startBallPosX, height, distance / 2)
-          );
-          aBallInstMesh.setColorAt(startBallIndex, tempColor.setHex(ballHex));
-        }
-
-        if (index < aAcids.length - 1) {
-          aBallInstMesh.setMatrixAt(
-            endBallIndex,
-            tempMatrix1.setPosition(endBallPosX, height, distance / 2)
-          );
-          aBallInstMesh.setColorAt(endBallIndex, tempColor.setHex(ballHex));
-
-          aSocketInstMesh.setMatrixAt(
-            index,
-            tempMultiMatrix.multiplyMatrices(
-              tempMatrix1.setPosition(jointPosX, height, distance / 2),
-              tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
-            )
-          );
-          aSocketInstMesh.setColorAt(index, tempColor.setHex(socketHex));
-        }
+      // Form peptide.
+      formPeptide({
+        chars: aAcids,
+        acidRadius: aminoAcidRadius,
+        jointLength,
+        acidInstMesh: aAcidInstMesh,
+        ballInstMesh: aBallInstMesh,
+        socketInstMesh: aSocketInstMesh,
+        y: height,
+        z: distance / 2,
       });
 
+      // Add constraint.
       const aAcidBodies = state.ammoPhysics.addMesh(aAcidInstMesh, acidMass)
         .bodies;
       const aBallBodies = state.ammoPhysics.addMesh(aBallInstMesh, ballMass)
@@ -243,6 +257,7 @@ export default new Vuex.Store({
         aSocketInstMesh,
         socketMass
       ).bodies;
+
       addPeptideConstraint({
         ammoPhysics: state.ammoPhysics,
         acidBodies: aAcidBodies,
