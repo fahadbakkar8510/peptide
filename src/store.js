@@ -46,6 +46,7 @@ import {
   ballMass,
   socketMass,
 } from "./constants";
+import { getCylinderInstMesh, getSphereInstMesh } from "./meshes";
 
 Vue.use(Vuex);
 
@@ -163,52 +164,33 @@ export default new Vuex.Store({
       });
 
       // Prepare to draw peptides.
-      const acidGeometry = new SphereGeometry(aminoAcidRadius, 30, 30);
-      const ballGeometry = new SphereGeometry(aminoAcidRadius / 5, 6, 6);
       const aAcids = state.controlInfo.chains.a.split("");
       const chainALength =
         (aminoAcidRadius * 2 + jointLength) * (aAcids.length - 1);
 
       // Add chain a acids.
-      const aAcidMaterial = new MeshLambertMaterial({});
-      const aAcidInstMesh = new InstancedMesh(
-        acidGeometry,
-        aAcidMaterial,
-        aAcids.length
-      );
-      aAcidInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-      aAcidInstMesh.castShadow = true;
-      aAcidInstMesh.receiveShadow = true;
+      const aAcidInstMesh = getSphereInstMesh({
+        radius: aminoAcidRadius,
+        count: aAcids.length,
+      });
       state.acidInstMeshes.push(aAcidInstMesh);
       state.scene.add(aAcidInstMesh);
 
       // Add chain a balls.
-      const aBallMaterial = new MeshLambertMaterial({});
-      const aBallInstMesh = new InstancedMesh(
-        ballGeometry,
-        aBallMaterial,
-        (aAcids.length - 1) * 2
-      );
-      aBallInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-      aBallInstMesh.castShadow = true;
-      aBallInstMesh.receiveShadow = true;
+      const aBallInstMesh = getSphereInstMesh({
+        radius: aminoAcidRadius / 5,
+        count: (aAcids.length - 1) * 2,
+      });
       state.scene.add(aBallInstMesh);
 
       // Add chain a sockets.
-      const aSocketGeometry = new CylinderGeometry(
-        aminoAcidRadius / 10,
-        aminoAcidRadius / 10,
-        jointLength
-      );
-      const aSocketMaterial = new MeshLambertMaterial({});
-      const aSocketInstMesh = new InstancedMesh(
-        aSocketGeometry,
-        aSocketMaterial,
-        aAcids.length - 1
-      );
-      aSocketInstMesh.instanceMatrix.setUsage(DynamicDrawUsage);
-      aSocketInstMesh.castShadow = true;
-      aSocketInstMesh.receiveShadow = true;
+      const socketRadius = aminoAcidRadius / 10;
+      const aSocketInstMesh = getCylinderInstMesh({
+        topRadius: socketRadius,
+        bottomRadius: socketRadius,
+        height: jointLength,
+        count: aAcids.length - 1,
+      });
       state.scene.add(aSocketInstMesh);
 
       // Set position of the elements.

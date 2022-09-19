@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "three": "^0.144.0",
-    "three-full": "^17.1.0",
     "vue": "^2.6.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
