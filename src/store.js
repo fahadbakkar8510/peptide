@@ -20,22 +20,35 @@ import {
   MeshLambertMaterial,
   sRGBEncoding,
   CylinderGeometry,
+  Vector2,
   Vector3,
   Raycaster,
 } from "three";
 import { AmmoPhysics } from "./AmmoPhysics";
 import { OrbitControls } from "./OrbitControls";
 import { addPeptideConstraint } from "./constraint";
-import { Vector2 } from "three-full";
+import {
+  acidHex,
+  ballHex,
+  socketHex,
+  fogHex,
+  lightAHex,
+  lightBHex,
+  lightCHex,
+  tempColor,
+  hoverColor,
+  activeColor,
+  floorColor,
+  backColor,
+  acidColor,
+  normalVecZ,
+  tempMultiMatrix,
+  tempMatrix1,
+  tempMatrix2,
+  raycaster,
+} from "./constants";
 
 Vue.use(Vuex);
-const color = new Color();
-const vecZ = new Vector3(0, 0, 1);
-const multiMatrix = new Matrix4();
-const matrix1 = new Matrix4();
-const matrix2 = new Matrix4();
-const raycaster = new Raycaster();
-const selColor = new Color(0x0000ff);
 
 export default new Vuex.Store({
   state: {
@@ -109,23 +122,23 @@ export default new Vuex.Store({
     },
     INITIALIZE_SCENE(state) {
       state.scene = new Scene();
-      state.scene.background = new Color(0x666666);
-      state.scene.fog = new FogExp2(0xcccccc, 0.002);
+      state.scene.background = backColor;
+      state.scene.fog = new FogExp2(fogHex, 0.002);
 
       // lights
-      const lightA = new DirectionalLight(0xffffff);
+      const lightA = new DirectionalLight(lightAHex);
       lightA.position.set(1, 1, 1);
       state.scene.add(lightA);
-      const lightB = new DirectionalLight(0x002288);
+      const lightB = new DirectionalLight(lightBHex);
       lightB.position.set(-1, -1, -1);
       state.scene.add(lightB);
-      const lightC = new AmbientLight(0x222222);
+      const lightC = new AmbientLight(lightCHex);
       state.scene.add(lightC);
 
       // Floor
       const floor = new Mesh(
         new BoxGeometry(1000, 5, 1000),
-        new ShadowMaterial({ color: 0x111111 })
+        new ShadowMaterial({ color: floorColor })
       );
       floor.position.y = -2.5;
       // floor.rotateX(0.3);
@@ -211,33 +224,33 @@ export default new Vuex.Store({
 
         aAcidInstMesh.setMatrixAt(
           index,
-          matrix1.setPosition(acidPosX, height, distance / 2)
+          tempMatrix1.setPosition(acidPosX, height, distance / 2)
         );
-        aAcidInstMesh.setColorAt(index, color.setHex(0xff0000));
+        aAcidInstMesh.setColorAt(index, tempColor.setHex(acidHex));
 
         if (index > 0) {
           aBallInstMesh.setMatrixAt(
             startBallIndex,
-            matrix1.setPosition(startBallPosX, height, distance / 2)
+            tempMatrix1.setPosition(startBallPosX, height, distance / 2)
           );
-          aBallInstMesh.setColorAt(startBallIndex, color.setHex(0x50c878));
+          aBallInstMesh.setColorAt(startBallIndex, tempColor.setHex(ballHex));
         }
 
         if (index < aAcids.length - 1) {
           aBallInstMesh.setMatrixAt(
             endBallIndex,
-            matrix1.setPosition(endBallPosX, height, distance / 2)
+            tempMatrix1.setPosition(endBallPosX, height, distance / 2)
           );
-          aBallInstMesh.setColorAt(endBallIndex, color.setHex(0x50c878));
+          aBallInstMesh.setColorAt(endBallIndex, tempColor.setHex(ballHex));
 
           aSocketInstMesh.setMatrixAt(
             index,
-            multiMatrix.multiplyMatrices(
-              matrix1.setPosition(jointPosX, height, distance / 2),
-              matrix2.makeRotationAxis(vecZ, Math.PI / 2)
+            tempMultiMatrix.multiplyMatrices(
+              tempMatrix1.setPosition(jointPosX, height, distance / 2),
+              tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
             )
           );
-          aSocketInstMesh.setColorAt(index, color.setHex(0x00ff00));
+          aSocketInstMesh.setColorAt(index, tempColor.setHex(socketHex));
         }
       });
 
@@ -303,9 +316,12 @@ export default new Vuex.Store({
 
         // Handle raycaster.
         if (state.acidInstMeshes.length) {
-          // state.acidInstMeshes.forEach((acidInstMesh) => {
-          //   for (let i = 0; i < acidInstMesh.count; i++) {}
-          // });
+          state.acidInstMeshes.forEach((acidInstMesh) => {
+            for (let i = 0; i < acidInstMesh.count; i++) {
+              acidInstMesh.setColorAt(i, acidColor);
+              acidInstMesh.instanceColor.needsUpdate = true;
+            }
+          });
 
           raycaster.setFromCamera(state.pointer, state.camera);
           const intersects = raycaster.intersectObjects(
@@ -314,8 +330,10 @@ export default new Vuex.Store({
           );
 
           if (intersects.length) {
-            console.log("intersect object: ", intersects[0]);
-            intersects[0].object.setColorAt(intersects[0].instanceId, selColor);
+            intersects[0].object.setColorAt(
+              intersects[0].instanceId,
+              hoverColor
+            );
             intersects[0].object.instanceColor.needsUpdate = true;
           }
         }
