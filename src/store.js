@@ -70,7 +70,6 @@ const formPeptide = ({
     const jointPosX = acidPosX + acidRadius + jointLength / 2;
 
     acidInstMesh.setMatrixAt(index, tempMatrix1.setPosition(acidPosX, y, z));
-    acidInstMesh.setColorAt(index, tempColor.setHex(acidHex));
 
     if (index > 0) {
       ballInstMesh.setMatrixAt(
