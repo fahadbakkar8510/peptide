@@ -26,8 +26,6 @@ import {
   lightBHex,
   lightCHex,
   tempColor,
-  hoverColor,
-  activeColor,
   floorColor,
   backColor,
   normalVecZ,
@@ -47,6 +45,7 @@ import {
   getCylinderInstMesh,
   getSphereInstMesh,
 } from "./meshes";
+import { getTextTexture } from "./common";
 
 Vue.use(Vuex);
 
@@ -108,10 +107,11 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   const socketRadius = acidRadius / 10;
 
   // Add acids.
-  const acidInstMeshes = getAcidInstMeshes({
+  const { acidInstMeshes, textTextures } = getAcidInstMeshes({
     radius: acidRadius,
     chars,
   });
+  textTextures[0][0] = getTextTexture({ text: "A", backColor: "#ff0000" });
   state.acidInstMeshes.push(...acidInstMeshes);
   state.scene.add(...acidInstMeshes);
 
@@ -383,30 +383,30 @@ export default new Vuex.Store({
       window.requestAnimationFrame(() => {
         dispatch("ANIMATE");
 
-        // // Handle raycaster.
-        // if (state.acidInstMeshes.length) {
-        //   state.acidInstMeshes.forEach((acidInstMeshes) => {
-        //     for (let i = 0; i < acidInstMeshes.count; i++) {
-        //       acidInstMeshes.setColorAt(i, acidColor);
-        //       acidInstMeshes.instanceColor.needsUpdate = true;
-        //     }
-        //   });
+        // Handle raycaster.
+        if (state.acidInstMeshes.length) {
+          // state.acidInstMeshes.forEach((acidInstMeshes) => {
+          //   for (let i = 0; i < acidInstMeshes.count; i++) {
+          //     acidInstMeshes.setColorAt(i, acidColor);
+          //     acidInstMeshes.instanceColor.needsUpdate = true;
+          //   }
+          // });
 
-        //   raycaster.setFromCamera(state.pointer, state.camera);
-        //   const intersects = raycaster.intersectObjects(
-        //     state.acidInstMeshes,
-        //     true
-        //   );
+          raycaster.setFromCamera(state.pointer, state.camera);
+          const intersects = raycaster.intersectObjects(
+            state.acidInstMeshes,
+            true
+          );
 
-        //   if (intersects.length) {
-        //     // console.log(intersects[0].object);
-        //     intersects[0].object.setColorAt(
-        //       intersects[0].instanceId,
-        //       hoverColor
-        //     );
-        //     intersects[0].object.instanceColor.needsUpdate = true;
-        //   }
-        // }
+          if (intersects.length) {
+            console.log(intersects[0].object);
+            intersects[0].object.setColorAt(
+              intersects[0].instanceId,
+              tempColor.setHex(0xff0000)
+            );
+            intersects[0].object.instanceColor.needsUpdate = true;
+          }
+        }
 
         state.renderer.render(state.scene, state.camera);
       });

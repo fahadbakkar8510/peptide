@@ -12,7 +12,8 @@ import { getTextTexture, chunk } from "./common";
 
 export const getAcidInstMeshes = ({ radius, chars }) => {
   const chunkChars = chunk({ arr: chars, chunkSize: maxTextureImageUnits });
-  const instMeshes = [];
+  const acidInstMeshes = [];
+  const textTextures = [];
 
   chunkChars.forEach((subChars) => {
     const geometry = new SphereGeometry(radius);
@@ -21,15 +22,15 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
       map: textureLoader.load("favicon.ico"),
     });
 
+    const textureValues = [];
+
+    subChars.forEach((char) =>
+      textureValues.push(getTextTexture({ text: char, backColor: acidHexStr }))
+    );
+
+    textTextures.push(textureValues);
+
     material.onBeforeCompile = (shader) => {
-      const textureValues = [];
-
-      subChars.forEach((char) =>
-        textureValues.push(
-          getTextTexture({ text: char, backColor: acidHexStr })
-        )
-      );
-
       shader.uniforms.textures = {
         type: "tv",
         value: textureValues,
@@ -94,10 +95,10 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
       new InstancedBufferAttribute(new Float32Array(textures), 1)
     );
 
-    instMeshes.push(mesh);
+    acidInstMeshes.push(mesh);
   });
 
-  return instMeshes;
+  return { acidInstMeshes, textTextures };
 };
 
 export const getSphereInstMesh = ({ radius, count }) => {
