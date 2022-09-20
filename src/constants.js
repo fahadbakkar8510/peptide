@@ -1,4 +1,4 @@
-import { Color, Matrix4, Raycaster, Vector3 } from "three";
+import { Color, Matrix4, Raycaster, TextureLoader, Vector3 } from "three";
 
 export const dimInch = "inch";
 export const dimFeetAndInch = "ft";
@@ -40,3 +40,5 @@ export const raycaster = new Raycaster();
 export const acidMass = 1;
 export const ballMass = 0.5;
 export const socketMass = 0.5;
+
+export const textureLoader = new TextureLoader();

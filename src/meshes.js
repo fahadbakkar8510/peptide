@@ -1,5 +1,4 @@
 import {
-  BoxGeometry,
   CylinderGeometry,
   DynamicDrawUsage,
   InstancedBufferAttribute,
@@ -7,33 +6,26 @@ import {
   MeshLambertMaterial,
   MeshStandardMaterial,
   SphereGeometry,
-  TextureLoader,
 } from "three";
+import { textureLoader } from "./constants";
 import { getTextMaterial } from "./common";
 
 export const getAcidInstMesh = ({ radius, chars }) => {
   const geometry = new SphereGeometry(radius);
 
   const material = new MeshStandardMaterial({
-    map: new TextureLoader().load(
-      "https://threejs.org/examples/textures/square-outline-textured.png"
-    ),
+    map: textureLoader.load("favicon.ico"),
   });
 
   material.onBeforeCompile = (shader) => {
+    const textureValues = [];
+    chars.forEach((char) =>
+      textureValues.push(getTextMaterial({ text: char }))
+    );
+
     shader.uniforms.textures = {
       type: "tv",
-      value: [
-        new TextureLoader().load(
-          "https://threejs.org/examples/textures/crate.gif"
-        ),
-        new TextureLoader().load(
-          "https://threejs.org/examples/textures/equirectangular.png"
-        ),
-        new TextureLoader().load(
-          "https://threejs.org/examples/textures/colors.png"
-        ),
-      ],
+      value: textureValues,
     };
 
     shader.vertexShader = shader.vertexShader
@@ -60,7 +52,7 @@ export const getAcidInstMesh = ({ radius, chars }) => {
       .replace(
         "#define STANDARD",
         `#define STANDARD
-                  uniform sampler2D textures[3];
+                  uniform sampler2D textures[${chars.length}];
                   varying vec3 vTint;
                   varying float vTextureIndex;`
       )
@@ -70,8 +62,14 @@ export const getAcidInstMesh = ({ radius, chars }) => {
               float x = vTextureIndex;
               vec4 col;
               col = texture2D(textures[0], vUv ) * step(-0.1, x) * step(x, 0.1);
-              col += texture2D(textures[1], vUv ) * step(0.9, x) * step(x, 1.1);
-              col += texture2D(textures[2], vUv ) * step(1.9, x) * step(x, 2.1);
+              ${[...Array(chars.length - 1).keys()]
+                .map(
+                  (i) => `
+              col += texture2D(textures[${i + 1}], vUv ) * step(${i +
+                    0.9}, x) * step(x, ${i + 1.1});
+              `
+                )
+                .join("")}
               gl_FragColor = col;
               `
       );
@@ -81,7 +79,7 @@ export const getAcidInstMesh = ({ radius, chars }) => {
   const textures = [];
 
   for (let i = 0; i < chars.length; i++) {
-    textures.push(Math.random() < 0.3 ? 0 : Math.random() < 0.5 ? 1 : 2);
+    textures.push(i);
   }
 
   geometry.setAttribute(
