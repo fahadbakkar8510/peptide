@@ -67,19 +67,19 @@ async function AmmoPhysics({ gravity }) {
   const meshes = [];
   const meshMap = new WeakMap();
 
-  function addMesh(mesh, mass = 0) {
+  function addMesh({ mesh, mass = 0, individualMasses = [] }) {
     const shape = getShape(mesh.geometry);
 
     if (shape !== null) {
       if (mesh.isInstancedMesh) {
-        return handleInstancedMesh(mesh, mass, shape);
+        return handleInstancedMesh({ mesh, mass, shape, individualMasses });
       } else if (mesh.isMesh) {
-        return handleMesh(mesh, mass, shape);
+        return handleMesh({ mesh, mass, shape });
       }
     }
   }
 
-  function handleMesh(mesh, mass, shape) {
+  function handleMesh({ mesh, mass, shape }) {
     const position = mesh.position;
     const quaternion = mesh.quaternion;
 
@@ -121,12 +121,14 @@ async function AmmoPhysics({ gravity }) {
     return { body };
   }
 
-  function handleInstancedMesh(mesh, mass, shape) {
+  function handleInstancedMesh({ mesh, mass, shape, individualMasses }) {
     const array = mesh.instanceMatrix.array;
     const bodies = [];
 
     for (let i = 0; i < mesh.count; i++) {
       const index = i * 16;
+      const realMass =
+        individualMasses[i] === undefined ? mass : individualMasses[i];
 
       const transform = new AmmoLib.btTransform();
       transform.setFromOpenGLMatrix(array.slice(index, index + 16));
@@ -134,10 +136,10 @@ async function AmmoPhysics({ gravity }) {
       const motionState = new AmmoLib.btDefaultMotionState(transform);
 
       const localInertia = new AmmoLib.btVector3(0, 0, 0);
-      shape.calculateLocalInertia(mass, localInertia);
+      shape.calculateLocalInertia(realMass, localInertia);
 
       const rbInfo = new AmmoLib.btRigidBodyConstructionInfo(
-        mass,
+        realMass,
         motionState,
         shape,
         localInertia

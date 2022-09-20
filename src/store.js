@@ -145,14 +145,31 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
 
   // Add constraint.
   let acidBodies = [];
-  acidInstMeshes.forEach((acidInstMesh) => {
+  acidInstMeshes.forEach((acidInstMesh, index) => {
+    const individualMasses = [];
+    if (index === 0) {
+      individualMasses.push(0);
+    }
+    if (index === acidInstMeshes.length - 1) {
+      individualMasses[acidInstMesh.count - 1] = 0;
+    }
+
     acidBodies.push(
-      ...state.ammoPhysics.addMesh(acidInstMesh, acidMass).bodies
+      ...state.ammoPhysics.addMesh({
+        mesh: acidInstMesh,
+        mass: acidMass,
+        individualMasses,
+      }).bodies
     );
   });
-  const ballBodies = state.ammoPhysics.addMesh(ballInstMesh, ballMass).bodies;
-  const socketBodies = state.ammoPhysics.addMesh(socketInstMesh, socketMass)
-    .bodies;
+  const ballBodies = state.ammoPhysics.addMesh({
+    mesh: ballInstMesh,
+    mass: ballMass,
+  }).bodies;
+  const socketBodies = state.ammoPhysics.addMesh({
+    mesh: socketInstMesh,
+    mass: socketMass,
+  }).bodies;
 
   addPeptideConstraint({
     ammoPhysics: state.ammoPhysics,
@@ -250,15 +267,15 @@ export default new Vuex.Store({
       state.scene.add(lightC);
 
       // Floor
-      const floor = new Mesh(
+      const floorMesh = new Mesh(
         new BoxGeometry(1000, 5, 1000),
         new ShadowMaterial({ color: floorColor })
       );
-      floor.position.y = -2.5;
-      // floor.rotateX(0.3);
-      floor.receiveShadow = true;
-      state.scene.add(floor);
-      state.ammoPhysics.addMesh(floor);
+      floorMesh.position.y = -2.5;
+      // floorMesh.rotateX(0.3);
+      floorMesh.receiveShadow = true;
+      state.scene.add(floorMesh);
+      state.ammoPhysics.addMesh({ mesh: floorMesh });
 
       // AxesHelper
       state.scene.add(new AxesHelper(1000));
