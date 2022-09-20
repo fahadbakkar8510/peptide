@@ -45,3 +45,11 @@ export const chunk = ({ arr, chunkSize }) => {
   }
   return tempArr;
 };
+
+export const getAlphaOnly = (str) => {
+  var alpha = "";
+  for (var i = 0; i < str.length; i++) {
+    if (str[i] >= "A" && str[i] <= "z") alpha += str[i];
+  }
+  return alpha;
+};

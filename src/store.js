@@ -17,7 +17,7 @@ import {
 } from "three";
 import { AmmoPhysics } from "./ammo.physics";
 import { OrbitControls } from "./orbit.controls";
-import { addPeptideConstraint } from "./constraints";
+import { addBondConstraint, addPeptideConstraint } from "./constraints";
 import {
   acidHex,
   ballHex,
@@ -181,6 +181,15 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     acidRadius,
     jointLength,
   });
+
+  return {
+    acidInstMeshes,
+    ballInstMesh,
+    socketInstMesh,
+    acidBodies,
+    ballBodies,
+    socketBodies,
+  };
 };
 
 export default new Vuex.Store({
@@ -298,7 +307,7 @@ export default new Vuex.Store({
 
       // Generate a peptide.
       const aAcids = state.controlInfo.chains.a.split("");
-      generatePeptide({
+      const aPeptideInfo = generatePeptide({
         state,
         chars: aAcids,
         acidRadius: aminoAcidRadius,
@@ -309,13 +318,20 @@ export default new Vuex.Store({
 
       // Generate b peptide.
       const bAcids = state.controlInfo.chains.b.split("");
-      generatePeptide({
+      const bPeptideInfo = generatePeptide({
         state,
         chars: bAcids,
         acidRadius: aminoAcidRadius,
         jointLength,
         y: height,
         z: -distance / 2,
+      });
+
+      addBondConstraint({
+        state,
+        aPeptideInfo,
+        bPeptideInfo,
+        crossLinks: state.controlInfo.cross_links,
       });
     },
     RESIZE(state, { width, height }) {
