@@ -58,6 +58,39 @@ export const getAngle = ({ A, B, C }) => {
     (a.x * b.x + a.y * b.y) /
       (Math.sqrt(a.x * a.x + a.y * a.y) * Math.sqrt(b.x * b.x + b.y * b.y))
   );
-  const degree = (radians * 180) / Math.PI;
+  let degree = (radians * 180) / Math.PI;
+  let isNegative = false;
+  if (a.x * b.x >= 0) {
+    if (a.x >= 0) {
+      if (a.y > b.y) isNegative = true;
+    } else {
+      if (a.y < b.y) isNegative = true;
+    }
+  } else {
+    if (a.y * b.y >= 0) {
+      if (a.y >= 0) {
+        if (a.x < 0) isNegative = true;
+      } else {
+        if (a.x > 0) isNegative = true;
+      }
+    } else {
+      if (a.y >= 0) {
+        if (
+          getAngle({ A: a, B: { x: 0, y: 0 }, C: { x: 1, y: 0 } }) +
+            getAngle({ A: b, B: { x: 0, y: 0 }, C: { x: 0, y: 1 } }) >
+          90
+        )
+          isNegative = true;
+      } else {
+        if (
+          getAngle({ A: a, B: { x: 0, y: 0 }, C: { x: 1, y: 0 } }) +
+            getAngle({ A: b, B: { x: 0, y: 0 }, C: { x: 0, y: 1 } }) <
+          90
+        )
+          isNegative = true;
+      }
+    }
+  }
+  if (isNegative) degree = 360 - degree;
   return degree;
 };
