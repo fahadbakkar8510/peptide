@@ -40,9 +40,10 @@ import {
   acidMass,
   ballMass,
   socketMass,
+  maxTextureImageUnits,
 } from "./constants";
 import {
-  getAcidInstMesh,
+  getAcidInstMeshes,
   getCylinderInstMesh,
   getSphereInstMesh,
 } from "./meshes";
@@ -53,7 +54,7 @@ const formPeptide = ({
   chars,
   acidRadius,
   jointLength,
-  acidInstMesh,
+  acidInstMeshes,
   ballInstMesh,
   socketInstMesh,
   y,
@@ -68,8 +69,13 @@ const formPeptide = ({
     const endBallIndex = startBallIndex + 1;
     const endBallPosX = acidPosX + acidRadius;
     const jointPosX = acidPosX + acidRadius + jointLength / 2;
+    const acidInstMeshIndex = parseInt(index / maxTextureImageUnits);
+    const acidIndex = index % maxTextureImageUnits;
 
-    acidInstMesh.setMatrixAt(index, tempMatrix1.setPosition(acidPosX, y, z));
+    acidInstMeshes[acidInstMeshIndex].setMatrixAt(
+      acidIndex,
+      tempMatrix1.setPosition(acidPosX, y, z)
+    );
 
     if (index > 0) {
       ballInstMesh.setMatrixAt(
@@ -102,12 +108,12 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   const socketRadius = acidRadius / 10;
 
   // Add acids.
-  const acidInstMesh = getAcidInstMesh({
+  const acidInstMeshes = getAcidInstMeshes({
     radius: acidRadius,
     chars,
   });
-  state.acidInstMeshes.push(acidInstMesh);
-  state.scene.add(acidInstMesh);
+  state.acidInstMeshes.push(...acidInstMeshes);
+  state.scene.add(...acidInstMeshes);
 
   // Add balls.
   const ballInstMesh = getSphereInstMesh({
@@ -130,7 +136,7 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     chars,
     acidRadius,
     jointLength,
-    acidInstMesh,
+    acidInstMeshes,
     ballInstMesh,
     socketInstMesh,
     y,
@@ -138,7 +144,12 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   });
 
   // Add constraint.
-  const acidBodies = state.ammoPhysics.addMesh(acidInstMesh, acidMass).bodies;
+  let acidBodies = [];
+  acidInstMeshes.forEach((acidInstMesh) => {
+    acidBodies.push(
+      ...state.ammoPhysics.addMesh(acidInstMesh, acidMass).bodies
+    );
+  });
   const ballBodies = state.ammoPhysics.addMesh(ballInstMesh, ballMass).bodies;
   const socketBodies = state.ammoPhysics.addMesh(socketInstMesh, socketMass)
     .bodies;
@@ -195,7 +206,7 @@ export default new Vuex.Store({
       state.renderer = new WebGLRenderer({ antialias: true });
       state.renderer.setPixelRatio(window.devicePixelRatio);
       state.renderer.setSize(state.width, state.height);
-      state.renderer.shadowMap.enabled = true;
+      state.renderer.shadowMap.enabled = false;
       state.renderer.outputEncoding = sRGBEncoding;
       el.appendChild(state.renderer.domElement);
     },
@@ -337,10 +348,10 @@ export default new Vuex.Store({
 
         // // Handle raycaster.
         // if (state.acidInstMeshes.length) {
-        //   state.acidInstMeshes.forEach((acidInstMesh) => {
-        //     for (let i = 0; i < acidInstMesh.count; i++) {
-        //       acidInstMesh.setColorAt(i, acidColor);
-        //       acidInstMesh.instanceColor.needsUpdate = true;
+        //   state.acidInstMeshes.forEach((acidInstMeshes) => {
+        //     for (let i = 0; i < acidInstMeshes.count; i++) {
+        //       acidInstMeshes.setColorAt(i, acidColor);
+        //       acidInstMeshes.instanceColor.needsUpdate = true;
         //     }
         //   });
 

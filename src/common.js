@@ -33,3 +33,11 @@ export const getTextTexture = ({ text, backColor }) => {
   texture.needsUpdate = true;
   return texture;
 };
+
+export const chunk = ({ arr, chunkSize }) => {
+  const tempArr = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    tempArr.push(arr.slice(i, i + chunkSize));
+  }
+  return tempArr;
+};
