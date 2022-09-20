@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col absolute w-64 h-auto pin-r pin-b bg-grey-darkest text-white rounded mr-2 mb-2 z-10">
+  <div class="flex flex-col absolute w-128 h-auto pin-r pin-b bg-grey-darkest text-white rounded mr-2 mb-2 z-10">
     <div class="p-2 mt-1">
       Control Panel
     </div>
@@ -7,23 +7,27 @@
       <div class="border-b border-grey-darkest mb-2 pb-2 w-100">
         <p class="flex items-center justify-between mb-1">
           A Chain
-          <input class="w-32" ref="chain_a" type="text" v-model="chains.a" />
+          <input class="w-64" ref="chain_a" type="text" v-model="chains.a" />
         </p>
         <p class="flex items-center justify-between mb-1">
           B Chain
-          <input class="w-32" ref="chain_b" type="text" v-model="chains.b" />
+          <input class="w-64" ref="chain_b" type="text" v-model="chains.b" />
+        </p>
+        <p class="flex items-center justify-between mb-1">
+          Cross Links
+          <input class="w-64" ref="cross_links" type="text" v-model="crossLinks" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Joint Length
-          <input class="w-32" ref="joint_length" type="number" v-model="jointLength" />
+          <input class="w-64" ref="joint_length" type="number" v-model="jointLength" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Distance
-          <input class="w-32" ref="distance" type="number" v-model="distance" />
+          <input class="w-64" ref="distance" type="number" v-model="distance" />
         </p>
         <p class="flex items-center justify-between mb-1">
           Amino Acid Radius
-          <input class="w-32" ref="amino_acid_radius" type="number" v-model="aminoAcidRadius" />
+          <input class="w-64" ref="amino_acid_radius" type="number" v-model="aminoAcidRadius" />
         </p>
         <p class="flex items-center">
           <button class="bg-grey-light cursor-pointer shadow p-2 mx-auto" @click="generatePeptides">
@@ -59,7 +63,8 @@ import { mapGetters, mapMutations } from "vuex"
 export default {
   data() {
     return {
-      chains: { a: 'KEEPQUALITY', b: 'GIVEQCCTSICSLYQNLENYCN' },
+      chains: { a: 'GIVEQCCTSICSLYQNLENYCN', b: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT' },
+      crossLinks: 'A:C6-A:C11;A:C7-B:C7;A:C21-B:C19',
       jointLength: 0.4,
       distance: 6,
       aminoAcidRadius: 1,
@@ -86,6 +91,10 @@ export default {
         this.$refs.chain_b.focus()
         return
       }
+      if (!this.crossLinks) {
+        this.$refs.cross_links.focus()
+        return
+      }
       if (this.jointLength <= 0) {
         this.$refs.joint_length.focus()
         return
@@ -100,6 +109,7 @@ export default {
       }
       this.SET_CONTROL_INFO({
         chains: this.chains,
+        cross_links: this.crossLinks,
         joint_length: this.jointLength,
         distance: this.distance,
         amino_acid_radius: this.aminoAcidRadius,
@@ -114,6 +124,7 @@ export default {
   mounted() {
     this.SET_CONTROL_INFO({
       chains: this.chains,
+      cross_links: this.crossLinks,
       joint_length: this.jointLength,
       distance: this.distance,
       amino_acid_radius: this.aminoAcidRadius
