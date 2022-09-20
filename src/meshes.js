@@ -97,7 +97,6 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
     instMeshes.push(mesh);
   });
 
-  // console.log("acid instance meshes: ", instMeshes);
   return instMeshes;
 };
 

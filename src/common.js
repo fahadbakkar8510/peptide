@@ -6,10 +6,7 @@ export const getFloat = (val) => {
   return floatVal;
 };
 
-const textTextures = [];
-
 export const getTextTexture = ({ text, backColor }) => {
-  if (textTextures[text]) return textTextures[text];
   const textCanvas = document.createElement("canvas");
   const ctx = textCanvas.getContext("2d");
   const measureText = ctx.measureText(text);
@@ -34,7 +31,6 @@ export const getTextTexture = ({ text, backColor }) => {
   texture.minFilter = LinearFilter;
   texture.generateMipmaps = false;
   texture.needsUpdate = true;
-  textTextures.push(texture);
   return texture;
 };
 

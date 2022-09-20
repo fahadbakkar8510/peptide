@@ -1,4 +1,12 @@
-import { getAlphaOnly, getAngle } from "./common";
+import { getAlphaOnly } from "./common";
+import {
+  ballHex,
+  ballMass,
+  socketHex,
+  socketMass,
+  tempColor,
+} from "./constants";
+import { getCylinderInstMesh, getSphereInstMesh } from "./meshes";
 
 export const addPeptideConstraint = ({
   ammoPhysics,
@@ -66,17 +74,54 @@ export const addBondConstraint = ({
   crossLinks,
   acidRadius,
   jointLength,
-  y,
-  z,
 }) => {
-  // console.log(aPeptideInfo, bPeptideInfo, crossLinks);
-  const peptideInfos = {
-    a: aPeptideInfo,
-    b: bPeptideInfo,
-  };
   crossLinks = crossLinks.split(";");
+  let p2p;
+  const ammo = state.ammoPhysics.AmmoLib;
+  const physicsWorld = state.ammoPhysics.physicsWorld;
+  const socketRadius = acidRadius / 10;
+  let acidAPivot = new ammo.btVector3(0, 0, -acidRadius);
+  let acidBPivot = new ammo.btVector3(0, 0, acidRadius);
+  let acidSamePivot = new ammo.btVector3(0, acidRadius, 0);
+  let ballPivot = new ammo.btVector3(0, 0, 0);
+  let socketAPivot = new ammo.btVector3(0, -jointLength / 2, 0);
+  let socketBPivot = new ammo.btVector3(0, jointLength / 2, 0);
 
-  crossLinks.forEach((crossLink) => {
+  // Add balls.
+  const ballInstMesh = getSphereInstMesh({
+    radius: acidRadius / 5,
+    count: crossLinks.length * 2,
+  });
+  state.scene.add(ballInstMesh);
+  for (let i = 0; i < ballInstMesh.count; i++) {
+    ballInstMesh.setColorAt(i, tempColor.setHex(ballHex));
+  }
+
+  // Add sockets.
+  const socketInstMesh = getCylinderInstMesh({
+    topRadius: socketRadius,
+    bottomRadius: socketRadius,
+    height: jointLength,
+    count: crossLinks.length,
+  });
+  state.scene.add(socketInstMesh);
+  for (let i = 0; i < socketInstMesh.count; i++) {
+    socketInstMesh.setColorAt(i, tempColor.setHex(socketHex));
+  }
+
+  // Add meshes to the physics.
+  const ballBodies = state.ammoPhysics.addMesh({
+    mesh: ballInstMesh,
+    mass: ballMass,
+  }).bodies;
+  const socketBodies = state.ammoPhysics.addMesh({
+    mesh: socketInstMesh,
+    mass: socketMass,
+  }).bodies;
+  const acidABodies = aPeptideInfo.acidBodies;
+  const acidBBodies = bPeptideInfo.acidBodies;
+
+  crossLinks.forEach((crossLink, index) => {
     const acids = crossLink.split("-");
     const acid0Locs = acids[0].split(":");
     const chain0 = acid0Locs[0].toLowerCase();
@@ -88,17 +133,90 @@ export const addBondConstraint = ({
     const acid1Char = getAlphaOnly(acid1Locs[1]);
     const acid1Num = parseInt(acid1Locs[1].match(/(\d+)/)[0]);
     if (acid1Char !== state.controlInfo.chains[chain1][acid1Num - 1]) return;
-    // console.log("acids: ", acids);
-    // console.log("acid0Locs: ", acid0Locs);
-    // console.log("chain0: ", chain0);
-    // console.log("acid0Char: ", acid0Char);
-    // console.log("acid0Num: ", acid0Num);
-    // console.log("acid1Locs: ", acid1Locs);
-    // console.log("chain1: ", chain1);
-    // console.log("acid1Char: ", acid1Char);
-    // console.log("acid1Num: ", acid1Num);
-    // console.log(
-    //   getAngle({ A: { x: 1, y: 1 }, B: { x: 3, y: 1 }, C: { x: 3, y: -2 } })
-    // );
+    const aBallIndex = index * 2;
+    const bBallIndex = aBallIndex + 1;
+
+    if (chain0 === chain1) {
+      const acidBodies = chain0 === "a" ? acidABodies : acidBBodies;
+      const acid0Index = acid0Num - 1;
+      const acid1Index = acid1Num - 1;
+
+      p2p = new ammo.btPoint2PointConstraint(
+        acidBodies[acid0Index],
+        ballBodies[aBallIndex],
+        acidSamePivot,
+        ballPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        ballBodies[aBallIndex],
+        socketBodies[index],
+        ballPivot,
+        socketAPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        socketBodies[index],
+        ballBodies[bBallIndex],
+        socketBPivot,
+        ballPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        ballBodies[bBallIndex],
+        acidBodies[acid1Index],
+        ballPivot,
+        acidSamePivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+    } else {
+      let acidAIndex, acidBIndex;
+
+      if (chain0 === "a") {
+        acidAIndex = acid0Num;
+        acidBIndex = acid1Num;
+      } else {
+        acidAIndex = acid1Num;
+        acidBIndex = acid0Num;
+      }
+
+      acidAIndex -= 1;
+      acidBIndex -= 1;
+
+      p2p = new ammo.btPoint2PointConstraint(
+        acidABodies[acidAIndex],
+        ballBodies[aBallIndex],
+        acidAPivot,
+        ballPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        ballBodies[aBallIndex],
+        socketBodies[index],
+        ballPivot,
+        socketAPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        socketBodies[index],
+        ballBodies[bBallIndex],
+        socketBPivot,
+        ballPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+
+      p2p = new ammo.btPoint2PointConstraint(
+        ballBodies[bBallIndex],
+        acidBBodies[acidBIndex],
+        ballPivot,
+        acidBPivot
+      );
+      physicsWorld.addConstraint(p2p, true);
+    }
   });
 };

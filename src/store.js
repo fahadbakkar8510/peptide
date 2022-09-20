@@ -19,7 +19,6 @@ import { AmmoPhysics } from "./ammo.physics";
 import { OrbitControls } from "./orbit.controls";
 import { addBondConstraint, addPeptideConstraint } from "./constraints";
 import {
-  acidHex,
   ballHex,
   socketHex,
   fogHex,
@@ -31,7 +30,6 @@ import {
   activeColor,
   floorColor,
   backColor,
-  acidColor,
   normalVecZ,
   tempMultiMatrix,
   tempMatrix1,
