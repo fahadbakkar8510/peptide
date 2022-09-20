@@ -335,29 +335,30 @@ export default new Vuex.Store({
       window.requestAnimationFrame(() => {
         dispatch("ANIMATE");
 
-        // Handle raycaster.
-        if (state.acidInstMeshes.length) {
-          state.acidInstMeshes.forEach((acidInstMesh) => {
-            for (let i = 0; i < acidInstMesh.count; i++) {
-              acidInstMesh.setColorAt(i, acidColor);
-              acidInstMesh.instanceColor.needsUpdate = true;
-            }
-          });
+        // // Handle raycaster.
+        // if (state.acidInstMeshes.length) {
+        //   state.acidInstMeshes.forEach((acidInstMesh) => {
+        //     for (let i = 0; i < acidInstMesh.count; i++) {
+        //       acidInstMesh.setColorAt(i, acidColor);
+        //       acidInstMesh.instanceColor.needsUpdate = true;
+        //     }
+        //   });
 
-          raycaster.setFromCamera(state.pointer, state.camera);
-          const intersects = raycaster.intersectObjects(
-            state.acidInstMeshes,
-            true
-          );
+        //   raycaster.setFromCamera(state.pointer, state.camera);
+        //   const intersects = raycaster.intersectObjects(
+        //     state.acidInstMeshes,
+        //     true
+        //   );
 
-          if (intersects.length) {
-            intersects[0].object.setColorAt(
-              intersects[0].instanceId,
-              hoverColor
-            );
-            intersects[0].object.instanceColor.needsUpdate = true;
-          }
-        }
+        //   if (intersects.length) {
+        //     // console.log(intersects[0].object);
+        //     intersects[0].object.setColorAt(
+        //       intersects[0].instanceId,
+        //       hoverColor
+        //     );
+        //     intersects[0].object.instanceColor.needsUpdate = true;
+        //   }
+        // }
 
         state.renderer.render(state.scene, state.camera);
       });
