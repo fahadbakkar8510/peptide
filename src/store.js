@@ -332,6 +332,10 @@ export default new Vuex.Store({
         aPeptideInfo,
         bPeptideInfo,
         crossLinks: state.controlInfo.cross_links,
+        acidRadius: aminoAcidRadius,
+        jointLength,
+        y: height,
+        z: -distance / 2,
       });
     },
     RESIZE(state, { width, height }) {

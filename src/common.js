@@ -53,3 +53,15 @@ export const getAlphaOnly = (str) => {
   }
   return alpha;
 };
+
+export const getAngle = ({ A, B, C }) => {
+  const a = { x: A.x - B.x, y: A.y - B.y };
+  const b = { x: C.x - B.x, y: C.y - B.y };
+  if (a.x === 0 && a.y === 0 && b.x === 0 && b.y === 0) return 0;
+  const radians = Math.acos(
+    (a.x * b.x + a.y * b.y) /
+      (Math.sqrt(a.x * a.x + a.y * a.y) * Math.sqrt(b.x * b.x + b.y * b.y))
+  );
+  const degree = (radians * 180) / Math.PI;
+  return degree;
+};

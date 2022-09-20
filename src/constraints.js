@@ -1,4 +1,4 @@
-import { getAlphaOnly } from "./common";
+import { getAlphaOnly, getAngle } from "./common";
 
 export const addPeptideConstraint = ({
   ammoPhysics,
@@ -64,6 +64,10 @@ export const addBondConstraint = ({
   aPeptideInfo,
   bPeptideInfo,
   crossLinks,
+  acidRadius,
+  jointLength,
+  y,
+  z,
 }) => {
   // console.log(aPeptideInfo, bPeptideInfo, crossLinks);
   const peptideInfos = {
@@ -84,14 +88,17 @@ export const addBondConstraint = ({
     const acid1Char = getAlphaOnly(acid1Locs[1]);
     const acid1Num = parseInt(acid1Locs[1].match(/(\d+)/)[0]);
     if (acid1Char !== state.controlInfo.chains[chain1][acid1Num - 1]) return;
-    console.log("acids: ", acids);
-    console.log("acid0Locs: ", acid0Locs);
-    console.log("chain0: ", chain0);
-    console.log("acid0Char: ", acid0Char);
-    console.log("acid0Num: ", acid0Num);
-    console.log("acid1Locs: ", acid1Locs);
-    console.log("chain1: ", chain1);
-    console.log("acid1Char: ", acid1Char);
-    console.log("acid1Num: ", acid1Num);
+    // console.log("acids: ", acids);
+    // console.log("acid0Locs: ", acid0Locs);
+    // console.log("chain0: ", chain0);
+    // console.log("acid0Char: ", acid0Char);
+    // console.log("acid0Num: ", acid0Num);
+    // console.log("acid1Locs: ", acid1Locs);
+    // console.log("chain1: ", chain1);
+    // console.log("acid1Char: ", acid1Char);
+    // console.log("acid1Num: ", acid1Num);
+    // console.log(
+    //   getAngle({ A: { x: 1, y: 1 }, B: { x: 3, y: 1 }, C: { x: 3, y: -2 } })
+    // );
   });
 };
