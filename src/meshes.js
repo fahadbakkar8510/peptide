@@ -7,8 +7,8 @@ import {
   MeshStandardMaterial,
   SphereGeometry,
 } from "three";
-import { textureLoader } from "./constants";
-import { getTextMaterial } from "./common";
+import { textureLoader, acidHexStr } from "./constants";
+import { getTextTexture } from "./common";
 
 export const getAcidInstMesh = ({ radius, chars }) => {
   const geometry = new SphereGeometry(radius);
@@ -20,7 +20,7 @@ export const getAcidInstMesh = ({ radius, chars }) => {
   material.onBeforeCompile = (shader) => {
     const textureValues = [];
     chars.forEach((char) =>
-      textureValues.push(getTextMaterial({ text: char }))
+      textureValues.push(getTextTexture({ text: char, backColor: acidHexStr }))
     );
 
     shader.uniforms.textures = {
@@ -32,46 +32,46 @@ export const getAcidInstMesh = ({ radius, chars }) => {
       .replace(
         "#define STANDARD",
         `#define STANDARD
-                  varying vec3 vTint;
-                  varying float vTextureIndex;`
+            varying vec3 vTint;
+            varying float vTextureIndex;`
       )
       .replace(
         "#include <common>",
         `#include <common>
-              attribute vec3 tint;
-              attribute float textureIndex;`
+            attribute vec3 tint;
+            attribute float textureIndex;`
       )
       .replace(
         "#include <project_vertex>",
         `#include <project_vertex>
-              vTint = tint;
-              vTextureIndex=textureIndex;`
+            vTint = tint;
+            vTextureIndex=textureIndex;`
       );
 
     shader.fragmentShader = shader.fragmentShader
       .replace(
         "#define STANDARD",
         `#define STANDARD
-                  uniform sampler2D textures[${chars.length}];
-                  varying vec3 vTint;
-                  varying float vTextureIndex;`
+            uniform sampler2D textures[${chars.length}];
+            varying vec3 vTint;
+            varying float vTextureIndex;`
       )
       .replace(
         "#include <fog_fragment>",
         `#include <fog_fragment>
-              float x = vTextureIndex;
-              vec4 col;
-              col = texture2D(textures[0], vUv ) * step(-0.1, x) * step(x, 0.1);
-              ${[...Array(chars.length - 1).keys()]
-                .map(
-                  (i) => `
-              col += texture2D(textures[${i + 1}], vUv ) * step(${i +
-                    0.9}, x) * step(x, ${i + 1.1});
-              `
-                )
-                .join("")}
-              gl_FragColor = col;
-              `
+            float x = vTextureIndex;
+            vec4 col;
+            col = texture2D(textures[0], vUv ) * step(-0.1, x) * step(x, 0.1);
+            ${[...Array(chars.length - 1).keys()]
+              .map(
+                (i) => `
+            col += texture2D(textures[${i + 1}], vUv ) * step(${i +
+                  0.9}, x) * step(x, ${i + 1.1});
+            `
+              )
+              .join("")}
+            gl_FragColor = col;
+            `
       );
   };
 

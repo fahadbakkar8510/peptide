@@ -13,6 +13,7 @@ export const cmPerPixel = cmPerFoot * (1.0 / pixelsPerFoot);
 export const pixelsPerCm = 1.0 / cmPerPixel;
 
 export const acidHex = 0x3d9970;
+export const acidHexStr = "#3d9970";
 export const ballHex = 0xff851b;
 export const socketHex = 0x001f3f;
 export const fogHex = 0x001f3f;

@@ -1,5 +1,4 @@
-import { LinearFilter, Sprite, SpriteMaterial, Texture } from "three";
-import { textureLoader } from "./constants";
+import { LinearFilter, Texture } from "three";
 
 export const getFloat = (val) => {
   let floatVal = parseFloat(val);
@@ -7,34 +6,30 @@ export const getFloat = (val) => {
   return floatVal;
 };
 
-// export const getTextMaterial = ({ text }) => {
-//   const textCanvas = document.createElement("canvas");
-//   const ctx = textCanvas.getContext("2d");
-//   textCanvas.width = Math.ceil(ctx.measureText(text).width + 16);
-//   textCanvas.height = 34;
-//   ctx.font = "24px grobold";
-//   ctx.strokeStyle = "#222";
-//   ctx.lineWidth = 8;
-//   ctx.lineJoin = "miter";
-//   ctx.miterLimit = 3;
-//   ctx.strokeText(text, 8, 26);
-//   ctx.fillStyle = "black";
-//   ctx.fillText(text, 8, 26);
-//   const spriteMap = new Texture(
-//     ctx.getImageData(0, 0, textCanvas.width, textCanvas.height)
-//   );
-//   return spriteMap;
-//   spriteMap.minFilter = LinearFilter;
-//   spriteMap.generateMipmaps = false;
-//   spriteMap.needsUpdate = true;
-//   const textMaterial = new SpriteMaterial({ map: spriteMap });
-//   return textMaterial;
-//   // const sprite = new Sprite(textMaterial);
-//   // sprite.scale.set((0.12 * textCanvas.width) / textCanvas.height, 0.12, 1);
-//   // sprite.position.y = 0.7;
-//   // return sprite;
-// };
-
-export const getTextMaterial = ({ text }) => {
-  return textureLoader.load("favicon.ico");
+export const getTextTexture = ({ text, backColor }) => {
+  const textCanvas = document.createElement("canvas");
+  const ctx = textCanvas.getContext("2d");
+  const measureText = ctx.measureText(text);
+  const width = 100;
+  textCanvas.width = width;
+  textCanvas.height = Math.ceil(
+    (measureText.fontBoundingBoxAscent * width) / measureText.width
+  );
+  if (backColor) {
+    ctx.fillStyle = backColor;
+    ctx.fillRect(0, 0, textCanvas.width, textCanvas.height);
+  }
+  ctx.font = `50px bold arial`;
+  ctx.strokeStyle = "#ff0000";
+  ctx.lineWidth = 1;
+  ctx.lineJoin = "miter";
+  ctx.miterLimit = 1;
+  ctx.strokeText(text, 20, 80);
+  ctx.fillStyle = "black";
+  ctx.fillText(text, 20, 80);
+  const texture = new Texture(textCanvas);
+  texture.minFilter = LinearFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return texture;
 };
