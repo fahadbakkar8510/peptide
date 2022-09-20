@@ -39,9 +39,10 @@ export const tempMatrix2 = new Matrix4();
 export const raycaster = new Raycaster();
 
 export const acidMass = 1;
-export const ballMass = 0.5;
-export const socketMass = 0.5;
+export const ballMass = 1;
+export const socketMass = 1;
 
 export const textureLoader = new TextureLoader();
-
 export const maxTextureImageUnits = 8;
+export const floatingHeight = 20;
+export const gravity = 9.8;

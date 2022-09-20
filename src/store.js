@@ -41,6 +41,8 @@ import {
   ballMass,
   socketMass,
   maxTextureImageUnits,
+  floatingHeight,
+  gravity,
 } from "./constants";
 import {
   getAcidInstMeshes,
@@ -278,7 +280,7 @@ export default new Vuex.Store({
       state.ammoPhysics.addMesh({ mesh: floorMesh });
 
       // AxesHelper
-      state.scene.add(new AxesHelper(1000));
+      state.scene.add(new AxesHelper(100));
     },
     GENERATE_PEPTIDES(state) {
       const aminoAcidRadius = Dimensioning.cmToMeasureRaw({
@@ -291,7 +293,7 @@ export default new Vuex.Store({
         cm: state.controlInfo.distance,
       });
       const height = Dimensioning.cmToMeasureRaw({
-        cm: 10,
+        cm: floatingHeight,
       });
 
       // Generate a peptide.
@@ -348,7 +350,7 @@ export default new Vuex.Store({
     INIT_SCENE({ state, commit }, { width, height, el }) {
       return new Promise(async (resolve) => {
         // AmmoPhysics
-        state.ammoPhysics = await AmmoPhysics({ gravity: 98 });
+        state.ammoPhysics = await AmmoPhysics({ gravity });
 
         commit("SET_VIEWPORT_SIZE", { width, height });
         commit("INITIALIZE_RENDERER", el);
