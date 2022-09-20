@@ -150,9 +150,9 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     if (index === 0) {
       individualMasses.push(0);
     }
-    if (index === acidInstMeshes.length - 1) {
-      individualMasses[acidInstMesh.count - 1] = 0;
-    }
+    // if (index === acidInstMeshes.length - 1) {
+    //   individualMasses[acidInstMesh.count - 1] = 0;
+    // }
 
     acidBodies.push(
       ...state.ammoPhysics.addMesh({
