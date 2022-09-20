@@ -65,7 +65,7 @@ export default {
     return {
       chains: { a: 'GIVEQCCTSICSLYQNLENYCN', b: 'FVNQHLCGSHLVEALYLVCGERGFFYTPKT' },
       crossLinks: 'A:C6-A:C11;A:C7-B:C7;A:C21-B:C19',
-      jointLength: 0.4,
+      jointLength: 0.6,
       distance: 6,
       aminoAcidRadius: 1,
     }

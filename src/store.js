@@ -331,7 +331,7 @@ export default new Vuex.Store({
         bPeptideInfo,
         crossLinks: state.controlInfo.cross_links,
         acidRadius: aminoAcidRadius,
-        jointLength,
+        jointLength: jointLength / 2,
         y: height,
         z: -distance / 2,
       });
