@@ -3,7 +3,6 @@ import {
   ballHex,
   ballMass,
   bondSocketHex,
-  socketHex,
   socketMass,
   tempColor,
 } from "./constants";

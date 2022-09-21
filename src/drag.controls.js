@@ -23,11 +23,11 @@ class DragControls extends EventDispatcher {
     _domElement.style.touchAction = "none"; // disable touch scroll
 
     let _selected = null,
-      _hovered = null;
+      _hovered = null,
+      _instanceId = 0,
+      _prevPos = null;
 
     const _intersections = [];
-
-    //
 
     const scope = this;
 
@@ -71,17 +71,29 @@ class DragControls extends EventDispatcher {
           const curPos = _intersection
             .sub(_offset)
             .applyMatrix4(_inverseMatrix);
+          if (!_prevPos) {
+            // console.log("_prevPos");
+            _prevPos = curPos.clone();
+          }
+
           if (_ammo) {
-            // const scalingFactor = 20;
-            // const diffPos = curPos.sub(_selected.position).clone();
-            // const resultantImpulse = new _ammo.btVector3(
-            //   diffPos.x,
-            //   diffPos.y,
-            //   diffPos.z
-            // );
-            // resultantImpulse.op_mul(scalingFactor);
-            // const physicsBody = _selected.userData.physicsBodies[instId];
-            // physicsBody.setLinearVelocity(resultantImpulse);
+            const scalingFactor = 20;
+            const diffPos = curPos
+              .clone()
+              .sub(_prevPos)
+              .clone();
+            // console.log("diffPos: ", diffPos);
+            // console.log("curPos: ", curPos);
+            // console.log("prevPos: ", _prevPos);
+            _prevPos = curPos.clone();
+            const resultantImpulse = new _ammo.btVector3(
+              diffPos.x,
+              diffPos.y,
+              diffPos.z
+            );
+            resultantImpulse.op_mul(scalingFactor);
+            const physicsBody = _selected.userData.physicsBodies[_instanceId];
+            physicsBody.setLinearVelocity(resultantImpulse);
           } else {
             _selected.position.copy(curPos);
           }
@@ -147,6 +159,7 @@ class DragControls extends EventDispatcher {
           scope.transformGroup === true
             ? _objects[0]
             : _intersections[0].object;
+        _instanceId = _intersections[0].instanceId;
 
         _plane.setFromNormalAndCoplanarPoint(
           _camera.getWorldDirection(_plane.normal),
@@ -173,6 +186,7 @@ class DragControls extends EventDispatcher {
         scope.dispatchEvent({ type: "dragend", object: _selected });
 
         _selected = null;
+        _prevPos = null;
       }
 
       _domElement.style.cursor = _hovered ? "pointer" : "auto";

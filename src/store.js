@@ -198,27 +198,6 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   };
 };
 
-const get3DPosFrom2DPos = ({ camera, pos2D, mesh }) => {
-  // console.log("mesh: ", mesh);
-  tempPos1.set(pos2D.x, pos2D.y, 0.5);
-  tempPos1.unproject(camera);
-  const dir = tempPos1.sub(camera.position).normalize();
-  const distance = -camera.position.z / dir.z;
-  tempPos2.copy(camera.position).add(dir.multiplyScalar(distance));
-  return tempPos2.clone();
-};
-
-const moveMesh = ({ ammo, mesh, prevPos, curPos, instId }) => {
-  const scalingFactor = 20;
-  if (prevPos === curPos) return;
-  const diffPos = curPos.sub(prevPos).clone();
-  // console.log("diff: ", diffPos);
-  const resultantImpulse = new ammo.btVector3(diffPos.x, diffPos.y, diffPos.z);
-  resultantImpulse.op_mul(scalingFactor);
-  const physicsBody = mesh.userData.physicsBodies[instId];
-  physicsBody.setLinearVelocity(resultantImpulse);
-};
-
 export default new Vuex.Store({
   state: {
     width: 0,
@@ -351,7 +330,6 @@ export default new Vuex.Store({
         y: height,
         z: distance / 2,
       });
-      console.log("aPeptideInfo: ", aPeptideInfo);
 
       // Generate b peptide.
       const bAcids = state.controlInfo.chains.b.split("");
@@ -378,7 +356,8 @@ export default new Vuex.Store({
       state.dragControls = new DragControls(
         [...aPeptideInfo.acidInstMeshes, ...bPeptideInfo.acidInstMeshes],
         state.camera,
-        state.renderer.domElement
+        state.renderer.domElement,
+        state.ammoPhysics.AmmoLib
       );
     },
     RESIZE(state, { width, height }) {
@@ -406,29 +385,6 @@ export default new Vuex.Store({
       }
     },
     SET_POINTER(state, pointer) {
-      // if (state.mouseDown && state.hoverAcidMesh) {
-      //   if (state.prevPos) {
-      //     const curPos = get3DPosFrom2DPos({
-      //       camera: state.camera,
-      //       pos2D: pointer,
-      //       mesh: state.hoverAcidMesh,
-      //     });
-      //     moveMesh({
-      //       ammo: state.ammoPhysics.AmmoLib,
-      //       mesh: state.hoverAcidMesh,
-      //       prevPos: state.prevPos.clone(),
-      //       curPos: curPos.clone(),
-      //       instId: state.hoverAcidInstId,
-      //     });
-      //     state.prevPos = curPos.clone();
-      //   } else {
-      //     state.prevPos = get3DPosFrom2DPos({
-      //       camera: state.camera,
-      //       pos2D: pointer,
-      //       mesh: state.hoverAcidMesh,
-      //     });
-      //   }
-      // }
       state.pointer = pointer;
     },
     SET_LEFT_MOUSE_DOWN(state, flag) {

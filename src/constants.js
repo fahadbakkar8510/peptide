@@ -59,4 +59,4 @@ export const socketMass = 1;
 export const textureLoader = new TextureLoader();
 export const maxTextureImageUnits = 15;
 export const floatingHeight = 20;
-export const gravity = 1;
+export const gravity = 2;

@@ -115,10 +115,10 @@ async function AmmoPhysics({ gravity }) {
     physicsWorld.addRigidBody(body);
     mesh.userData.physicsBody = body;
 
-    if (mass > 0) {
-      meshes.push(mesh);
-      meshMap.set(mesh, body);
-    }
+    // if (mass > 0) {
+    meshes.push(mesh);
+    meshMap.set(mesh, body);
+    // }
 
     return { body };
   }
@@ -155,10 +155,10 @@ async function AmmoPhysics({ gravity }) {
 
     mesh.userData.physicsBodies = bodies;
 
-    if (mass > 0) {
-      meshes.push(mesh);
-      meshMap.set(mesh, bodies);
-    }
+    // if (mass > 0) {
+    meshes.push(mesh);
+    meshMap.set(mesh, bodies);
+    // }
 
     return { bodies };
   }
