@@ -110,7 +110,8 @@ async function AmmoPhysics({ gravity }) {
     );
 
     const body = new AmmoLib.btRigidBody(rbInfo);
-    // body.setFriction(4);
+    body.setFriction(50);
+    body.setDamping(0.8, 0.8);
     physicsWorld.addRigidBody(body);
     mesh.userData.physicsBody = body;
 
