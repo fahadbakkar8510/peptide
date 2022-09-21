@@ -57,6 +57,6 @@ export const ballMass = 1;
 export const socketMass = 1;
 
 export const textureLoader = new TextureLoader();
-export const maxTextureImageUnits = 8;
+export const maxTextureImageUnits = 15;
 export const floatingHeight = 20;
-export const gravity = 9.8;
+export const gravity = 1;
