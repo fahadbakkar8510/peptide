@@ -311,16 +311,16 @@ export default new Vuex.Store({
       const lightC = new AmbientLight(lightCHex);
       state.scene.add(lightC);
 
-      // Floor
-      const floorMesh = new Mesh(
-        new BoxGeometry(1000, 5, 1000),
-        new ShadowMaterial({ color: floorColor })
-      );
-      floorMesh.position.y = -2.5;
-      // floorMesh.rotateX(0.3);
-      floorMesh.receiveShadow = true;
-      state.scene.add(floorMesh);
-      state.ammoPhysics.addMesh({ mesh: floorMesh });
+      // // Floor
+      // const floorMesh = new Mesh(
+      //   new BoxGeometry(1000, 5, 1000),
+      //   new ShadowMaterial({ color: floorColor })
+      // );
+      // floorMesh.position.y = -2.5;
+      // // floorMesh.rotateX(0.3);
+      // floorMesh.receiveShadow = true;
+      // state.scene.add(floorMesh);
+      // state.ammoPhysics.addMesh({ mesh: floorMesh });
 
       // AxesHelper
       state.scene.add(new AxesHelper(100));
