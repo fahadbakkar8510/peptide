@@ -17,6 +17,7 @@ import {
 } from "three";
 import { AmmoPhysics } from "./ammo.physics";
 import { OrbitControls } from "./orbit.controls";
+import { DragControls } from "./drag.controls";
 import { addBondConstraint, addPeptideConstraint } from "./constraints";
 import {
   ballHex,
@@ -223,7 +224,8 @@ export default new Vuex.Store({
     width: 0,
     height: 0,
     camera: null,
-    controls: null,
+    orbitControls: null,
+    dragControls: null,
     scene: null,
     renderer: null,
     pyramids: [],
@@ -286,15 +288,15 @@ export default new Vuex.Store({
       state.camera.position.z = Dimensioning.cmToMeasureRaw({ cm: 50 });
     },
     INITIALIZE_CONTROLS(state) {
-      state.controls = new OrbitControls(
+      state.orbitControls = new OrbitControls(
         state.camera,
         state.renderer.domElement
       );
-      state.controls.rotateSpeed = 1.0;
-      state.controls.zoomSpeed = 1.2;
-      state.controls.panSpeed = 0.8;
-      state.controls.enableZoom = true;
-      state.controls.enablePan = true;
+      state.orbitControls.rotateSpeed = 1.0;
+      state.orbitControls.zoomSpeed = 1.2;
+      state.orbitControls.panSpeed = 0.8;
+      state.orbitControls.enableZoom = true;
+      state.orbitControls.enablePan = true;
     },
     INITIALIZE_SCENE(state) {
       state.scene = new Scene();
@@ -349,7 +351,7 @@ export default new Vuex.Store({
         y: height,
         z: distance / 2,
       });
-      // console.log("aPeptideInfo: ", aPeptideInfo);
+      console.log("aPeptideInfo: ", aPeptideInfo);
 
       // Generate b peptide.
       const bAcids = state.controlInfo.chains.b.split("");
@@ -372,6 +374,12 @@ export default new Vuex.Store({
         y: height,
         z: -distance / 2,
       });
+
+      state.dragControls = new DragControls(
+        [...aPeptideInfo.acidInstMeshes, ...bPeptideInfo.acidInstMeshes],
+        state.camera,
+        state.renderer.domElement
+      );
     },
     RESIZE(state, { width, height }) {
       state.width = width;
@@ -394,33 +402,33 @@ export default new Vuex.Store({
         state.camera.rotation.set(0, 0, 0);
         state.camera.quaternion.set(0, 0, 0, 1);
         state.camera.up.set(0, 1, 0);
-        state.controls.target.set(0, 0, 0);
+        state.orbitControls.target.set(0, 0, 0);
       }
     },
     SET_POINTER(state, pointer) {
-      if (state.mouseDown && state.hoverAcidMesh) {
-        if (state.prevPos) {
-          const curPos = get3DPosFrom2DPos({
-            camera: state.camera,
-            pos2D: pointer,
-            mesh: state.hoverAcidMesh,
-          });
-          moveMesh({
-            ammo: state.ammoPhysics.AmmoLib,
-            mesh: state.hoverAcidMesh,
-            prevPos: state.prevPos.clone(),
-            curPos: curPos.clone(),
-            instId: state.hoverAcidInstId,
-          });
-          state.prevPos = curPos.clone();
-        } else {
-          state.prevPos = get3DPosFrom2DPos({
-            camera: state.camera,
-            pos2D: pointer,
-            mesh: state.hoverAcidMesh,
-          });
-        }
-      }
+      // if (state.mouseDown && state.hoverAcidMesh) {
+      //   if (state.prevPos) {
+      //     const curPos = get3DPosFrom2DPos({
+      //       camera: state.camera,
+      //       pos2D: pointer,
+      //       mesh: state.hoverAcidMesh,
+      //     });
+      //     moveMesh({
+      //       ammo: state.ammoPhysics.AmmoLib,
+      //       mesh: state.hoverAcidMesh,
+      //       prevPos: state.prevPos.clone(),
+      //       curPos: curPos.clone(),
+      //       instId: state.hoverAcidInstId,
+      //     });
+      //     state.prevPos = curPos.clone();
+      //   } else {
+      //     state.prevPos = get3DPosFrom2DPos({
+      //       camera: state.camera,
+      //       pos2D: pointer,
+      //       mesh: state.hoverAcidMesh,
+      //     });
+      //   }
+      // }
       state.pointer = pointer;
     },
     SET_LEFT_MOUSE_DOWN(state, flag) {
@@ -499,7 +507,7 @@ export default new Vuex.Store({
                 hoverAcidInstId,
               ];
               state.hoverAcidMesh = hoverAcidInstMesh;
-              state.controls.enableRotate = false;
+              state.orbitControls.enableRotate = false;
               commit("SET_CURSOR", "pointer");
             }
           }
@@ -520,7 +528,7 @@ export default new Vuex.Store({
             });
             state.hoverTextureKeys = [];
             state.hoverAcidMesh = null;
-            state.controls.enableRotate = true;
+            state.orbitControls.enableRotate = true;
             commit("SET_CURSOR", "default");
           }
         }
