@@ -15,7 +15,7 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
   const acidInstMeshes = [];
   const textTextures = [];
 
-  chunkChars.forEach((subChars) => {
+  chunkChars.forEach((subChars, index) => {
     const geometry = new SphereGeometry(radius);
 
     const material = new MeshStandardMaterial({
@@ -95,6 +95,8 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
       new InstancedBufferAttribute(new Float32Array(textures), 1)
     );
 
+    mesh.chars = subChars;
+    mesh.index = index;
     acidInstMeshes.push(mesh);
   });
 

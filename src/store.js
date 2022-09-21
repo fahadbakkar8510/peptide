@@ -111,9 +111,9 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     radius: acidRadius,
     chars,
   });
-  textTextures[0][0] = getTextTexture({ text: "A", backColor: "#ff0000" });
-  state.acidInstMeshes.push(...acidInstMeshes);
   state.scene.add(...acidInstMeshes);
+  state.acidInstChunkMeshes.push(acidInstMeshes);
+  state.acidTextures.push(textTextures);
 
   // Add balls.
   const ballInstMesh = getSphereInstMesh({
@@ -201,7 +201,8 @@ export default new Vuex.Store({
     pyramids: [],
     controlInfo: {},
     pointer: new Vector2(),
-    acidInstMeshes: [],
+    acidInstChunkMeshes: [],
+    acidTextures: [],
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -384,29 +385,23 @@ export default new Vuex.Store({
         dispatch("ANIMATE");
 
         // Handle raycaster.
-        if (state.acidInstMeshes.length) {
-          // state.acidInstMeshes.forEach((acidInstMeshes) => {
-          //   for (let i = 0; i < acidInstMeshes.count; i++) {
-          //     acidInstMeshes.setColorAt(i, acidColor);
-          //     acidInstMeshes.instanceColor.needsUpdate = true;
-          //   }
-          // });
-
-          raycaster.setFromCamera(state.pointer, state.camera);
-          const intersects = raycaster.intersectObjects(
-            state.acidInstMeshes,
-            true
-          );
+        raycaster.setFromCamera(state.pointer, state.camera);
+        state.acidInstChunkMeshes.forEach((acidInstMeshes, index) => {
+          const intersects = raycaster.intersectObjects(acidInstMeshes, true);
 
           if (intersects.length) {
-            console.log(intersects[0].object);
-            intersects[0].object.setColorAt(
-              intersects[0].instanceId,
-              tempColor.setHex(0xff0000)
-            );
-            intersects[0].object.instanceColor.needsUpdate = true;
+            const selAcidInstMesh = intersects[0].object;
+            const selPeptideIndex = selAcidInstMesh.index;
+            const selAcidIndex = intersects[0].instanceId;
+            const selAcidChar = selAcidInstMesh.chars[selAcidIndex];
+            state.acidTextures[index][selPeptideIndex][
+              selAcidIndex
+            ] = getTextTexture({
+              text: selAcidChar,
+              backColor: "#ff0000",
+            });
           }
-        }
+        });
 
         state.renderer.render(state.scene, state.camera);
       });
