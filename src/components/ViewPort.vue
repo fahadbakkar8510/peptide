@@ -1,5 +1,5 @@
 <template>
-  <div class="viewport"></div>
+  <div class="viewport" v-bind:style="{cursor: selectedCursor}"></div>
 </template>
 
 <script>
@@ -8,7 +8,8 @@ import { mapMutations, mapActions } from "vuex"
 export default {
   data() {
     return {
-      height: 0
+      height: 0,
+      selectedCursor: 'default'
     }
   },
   methods: {
@@ -41,6 +42,13 @@ export default {
         },
         true
       )
+    })
+    this.$store.subscribe((mutation, state) => {
+      switch (mutation.type) {
+        case 'SET_CURSOR':
+          this.selectedCursor = state.cursor
+          break;
+      }
     })
   },
 }

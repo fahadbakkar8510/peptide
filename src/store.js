@@ -211,6 +211,7 @@ export default new Vuex.Store({
     hoverAcidMesh: null,
     selAcidMesh: null,
     iteration: 0,
+    cursor: null,
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -376,6 +377,9 @@ export default new Vuex.Store({
       console.log(flag);
       state.mouseDown = flag;
     },
+    SET_CURSOR(state, cursor) {
+      state.cursor = cursor;
+    },
   },
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
@@ -392,7 +396,7 @@ export default new Vuex.Store({
         resolve();
       });
     },
-    ANIMATE({ state, dispatch }) {
+    ANIMATE({ state, dispatch, commit }) {
       window.requestAnimationFrame(() => {
         dispatch("ANIMATE");
 
@@ -433,6 +437,7 @@ export default new Vuex.Store({
               selAcidIndex,
             ];
             state.hoverAcidMesh = selAcidInstMesh;
+            commit("SET_CURSOR", "pointer");
           }
         } else {
           if (state.hoverAcidMesh && state.hoverTextureKeys.length === 3) {
@@ -447,6 +452,7 @@ export default new Vuex.Store({
             });
             state.hoverTextureKeys = [];
             state.hoverAcidMesh = null;
+            commit("SET_CURSOR", "default");
           }
         }
 
