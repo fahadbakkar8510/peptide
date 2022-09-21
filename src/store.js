@@ -120,8 +120,6 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     iteration: state.iteration++,
   });
   state.scene.add(...acidInstMeshes);
-  state.acidInstMeshes.push(...acidInstMeshes);
-  state.acidChunkTextures.push(textTextures);
 
   // Add balls.
   const ballInstMesh = getSphereInstMesh({
@@ -152,7 +150,7 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   });
 
   // Add constraint.
-  let acidBodies = [];
+  const acidBodies = [];
   acidInstMeshes.forEach((acidInstMesh, index) => {
     const individualMasses = [];
     if (index === 0) {
@@ -188,6 +186,9 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     jointLength,
   });
 
+  state.acidInstMeshes.push(...acidInstMeshes);
+  state.acidChunkTextures.push(textTextures);
+
   return {
     acidInstMeshes,
     ballInstMesh,
@@ -196,6 +197,30 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
     ballBodies,
     socketBodies,
   };
+};
+
+const get3DPosFrom2DPos = ({ camera, pos2D, mesh }) => {
+  tempPos1.set(pos2D.x, pos2D.y, 0.5);
+  tempPos1.unproject(camera);
+  tempPos1.sub(camera.position);
+  const distance = -camera.position.z / tempPos1.z;
+  tempPos2.copy(camera.position).add(tempPos1.multiplyScalar(distance));
+  // mesh.matrixWorldNeedsUpdate = true;
+  // mesh.updateMatrixWorld(true);
+  // mesh.matrixWorld.decompose(tempPos1, tempQuat, tempScale);
+  // console.log(mesh, tempPos2, tempPos1, tempQuat, tempScale);
+  return tempPos2.clone();
+};
+
+const moveMesh = ({ ammo, mesh, prevPos, curPos, instId }) => {
+  const scalingFactor = 20;
+  if (prevPos === curPos) return;
+  const diffPos = curPos.sub(prevPos).divideScalar(scalingFactor);
+  // console.log("diff: ", diffPos);
+  const resultantImpulse = new ammo.btVector3(diffPos.x, diffPos.y, diffPos.z);
+  resultantImpulse.op_mul(scalingFactor);
+  const physicsBody = mesh.userData.physicsBodies[instId];
+  physicsBody.setLinearVelocity(resultantImpulse);
 };
 
 export default new Vuex.Store({
@@ -217,6 +242,7 @@ export default new Vuex.Store({
     hoverAcidInstId: null,
     iteration: 0,
     cursor: null,
+    prevPos: null,
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -328,6 +354,7 @@ export default new Vuex.Store({
         y: height,
         z: distance / 2,
       });
+      // console.log("aPeptideInfo: ", aPeptideInfo);
 
       // Generate b peptide.
       const bAcids = state.controlInfo.chains.b.split("");
@@ -377,32 +404,32 @@ export default new Vuex.Store({
     },
     SET_POINTER(state, pointer) {
       if (state.mouseDown && state.hoverAcidMesh) {
-        tempPos1.set(pointer.x, pointer.y, 0.5);
-        tempPos1.unproject(state.camera);
-        tempPos1.sub(state.camera.position);
-        const distance = -state.camera.position.z / tempPos1.z;
-        tempPos2
-          .copy(state.camera.position)
-          .add(tempPos1.multiplyScalar(distance));
-        state.hoverAcidMesh.matrixWorldNeedsUpdate = true;
-        state.hoverAcidMesh.updateMatrixWorld(true);
-        state.hoverAcidMesh.matrixWorld.decompose(
-          tempPos1,
-          tempQuat,
-          tempScale
-        );
-        console.log(
-          state.hoverAcidMesh,
-          tempPos2,
-          tempPos1,
-          tempQuat,
-          tempScale
-        );
+        if (state.prevPos) {
+          const curPos = get3DPosFrom2DPos({
+            camera: state.camera,
+            pos2D: pointer,
+            mesh: state.hoverAcidMesh,
+          });
+          moveMesh({
+            ammo: state.ammoPhysics.AmmoLib,
+            mesh: state.hoverAcidMesh,
+            prevPos: state.prevPos,
+            curPos,
+            instId: state.hoverAcidInstId,
+          });
+          state.prevPos = curPos;
+        } else {
+          state.prevPos = get3DPosFrom2DPos({
+            camera: state.camera,
+            pos2D: pointer,
+            mesh: state.hoverAcidMesh,
+          });
+        }
       }
       state.pointer = pointer;
     },
     SET_LEFT_MOUSE_DOWN(state, flag) {
-      console.log("mousedown: ", flag);
+      // console.log("mousedown: ", flag);
       state.mouseDown = flag;
 
       if (state.hoverTextureKeys.length === 3) {
@@ -482,7 +509,11 @@ export default new Vuex.Store({
             }
           }
         } else {
-          if (state.hoverAcidMesh && state.hoverTextureKeys.length === 3) {
+          if (
+            !state.mouseDown &&
+            state.hoverAcidMesh &&
+            state.hoverTextureKeys.length === 3
+          ) {
             // console.log("hover out");
             const selAcidChar =
               state.hoverAcidMesh.chars[state.hoverTextureKeys[2]];

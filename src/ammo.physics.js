@@ -112,6 +112,7 @@ async function AmmoPhysics({ gravity }) {
     const body = new AmmoLib.btRigidBody(rbInfo);
     // body.setFriction(4);
     physicsWorld.addRigidBody(body);
+    mesh.userData.physicsBody = body;
 
     if (mass > 0) {
       meshes.push(mesh);
@@ -150,6 +151,8 @@ async function AmmoPhysics({ gravity }) {
 
       bodies.push(body);
     }
+
+    mesh.userData.physicsBodies = bodies;
 
     if (mass > 0) {
       meshes.push(mesh);
