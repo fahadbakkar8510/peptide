@@ -39,6 +39,8 @@ import {
   maxTextureImageUnits,
   floatingHeight,
   gravity,
+  hoverHexStr,
+  acidHexStr,
 } from "./constants";
 import {
   getAcidInstMeshes,
@@ -110,10 +112,11 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
   const { acidInstMeshes, textTextures } = getAcidInstMeshes({
     radius: acidRadius,
     chars,
+    iteration: state.iteration++,
   });
   state.scene.add(...acidInstMeshes);
-  state.acidInstChunkMeshes.push(acidInstMeshes);
-  state.acidTextures.push(textTextures);
+  state.acidInstMeshes.push(...acidInstMeshes);
+  state.acidChunkTextures.push(textTextures);
 
   // Add balls.
   const ballInstMesh = getSphereInstMesh({
@@ -201,8 +204,13 @@ export default new Vuex.Store({
     pyramids: [],
     controlInfo: {},
     pointer: new Vector2(),
-    acidInstChunkMeshes: [],
-    acidTextures: [],
+    acidInstMeshes: [],
+    acidChunkTextures: [],
+    mouseDown: false,
+    hoverTextureKeys: [],
+    hoverAcidMesh: null,
+    selAcidMesh: null,
+    iteration: 0,
   },
   getters: {
     CAMERA_POSITION: (state) => {
@@ -364,6 +372,10 @@ export default new Vuex.Store({
     SET_POINTER(state, pointer) {
       state.pointer = pointer;
     },
+    SET_MOUSE_DOWN(state, flag) {
+      console.log(flag);
+      state.mouseDown = flag;
+    },
   },
   actions: {
     INIT_SCENE({ state, commit }, { width, height, el }) {
@@ -386,22 +398,57 @@ export default new Vuex.Store({
 
         // Handle raycaster.
         raycaster.setFromCamera(state.pointer, state.camera);
-        state.acidInstChunkMeshes.forEach((acidInstMeshes, index) => {
-          const intersects = raycaster.intersectObjects(acidInstMeshes, true);
+        const intersects = raycaster.intersectObjects(
+          state.acidInstMeshes,
+          false
+        );
 
-          if (intersects.length) {
-            const selAcidInstMesh = intersects[0].object;
-            const selPeptideIndex = selAcidInstMesh.index;
-            const selAcidIndex = intersects[0].instanceId;
-            const selAcidChar = selAcidInstMesh.chars[selAcidIndex];
-            state.acidTextures[index][selPeptideIndex][
+        if (intersects.length) {
+          const selAcidInstMesh = intersects[0].object;
+          const selPeptideIteration = selAcidInstMesh.iteration;
+          const selAcidInstMeshIndex = selAcidInstMesh.instMeshIndex;
+          const selAcidIndex = intersects[0].instanceId;
+          const selAcidChar = selAcidInstMesh.chars[selAcidIndex];
+
+          if (state.hoverAcidMesh != selAcidInstMesh) {
+            // console.log("Hover in from other.");
+            if (state.hoverTextureKeys.length === 3) {
+              state.acidChunkTextures[state.hoverTextureKeys[0]][
+                state.hoverTextureKeys[1]
+              ][state.hoverTextureKeys[2]] = getTextTexture({
+                text: selAcidChar,
+                backColor: acidHexStr,
+              });
+            }
+
+            state.acidChunkTextures[selPeptideIteration][selAcidInstMeshIndex][
               selAcidIndex
             ] = getTextTexture({
               text: selAcidChar,
-              backColor: "#ff0000",
+              backColor: hoverHexStr,
             });
+            state.hoverTextureKeys = [
+              selPeptideIteration,
+              selAcidInstMeshIndex,
+              selAcidIndex,
+            ];
+            state.hoverAcidMesh = selAcidInstMesh;
           }
-        });
+        } else {
+          if (state.hoverAcidMesh && state.hoverTextureKeys.length === 3) {
+            // console.log("hover out");
+            const selAcidChar =
+              state.hoverAcidMesh.chars[state.hoverTextureKeys[2]];
+            state.acidChunkTextures[state.hoverTextureKeys[0]][
+              state.hoverTextureKeys[1]
+            ][state.hoverTextureKeys[2]] = getTextTexture({
+              text: selAcidChar,
+              backColor: acidHexStr,
+            });
+            state.hoverTextureKeys = [];
+            state.hoverAcidMesh = null;
+          }
+        }
 
         state.renderer.render(state.scene, state.camera);
       });

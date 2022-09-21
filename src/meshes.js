@@ -10,12 +10,13 @@ import {
 import { textureLoader, acidHexStr, maxTextureImageUnits } from "./constants";
 import { getTextTexture, chunk } from "./common";
 
-export const getAcidInstMeshes = ({ radius, chars }) => {
+export const getAcidInstMeshes = ({ radius, chars, iteration }) => {
+  // console.log("iteration: ", iteration);
   const chunkChars = chunk({ arr: chars, chunkSize: maxTextureImageUnits });
   const acidInstMeshes = [];
   const textTextures = [];
 
-  chunkChars.forEach((subChars, index) => {
+  chunkChars.forEach((subChars, instMeshIndex) => {
     const geometry = new SphereGeometry(radius);
 
     const material = new MeshStandardMaterial({
@@ -24,9 +25,10 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
 
     const textureValues = [];
 
-    subChars.forEach((char) =>
-      textureValues.push(getTextTexture({ text: char, backColor: acidHexStr }))
-    );
+    subChars.forEach((char) => {
+      const textTexture = getTextTexture({ text: char, backColor: acidHexStr });
+      textureValues.push(textTexture);
+    });
 
     textTextures.push(textureValues);
 
@@ -95,8 +97,9 @@ export const getAcidInstMeshes = ({ radius, chars }) => {
       new InstancedBufferAttribute(new Float32Array(textures), 1)
     );
 
+    mesh.iteration = iteration;
+    mesh.instMeshIndex = instMeshIndex;
     mesh.chars = subChars;
-    mesh.index = index;
     acidInstMeshes.push(mesh);
   });
 

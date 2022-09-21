@@ -51,43 +51,28 @@ export const getAlphaOnly = (str) => {
 };
 
 export const getAngle = ({ A, B, C }) => {
-  const a = { x: A.x - B.x, y: A.y - B.y };
-  const b = { x: C.x - B.x, y: C.y - B.y };
-  if (a.x === 0 && a.y === 0 && b.x === 0 && b.y === 0) return 0;
+  const v1 = { x: A.x - B.x, y: A.y - B.y };
+  const v2 = { x: C.x - B.x, y: C.y - B.y };
+  if (v1.x === 0 && v1.y === 0 && v2.x === 0 && v2.y === 0) return 0;
   const radians = Math.acos(
-    (a.x * b.x + a.y * b.y) /
-      (Math.sqrt(a.x * a.x + a.y * a.y) * Math.sqrt(b.x * b.x + b.y * b.y))
+    (v1.x * v2.x + v1.y * v2.y) /
+      (Math.sqrt(v1.x * v1.x + v1.y * v1.y) *
+        Math.sqrt(v2.x * v2.x + v2.y * v2.y))
   );
   let degree = (radians * 180) / Math.PI;
   let isNegative = false;
-  if (a.x * b.x >= 0) {
-    if (a.x >= 0) {
-      if (a.y > b.y) isNegative = true;
-    } else {
-      if (a.y < b.y) isNegative = true;
+  if (v1.x * v2.x >= 0) {
+    if (v1.x >= 0) {
+      if (v1.y * v2.y >= 0) {
+        if (v1.y >= 0) {
+        }
+      }
     }
   } else {
-    if (a.y * b.y >= 0) {
-      if (a.y >= 0) {
-        if (a.x < 0) isNegative = true;
-      } else {
-        if (a.x > 0) isNegative = true;
-      }
-    } else {
-      if (a.y >= 0) {
-        if (
-          getAngle({ A: a, B: { x: 0, y: 0 }, C: { x: 1, y: 0 } }) +
-            getAngle({ A: b, B: { x: 0, y: 0 }, C: { x: 0, y: 1 } }) >
-          90
-        )
-          isNegative = true;
-      } else {
-        if (
-          getAngle({ A: a, B: { x: 0, y: 0 }, C: { x: 1, y: 0 } }) +
-            getAngle({ A: b, B: { x: 0, y: 0 }, C: { x: 0, y: 1 } }) <
-          90
-        )
-          isNegative = true;
+    if (v1.x >= 0) {
+      if (v1.y * v2.y >= 0) {
+        if (v1.y >= 0) {
+        }
       }
     }
   }
