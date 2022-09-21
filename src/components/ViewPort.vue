@@ -13,7 +13,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["RESIZE", "SET_POINTER", "SET_MOUSE_DOWN"]),
+    ...mapMutations(["RESIZE", "SET_POINTER", "SET_LEFT_MOUSE_DOWN"]),
     ...mapActions(["INIT_SCENE", "ANIMATE"]),
   },
   mounted() {
@@ -21,10 +21,26 @@ export default {
       this.SET_POINTER({ x: (event.clientX / this.$el.offsetWidth) * 2 - 1, y: -(event.clientY / this.$el.offsetHeight) * 2 + 1 })
     })
     this.$el.addEventListener('mousedown', (event) => {
-      this.SET_MOUSE_DOWN(true)
+      switch (event.which) {
+        case 1: // Left
+          this.SET_LEFT_MOUSE_DOWN(true)
+          break;
+        case 2: // Middle
+          break;
+        case 3: // Right
+          break;
+      }
     })
     this.$el.addEventListener('mouseup', (event) => {
-      this.SET_MOUSE_DOWN(false)
+      switch (event.which) {
+        case 1: // Left
+          this.SET_LEFT_MOUSE_DOWN(false)
+          break;
+        case 2: // Middle
+          break;
+        case 3: // Right
+          break;
+      }
     })
     this.INIT_SCENE({
       width: this.$el.offsetWidth,

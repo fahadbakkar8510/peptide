@@ -371,10 +371,13 @@ export default new Vuex.Store({
       }
     },
     SET_POINTER(state, pointer) {
+      if (state.selAcidMesh) {
+        console.log(pointer);
+      }
       state.pointer = pointer;
     },
-    SET_MOUSE_DOWN(state, flag) {
-      console.log(flag);
+    SET_LEFT_MOUSE_DOWN(state, flag) {
+      // console.log("mousedown: ", flag);
       state.mouseDown = flag;
     },
     SET_CURSOR(state, cursor) {
@@ -408,36 +411,41 @@ export default new Vuex.Store({
         );
 
         if (intersects.length) {
-          const selAcidInstMesh = intersects[0].object;
-          const selPeptideIteration = selAcidInstMesh.iteration;
-          const selAcidInstMeshIndex = selAcidInstMesh.instMeshIndex;
-          const selAcidIndex = intersects[0].instanceId;
-          const selAcidChar = selAcidInstMesh.chars[selAcidIndex];
+          if (state.mouseDown) {
+            state.selAcidMesh = state.hoverAcidMesh;
+          } else {
+            const selAcidInstMesh = intersects[0].object;
+            const selPeptideIteration = selAcidInstMesh.iteration;
+            const selAcidInstMeshIndex = selAcidInstMesh.instMeshIndex;
+            const selAcidIndex = intersects[0].instanceId;
+            const selAcidChar = selAcidInstMesh.chars[selAcidIndex];
 
-          if (state.hoverAcidMesh != selAcidInstMesh) {
-            // console.log("Hover in from other.");
-            if (state.hoverTextureKeys.length === 3) {
-              state.acidChunkTextures[state.hoverTextureKeys[0]][
-                state.hoverTextureKeys[1]
-              ][state.hoverTextureKeys[2]] = getTextTexture({
+            if (state.hoverAcidMesh != selAcidInstMesh) {
+              // console.log("Hover in from other.");
+              if (state.hoverTextureKeys.length === 3) {
+                state.acidChunkTextures[state.hoverTextureKeys[0]][
+                  state.hoverTextureKeys[1]
+                ][state.hoverTextureKeys[2]] = getTextTexture({
+                  text: selAcidChar,
+                  backColor: acidHexStr,
+                });
+              }
+
+              state.acidChunkTextures[selPeptideIteration][
+                selAcidInstMeshIndex
+              ][selAcidIndex] = getTextTexture({
                 text: selAcidChar,
-                backColor: acidHexStr,
+                backColor: hoverHexStr,
               });
+              state.hoverTextureKeys = [
+                selPeptideIteration,
+                selAcidInstMeshIndex,
+                selAcidIndex,
+              ];
+              state.hoverAcidMesh = selAcidInstMesh;
+              state.selAcidMesh = null;
+              commit("SET_CURSOR", "pointer");
             }
-
-            state.acidChunkTextures[selPeptideIteration][selAcidInstMeshIndex][
-              selAcidIndex
-            ] = getTextTexture({
-              text: selAcidChar,
-              backColor: hoverHexStr,
-            });
-            state.hoverTextureKeys = [
-              selPeptideIteration,
-              selAcidInstMeshIndex,
-              selAcidIndex,
-            ];
-            state.hoverAcidMesh = selAcidInstMesh;
-            commit("SET_CURSOR", "pointer");
           }
         } else {
           if (state.hoverAcidMesh && state.hoverTextureKeys.length === 3) {
@@ -451,7 +459,7 @@ export default new Vuex.Store({
               backColor: acidHexStr,
             });
             state.hoverTextureKeys = [];
-            state.hoverAcidMesh = null;
+            state.hoverAcidMesh = state.selAcidMesh = null;
             commit("SET_CURSOR", "default");
           }
         }
