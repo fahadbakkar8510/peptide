@@ -22,6 +22,7 @@ export const pixelsPerCm = 1.0 / cmPerPixel;
 export const acidHex = 0x3d9970;
 export const ballHex = 0xff851b;
 export const socketHex = 0x001f3f;
+export const bondSocketHex = 0xff0000;
 export const fogHex = 0x001f3f;
 export const lightAHex = 0xffffff;
 export const lightBHex = 0x002288;

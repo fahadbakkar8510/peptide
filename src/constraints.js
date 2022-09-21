@@ -2,6 +2,7 @@ import { getAlphaOnly } from "./common";
 import {
   ballHex,
   ballMass,
+  bondSocketHex,
   socketHex,
   socketMass,
   tempColor,
@@ -106,7 +107,7 @@ export const addBondConstraint = ({
   });
   state.scene.add(socketInstMesh);
   for (let i = 0; i < socketInstMesh.count; i++) {
-    socketInstMesh.setColorAt(i, tempColor.setHex(socketHex));
+    socketInstMesh.setColorAt(i, tempColor.setHex(bondSocketHex));
   }
 
   // Add meshes to the physics.
