@@ -1,4 +1,11 @@
-import { Color, Matrix4, Raycaster, TextureLoader, Vector3 } from "three";
+import {
+  Color,
+  Matrix4,
+  Quaternion,
+  Raycaster,
+  TextureLoader,
+  Vector3,
+} from "three";
 
 export const dimInch = "inch";
 export const dimFeetAndInch = "ft";
@@ -28,9 +35,15 @@ export const tempColor = new Color();
 export const floorColor = new Color(0x111111);
 export const backColor = new Color(0x666666);
 
+export const tempPos1 = new Vector3();
+export const tempPos2 = new Vector3();
 export const normalVecX = new Vector3(1, 0, 0);
 export const normalVecY = new Vector3(0, 1, 0);
 export const normalVecZ = new Vector3(0, 0, 1);
+
+export const tempQuat = new Quaternion();
+
+export const tempScale = new Vector3();
 
 export const tempMultiMatrix = new Matrix4();
 export const tempMatrix1 = new Matrix4();
