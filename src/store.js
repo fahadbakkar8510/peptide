@@ -44,8 +44,6 @@ import {
   tempPos1,
   tempPos2,
   activeHexStr,
-  tempQuat,
-  tempScale,
 } from "./constants";
 import {
   getAcidInstMeshes,
@@ -200,22 +198,19 @@ const generatePeptide = ({ state, chars, acidRadius, jointLength, y, z }) => {
 };
 
 const get3DPosFrom2DPos = ({ camera, pos2D, mesh }) => {
+  // console.log("mesh: ", mesh);
   tempPos1.set(pos2D.x, pos2D.y, 0.5);
   tempPos1.unproject(camera);
-  tempPos1.sub(camera.position);
-  const distance = -camera.position.z / tempPos1.z;
-  tempPos2.copy(camera.position).add(tempPos1.multiplyScalar(distance));
-  // mesh.matrixWorldNeedsUpdate = true;
-  // mesh.updateMatrixWorld(true);
-  // mesh.matrixWorld.decompose(tempPos1, tempQuat, tempScale);
-  // console.log(mesh, tempPos2, tempPos1, tempQuat, tempScale);
+  const dir = tempPos1.sub(camera.position).normalize();
+  const distance = -camera.position.z / dir.z;
+  tempPos2.copy(camera.position).add(dir.multiplyScalar(distance));
   return tempPos2.clone();
 };
 
 const moveMesh = ({ ammo, mesh, prevPos, curPos, instId }) => {
   const scalingFactor = 20;
   if (prevPos === curPos) return;
-  const diffPos = curPos.sub(prevPos).divideScalar(scalingFactor);
+  const diffPos = curPos.sub(prevPos).clone();
   // console.log("diff: ", diffPos);
   const resultantImpulse = new ammo.btVector3(diffPos.x, diffPos.y, diffPos.z);
   resultantImpulse.op_mul(scalingFactor);
@@ -413,11 +408,11 @@ export default new Vuex.Store({
           moveMesh({
             ammo: state.ammoPhysics.AmmoLib,
             mesh: state.hoverAcidMesh,
-            prevPos: state.prevPos,
-            curPos,
+            prevPos: state.prevPos.clone(),
+            curPos: curPos.clone(),
             instId: state.hoverAcidInstId,
           });
-          state.prevPos = curPos;
+          state.prevPos = curPos.clone();
         } else {
           state.prevPos = get3DPosFrom2DPos({
             camera: state.camera,
