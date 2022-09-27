@@ -1,0 +1,16 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.node.json",
+  "include": [
+    "vite.config.*",
+    "vitest.config.*",
+    "cypress.config.*",
+    "three.config.*"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "typeRoots": ["node_modules/ammojs-typed/ammo/ambient"],
+    "types": [
+      "node"
+    ]
+  }
+}

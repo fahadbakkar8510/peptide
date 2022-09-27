@@ -1,3 +1,7 @@
+const friction = 50;
+const liniearDamping = .8;
+const rotationDamping = .8;
+
 async function AmmoPhysics({ gravity }) {
   if ("Ammo" in window === false) {
     console.error("AmmoPhysics: Couldn't find Ammo.js");
@@ -110,8 +114,8 @@ async function AmmoPhysics({ gravity }) {
     );
 
     const body = new AmmoLib.btRigidBody(rbInfo);
-    body.setFriction(50);
-    body.setDamping(0.8, 0.8);
+    body.setFriction(friction);
+    body.setDamping(liniearDamping,rotationDamping);
     physicsWorld.addRigidBody(body);
     mesh.userData.physicsBody = body;
 
@@ -148,6 +152,8 @@ async function AmmoPhysics({ gravity }) {
       );
 
       const body = new AmmoLib.btRigidBody(rbInfo);
+      body.setFriction(friction);
+      body.setDamping(liniearDamping, rotationDamping);
       physicsWorld.addRigidBody(body);
 
       bodies.push(body);
