@@ -8,7 +8,9 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "typeRoots": ["node_modules/ammojs-typed/ammo/ambient"],
+    "typeRoots": [
+      "node_modules/ammojs-typed/ammo/ambient"
+    ],
     "types": [
       "node"
     ]
