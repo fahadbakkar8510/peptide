@@ -15,9 +15,7 @@ onMounted(() => {
 })
 
 async function init() {
-  // first set up a descriptions of the world
-  console.log('onMounted()')
-
+  // first set up descriptions of the world
   const threeWorld = new ThreeWorld(canvas)
   const phyWorld = new PhysicsWorld()
   const descWorld = new DescWorld(threeWorld, phyWorld)
