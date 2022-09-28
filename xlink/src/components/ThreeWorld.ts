@@ -1,6 +1,6 @@
 import * as THREE from 'three'
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import type { DescWorld } from './DescWorld'
 import type { PhysicsInterface } from './PhysicsWorld'
 
 export interface ThreeInterface {
@@ -11,26 +11,48 @@ export interface ThreeInterface {
 }
 
 export class ThreeWorld implements ThreeInterface {
-  private descWorld: DescWorld | undefined = undefined
   private canvas: THREE.PerspectiveCamera
   private scene: THREE.Scene
   private camera: THREE.PerspectiveCamera
   private renderer: THREE.WebGLRenderer
   private prevRender: number | null = null
-  // Map each peptide name to an array of meshes (one for each residue)
   private meshMap: Map<string, THREE.Mesh> = new Map<string, THREE.Mesh>()
+  private orbitControls: OrbitControls
 
   constructor(canvas: any) {
     this.canvas = canvas
+
+    // Scene
     this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    this.renderer = new THREE.WebGLRenderer()
+    this.scene.background = backColor
+    this.scene.fog = new THREE.FogExp2(fogHex, fogDensity)
+
+    // Lights
+    const lightA = new THREE.DirectionalLight(lightAHex);
+    lightA.position.set(1, 1, 1);
+    this.scene.add(lightA);
+
+    const lightB = new THREE.DirectionalLight(lightBHex);
+    lightB.position.set(-1, -1, -1);
+    this.scene.add(lightB);
+
+    const lightC = new THREE.AmbientLight(lightCHex);
+    this.scene.add(lightC);
+
+    // Camera
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
+    this.camera.position.z = 5
+
+    // Renderer
+    this.renderer = new THREE.WebGLRenderer({ antialias: true })
+    this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(window.innerWidth, window.innerHeight)
+    this.renderer.shadowMap.enabled = false
+    this.renderer.outputEncoding = THREE.sRGBEncoding
     canvas.value.appendChild(this.renderer.domElement)
 
-    // add orbit controls
-    const controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.camera.position.z = 5
+    // Orbit Controls
+    this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement)
   }
 
   addResidue(id: string, radius: number, x: number, y: number, z: number): void {
@@ -62,15 +84,10 @@ export class ThreeWorld implements ThreeInterface {
     }
   }
 
-  public animate(physicsWorld: PhysicsInterface) {
+  public animate() {
     requestAnimationFrame((t) => {
-      if (this.prevRender === null) {
-        this.prevRender = t
-      }
-      physicsWorld.stepSimulation((t - this.prevRender) / 1000)
+      this.animate()
       this.renderer.render(this.scene, this.camera)
-      this.prevRender = t
-      this.animate(physicsWorld)
     })
   }
 }

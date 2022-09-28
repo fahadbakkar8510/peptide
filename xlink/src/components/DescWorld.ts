@@ -12,16 +12,34 @@ export interface DescInterface {
 }
 
 export class Residue {
+  public id: string
+  public name: string
+
   constructor(id: string, name: string) {
     this.id = id
     this.name = name
   }
-  public id: string
-  public name: string
+}
+
+export class Joint {
+  public residue1Id: string
+  public residue2Id: string
+  public ballId: string
+  public socket1Id: string
+  public socket2Id: string
+
+  constructor(residue1Id: string, residue2Id: string, ballId: string, socket1Id: string, socket2Id: string) {
+    this.residue1Id = residue1Id
+    this.residue2Id = residue2Id
+    this.ballId = ballId
+    this.socket1Id = socket1Id
+    this.socket2Id = socket2Id
+  }
 }
 
 export class Peptide extends Array<Residue> { }
 export class Peptides extends Map<string, Peptide> { }
+export class Joints extends Array<Joint> { }
 
 export class DescWorld implements DescInterface {
   private radius = 0.1 // for the moment, we'll just have a single common radius.
