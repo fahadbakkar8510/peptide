@@ -1,8 +1,12 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1 } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, instanceCount } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue } from './desc.world'
 import { getTextTexture } from './common';
+
+export class DynamicInstMesh extends THREE.InstancedMesh {
+  public index: number = 0
+}
 
 export class InstMeshInfo {
   public instMesh: any
@@ -76,17 +80,18 @@ export class ThreeWorld implements ThreeInterface {
   }
 
   addResidue(info: Residue) {
-    let residueInstMesh: THREE.InstancedMesh = this.residueInstMeshes.get(info.name)
+    let residueInstMesh: DynamicInstMesh = this.residueInstMeshes.get(info.name)
 
     if (residueInstMesh) {
-      const index = residueInstMesh.count++
+      const index = ++residueInstMesh.index
+      console.log('index: ', index)
       residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
       return new InstMeshInfo(residueInstMesh, index)
     } else {
-      residueInstMesh = new THREE.InstancedMesh(
+      residueInstMesh = new DynamicInstMesh(
         new THREE.SphereGeometry(info.radius),
         new THREE.MeshStandardMaterial({ map: getTextTexture(info.name, acidHexStr) }),
-        1
+        instanceCount
       )
       residueInstMesh.setMatrixAt(0, tempMatrix1.setPosition(info.pos))
       this.scene.add(residueInstMesh)

@@ -26,7 +26,6 @@ export const backColor = new Color(0x666666)
 
 export const tempPos1 = new Vector3()
 export const tempPos2 = new Vector3()
-export const startPos = new Vector3(0, 1, 0)
 export const normalVecX = new Vector3(1, 0, 0)
 export const normalVecY = new Vector3(0, 1, 0)
 export const normalVecZ = new Vector3(0, 0, 1)
@@ -58,3 +57,5 @@ export const frameRate = 60
 export const friction = 50
 export const linearDamping = .8
 export const rotationDamping = .8
+
+export const instanceCount = 10

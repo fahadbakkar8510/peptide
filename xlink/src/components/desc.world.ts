@@ -5,7 +5,7 @@
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, startPos } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius } from './constants';
 import { getAlphaOnly } from './common'
 import type * as THREE from 'three';
 
@@ -70,7 +70,7 @@ export class Peptides extends Map<string, Peptide> { }
 export class Joints extends Array<Joint> { }
 
 export interface DescInterface {
-  addPeptide(name: string, sequence: string): void
+  addPeptide(name: string, sequence: string, startPos: THREE.Vector3): void
   addCrossLinks(crossLinkStr: string): void
 }
 
@@ -90,7 +90,7 @@ export class DescWorld implements DescInterface {
     this.physicsWorld = physicsWorld
   }
 
-  public addPeptide(name: string, sequence: string) {
+  public addPeptide(name: string, sequence: string, startPos: THREE.Vector3) {
     let peptide = new Peptide()
     this.peptides.set(name, peptide)
     let prevResidue: Residue
