@@ -1,6 +1,13 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
 
+const meshes: any[] = []
+const meshMap: WeakMap<any, any> = new WeakMap<any, any>()
+let ammo: typeof Ammo | undefined
+let worldTransform: Ammo.btTransform | undefined
+let physicsWorld: Ammo.btDiscreteDynamicsWorld | undefined
+let lastTime: number = 0
+
 export interface PhysicsInterface {
   init(): Promise<void>
   getShape(geometry: any): any
@@ -8,40 +15,37 @@ export interface PhysicsInterface {
   handleMesh(mesh: any, mass: number, shape: any): Ammo.btRigidBody
   handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number>): Ammo.btRigidBody[]
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number): void
+  step(): void
 }
 
 export class PhysicsWorld implements PhysicsInterface {
-  private ammo: typeof Ammo | undefined
-  private worldTransform: Ammo.btTransform | undefined
-  private physicsWorld: Ammo.btDiscreteDynamicsWorld | undefined
-  private meshes: Array<any> = []
-  private meshMap: WeakMap<any, any> = new WeakMap<any, any>()
-  private lastTime: number = 0
-
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      if (this.ammo) {
+      console.log('initial ammo: ', ammo)
+
+      if (ammo) {
         resolve()
         return
       }
 
       window.addEventListener('DOMContentLoaded', () => {
-        Ammo.bind(window)().then(ammo => {
-          this.ammo = ammo
-          this.worldTransform = new ammo.btTransform()
+        Ammo.bind(window)().then(newAmmo => {
+          ammo = newAmmo
+          console.log('current ammo: ', ammo)
+          worldTransform = new ammo.btTransform()
           const collisionConfiguration = new ammo.btDefaultCollisionConfiguration()
           const physicsDispatcher = new ammo.btCollisionDispatcher(
             collisionConfiguration
           )
           const physicsBroadphase = new ammo.btDbvtBroadphase()
           const physicsSolver = new ammo.btSequentialImpulseConstraintSolver()
-          this.physicsWorld = new ammo.btDiscreteDynamicsWorld(
+          physicsWorld = new ammo.btDiscreteDynamicsWorld(
             physicsDispatcher,
             physicsBroadphase,
             physicsSolver,
             collisionConfiguration
           )
-          this.physicsWorld.setGravity(new ammo.btVector3(0, -gravity, 0))
+          physicsWorld.setGravity(new ammo.btVector3(0, -gravity, 0))
           setInterval(this.step, 1000 / frameRate)
           resolve()
         })
@@ -64,14 +68,14 @@ export class PhysicsWorld implements PhysicsInterface {
         sx = parameters.width !== undefined ? parameters.width / 2 : 0.5
         sy = parameters.height !== undefined ? parameters.height / 2 : 0.5
         sz = parameters.depth !== undefined ? parameters.depth / 2 : 0.5
-        shape = new this.ammo!.btBoxShape(new this.ammo!.btVector3(sx, sy, sz))
+        shape = new ammo!.btBoxShape(new ammo!.btVector3(sx, sy, sz))
         shape.setMargin(0.05)
         break
 
       case "SphereGeometry":
       case "IcosahedronGeometry":
         radius = parameters.radius !== undefined ? parameters.radius : 1
-        shape = new this.ammo!.btSphereShape(radius)
+        shape = new ammo!.btSphereShape(radius)
         shape.setMargin(0.05)
         break
 
@@ -81,8 +85,8 @@ export class PhysicsWorld implements PhysicsInterface {
         radiusBottom =
           parameters.radiusBottom !== undefined ? parameters.radiusBottom : 1
         sy = parameters.height !== undefined ? parameters.height / 2 : 0.5
-        shape = new this.ammo!.btCylinderShape(
-          new this.ammo!.btVector3(radiusTop, radiusBottom, sy)
+        shape = new ammo!.btCylinderShape(
+          new ammo!.btVector3(radiusTop, radiusBottom, sy)
         )
         shape.setMargin(0.05)
         break
@@ -107,13 +111,13 @@ export class PhysicsWorld implements PhysicsInterface {
     const position = mesh.position
     const quaternion = mesh.quaternion
 
-    const transform = new this.ammo!.btTransform()
+    const transform = new ammo!.btTransform()
     transform.setIdentity()
     transform.setOrigin(
-      new this.ammo!.btVector3(position.x, position.y, position.z)
+      new ammo!.btVector3(position.x, position.y, position.z)
     )
     transform.setRotation(
-      new this.ammo!.btQuaternion(
+      new ammo!.btQuaternion(
         quaternion.x,
         quaternion.y,
         quaternion.z,
@@ -121,27 +125,27 @@ export class PhysicsWorld implements PhysicsInterface {
       )
     )
 
-    const motionState = new this.ammo!.btDefaultMotionState(transform)
+    const motionState = new ammo!.btDefaultMotionState(transform)
 
-    const localInertia = new this.ammo!.btVector3(0, 0, 0)
+    const localInertia = new ammo!.btVector3(0, 0, 0)
     shape.calculateLocalInertia(mass, localInertia)
 
-    const rbInfo = new this.ammo!.btRigidBodyConstructionInfo(
+    const rbInfo = new ammo!.btRigidBodyConstructionInfo(
       mass,
       motionState,
       shape,
       localInertia
     )
 
-    const body = new this.ammo!.btRigidBody(rbInfo)
+    const body = new ammo!.btRigidBody(rbInfo)
     body.setFriction(friction)
     body.setDamping(linearDamping, rotationDamping)
-    this.physicsWorld!.addRigidBody(body)
+    physicsWorld!.addRigidBody(body)
     mesh.userData.physicsBody = body
 
     // if (mass > 0) {
-    this.meshes.push(mesh)
-    this.meshMap.set(mesh, body)
+    meshes.push(mesh)
+    meshMap.set(mesh, body)
     // }
 
     return body
@@ -156,25 +160,25 @@ export class PhysicsWorld implements PhysicsInterface {
       const realMass =
         individualMasses[i] === undefined ? mass : individualMasses[i]
 
-      const transform = new this.ammo!.btTransform()
+      const transform = new ammo!.btTransform()
       transform.setFromOpenGLMatrix(array.slice(index, index + 16))
 
-      const motionState = new this.ammo!.btDefaultMotionState(transform)
+      const motionState = new ammo!.btDefaultMotionState(transform)
 
-      const localInertia = new this.ammo!.btVector3(0, 0, 0)
+      const localInertia = new ammo!.btVector3(0, 0, 0)
       shape.calculateLocalInertia(realMass, localInertia)
 
-      const rbInfo = new this.ammo!.btRigidBodyConstructionInfo(
+      const rbInfo = new ammo!.btRigidBodyConstructionInfo(
         realMass,
         motionState,
         shape,
         localInertia
       )
 
-      const body = new this.ammo!.btRigidBody(rbInfo)
+      const body = new ammo!.btRigidBody(rbInfo)
       body.setFriction(friction)
       body.setDamping(linearDamping, rotationDamping)
-      this.physicsWorld!.addRigidBody(body)
+      physicsWorld!.addRigidBody(body)
 
       bodies.push(body)
     }
@@ -182,8 +186,8 @@ export class PhysicsWorld implements PhysicsInterface {
     mesh.userData.physicsBodies = bodies
 
     // if (mass > 0) {
-    this.meshes.push(mesh)
-    this.meshMap.set(mesh, bodies)
+    meshes.push(mesh)
+    meshMap.set(mesh, bodies)
     // }
 
     return bodies
@@ -191,72 +195,72 @@ export class PhysicsWorld implements PhysicsInterface {
 
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number = 0) {
     if (mesh.isInstancedMesh) {
-      const bodies = this.meshMap.get(mesh)
+      const bodies = meshMap.get(mesh)
       const body = bodies[index]
 
-      body.setAngularVelocity(new this.ammo!.btVector3(0, 0, 0))
-      body.setLinearVelocity(new this.ammo!.btVector3(0, 0, 0))
+      body.setAngularVelocity(new ammo!.btVector3(0, 0, 0))
+      body.setLinearVelocity(new ammo!.btVector3(0, 0, 0))
 
-      this.worldTransform!.setIdentity()
-      this.worldTransform!.setOrigin(
-        new this.ammo!.btVector3(position.x, position.y, position.z)
+      worldTransform!.setIdentity()
+      worldTransform!.setOrigin(
+        new ammo!.btVector3(position.x, position.y, position.z)
       )
-      body.setWorldTransform(this.worldTransform)
+      body.setWorldTransform(worldTransform)
     } else if (mesh.isMesh) {
-      const body = this.meshMap.get(mesh)
+      const body = meshMap.get(mesh)
 
-      body.setAngularVelocity(new this.ammo!.btVector3(0, 0, 0))
-      body.setLinearVelocity(new this.ammo!.btVector3(0, 0, 0))
+      body.setAngularVelocity(new ammo!.btVector3(0, 0, 0))
+      body.setLinearVelocity(new ammo!.btVector3(0, 0, 0))
 
-      this.worldTransform!.setIdentity()
-      this.worldTransform!.setOrigin(
-        new this.ammo!.btVector3(position.x, position.y, position.z)
+      worldTransform!.setIdentity()
+      worldTransform!.setOrigin(
+        new ammo!.btVector3(position.x, position.y, position.z)
       )
-      body.setWorldTransform(this.worldTransform)
+      body.setWorldTransform(worldTransform)
     }
   }
 
   step() {
     const time = performance.now()
 
-    if (this.lastTime > 0) {
-      const delta = (time - this.lastTime) / 1000
+    if (lastTime > 0) {
+      const delta = (time - lastTime) / 1000
 
       // console.time("physicsWorld.step")
-      this.physicsWorld!.stepSimulation(delta, 10)
+      physicsWorld!.stepSimulation(delta, 10)
       // console.timeEnd("physicsWorld.step")
     }
 
-    this.lastTime = time
+    lastTime = time
 
-    for (let i = 0, l = this.meshes.length; i < l; i++) {
-      const mesh = this.meshes[i]
+    for (let i = 0, l = meshes.length; i < l; i++) {
+      const mesh = meshes[i]
 
       if (mesh.isInstancedMesh) {
         const array = mesh.instanceMatrix.array
-        const bodies = this.meshMap.get(mesh)
+        const bodies = meshMap.get(mesh)
 
         for (let j = 0; j < bodies.length; j++) {
           const body = bodies[j]
 
           const motionState = body.getMotionState()
-          motionState.getWorldTransform(this.worldTransform)
+          motionState.getWorldTransform(worldTransform)
 
-          const position = this.worldTransform!.getOrigin()
-          const quaternion = this.worldTransform!.getRotation()
+          const position = worldTransform!.getOrigin()
+          const quaternion = worldTransform!.getRotation()
 
           compose(position, quaternion, array, j * 16)
         }
 
         mesh.instanceMatrix.needsUpdate = true
       } else if (mesh.isMesh) {
-        const body = this.meshMap.get(mesh)
+        const body = meshMap.get(mesh)
 
         const motionState = body.getMotionState()
-        motionState.getWorldTransform(this.worldTransform)
+        motionState.getWorldTransform(worldTransform)
 
-        const position = this.worldTransform!.getOrigin()
-        const quaternion = this.worldTransform!.getRotation()
+        const position = worldTransform!.getOrigin()
+        const quaternion = worldTransform!.getRotation()
         mesh.position.set(position.x(), position.y(), position.z())
         mesh.quaternion.set(
           quaternion.x(),
@@ -267,24 +271,7 @@ export class PhysicsWorld implements PhysicsInterface {
       }
     }
 
-    this.detectCollision()
-  }
-
-  detectCollision() {
-    let dispatcher = this.physicsWorld!.getDispatcher()
-    let numManifolds = dispatcher.getNumManifolds()
-
-    for (let i = 0; i < numManifolds; i++) {
-      let contactManifold = dispatcher.getManifoldByIndexInternal(i)
-      let numContacts = contactManifold.getNumContacts()
-
-      for (let j = 0; j < numContacts; j++) {
-        let contactPoint = contactManifold.getContactPoint(j)
-        let distance = contactPoint.getDistance()
-        // if (distance > 0) continue
-        // console.log({ manifoldIndex: i, contactIndex: j, distance: distance })
-      }
-    }
+    detectCollision()
   }
 }
 
@@ -325,4 +312,21 @@ function compose(position: Ammo.btVector3, quaternion: Ammo.btQuaternion, array:
   array[index + 13] = position.y()
   array[index + 14] = position.z()
   array[index + 15] = 1
+}
+
+function detectCollision() {
+  let dispatcher = physicsWorld!.getDispatcher()
+  let numManifolds = dispatcher.getNumManifolds()
+
+  for (let i = 0; i < numManifolds; i++) {
+    let contactManifold = dispatcher.getManifoldByIndexInternal(i)
+    let numContacts = contactManifold.getNumContacts()
+
+    for (let j = 0; j < numContacts; j++) {
+      let contactPoint = contactManifold.getContactPoint(j)
+      let distance = contactPoint.getDistance()
+      // if (distance > 0) continue
+      // console.log({ manifoldIndex: i, contactIndex: j, distance: distance })
+    }
+  }
 }

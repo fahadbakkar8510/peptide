@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { tempPos1, residueRadius, socketRadius, socketLength, ballRadius } from './constants'
+import { tempPos1, residueRadius, socketRadius, socketLength, ballRadius, frameRate } from './constants';
 import { getAlphaOnly } from './common'
 
 export class Residue {
@@ -68,7 +68,6 @@ export class Peptides extends Map<string, Peptide> { }
 export class Joints extends Array<Joint> { }
 
 export interface DescInterface {
-  start(): void
   addPeptide(name: string, sequence: string): void
   addCrossLinks(crossLinkStr: string): void
 }
@@ -87,27 +86,6 @@ export class DescWorld implements DescInterface {
   constructor(threeWorld: ThreeInterface, physicsWorld: PhysicsInterface) {
     this.threeWorld = threeWorld
     this.physicsWorld = physicsWorld
-    this.threeWorld.animate()
-  }
-
-  public async start(): Promise<void> {
-    // await this.physicsWorld.init(this.threeWorld)
-    // let y = 0
-    // this.peptides.forEach((peptide, key) => {
-    //   let x = 0
-    //   peptide.forEach((residue, index) => {
-    //     let mass = (index > 0) ? 1 : 0
-    //     this.threeWorld.addResidue(residue.id, residueRadius, tempPos1.set(x, y, 0))
-    //     this.physicsWorld.addResidue(residue.id, residueRadius, tempPos1.set(x, y, 0), mass)
-    //     x += 2 * residueRadius
-    //     if (index > 0) {
-    //       let id = this.newID()
-    //       this.joints.push(id)
-    //       this.physicsWorld.addP2PConstraint(id, peptide[index - 1].id, residue.id, 0, -2 * residueRadius, 0, 0, 2 * residueRadius, 0)
-    //     }
-    //   })
-    //   y += 2 * residueRadius
-    // })
   }
 
   public addPeptide(name: string, sequence: string) {

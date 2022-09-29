@@ -48,6 +48,9 @@ export class ThreeWorld implements ThreeInterface {
 
     // Axes Helper
     this.scene.add(new THREE.AxesHelper(100))
+
+    // Animate
+    this.animate()
   }
 
   public animate() {
