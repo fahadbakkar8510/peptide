@@ -5,7 +5,7 @@
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { residueRadius, socketRadius, socketLength, ballRadius } from './constants'
+import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1 } from './constants';
 import { getAlphaOnly } from './common'
 import type * as THREE from 'three'
 import type { DynamicInstMesh } from './three.world'
@@ -29,12 +29,14 @@ export class Socket {
   public residueId: string
   public radius: number
   public length: number
+  public matrix: THREE.Matrix4
 
-  constructor(id: string, residueId: string, radius: number, length: number) {
+  constructor(id: string, residueId: string, radius: number, length: number, matrix: THREE.Matrix4) {
     this.id = id
     this.residueId = residueId
     this.radius = radius
     this.length = length
+    this.matrix = matrix
   }
 }
 
@@ -43,12 +45,14 @@ export class Ball {
   public socket1Id: string
   public socket2Id: string
   public radius: number
+  public matrix: THREE.Matrix4
 
-  constructor(id: string, socket1Id: string, socket2Id: string, radius: number) {
+  constructor(id: string, socket1Id: string, socket2Id: string, radius: number, matrix: THREE.Matrix4) {
     this.id = id
     this.socket1Id = socket1Id
     this.socket2Id = socket2Id
     this.radius = radius
+    this.matrix = matrix
   }
 }
 
@@ -93,14 +97,18 @@ export class DescWorld implements DescInterface {
     let prevResidue: Residue
 
     sequence.split('').forEach((c, i) => {
-      const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(startPos.x + (2 * socketLength + residueRadius) * i))
+      const residueX = startPos.x + (2 * socketLength + residueRadius) * i
+      const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(residueX))
       this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {
-        const socket1 = new Socket(this.newID(), prevResidue.id, socketRadius, socketLength)
-        const socket2 = new Socket(this.newID(), residue.id, socketRadius, socketLength)
-        const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius)
+        const socket1X = residueX + residueRadius + socketLength / 2
+        const socket1 = new Socket(this.newID(), prevResidue.id, socketRadius, socketLength, tempMatrix1.setPosition(startPos.clone().setX(socket1X)))
+        const socket2X = socket1X + socketLength
+        const socket2 = new Socket(this.newID(), residue.id, socketRadius, socketLength, tempMatrix1.setPosition(startPos.clone().setX(socket2X)))
+        const ballX = socket1X + socketLength / 2
+        const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1.setPosition(startPos.clone().setX(ballX)))
         const joint = new Joint(socket1, ball, socket2)
         this.joints.push(joint)
       }
@@ -129,9 +137,12 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength)
-      const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength)
-      const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius)
+      const socket1X = residue1.pos.x + residueRadius + socketLength / 2
+      const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength, tempMatrix1.setPosition(residue1.pos.clone().setX(socket1X)))
+      const socket2X = socket1X + socketLength
+      const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength, tempMatrix1.setPosition(residue1.pos.clone().setX(socket2X)))
+      const ballX = socket1X + socketLength / 2
+      const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1.setPosition(residue1.pos.clone().setX(ballX)))
       const joint = new Joint(socket1, ball, socket2)
       this.joints.push(joint)
     })
