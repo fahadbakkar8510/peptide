@@ -1,21 +1,12 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, instanceCount } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue } from './desc.world'
 import { getTextTexture } from './common';
+import type { PhysicsInterface } from './physics.world';
 
 export class DynamicInstMesh extends THREE.InstancedMesh {
   public index: number = 0
-}
-
-export class InstMeshInfo {
-  public instMesh: any
-  public index: number
-
-  constructor(instMesh: any, index: number) {
-    this.instMesh = instMesh
-    this.index = index
-  }
 }
 
 export interface ThreeInterface {
@@ -28,9 +19,12 @@ export class ThreeWorld implements ThreeInterface {
   private camera: THREE.PerspectiveCamera
   private renderer: THREE.WebGLRenderer
   private orbitControls: OrbitControls
-  private residueInstMeshes: Map<string, any>
+  private residueInstMeshes: Map<string, any> = new Map<string, any>()
+  private physicsWorld: PhysicsInterface
 
-  constructor(canvas: any) {
+  constructor(canvas: any, physicsWorld: PhysicsInterface) {
+    this.physicsWorld = physicsWorld
+
     // Scene
     this.scene = new THREE.Scene()
     this.scene.background = backColor
@@ -66,7 +60,16 @@ export class ThreeWorld implements ThreeInterface {
     // Axes Helper
     this.scene.add(new THREE.AxesHelper(100))
 
-    this.residueInstMeshes = new Map<string, any>()
+    // Add floor
+    const floorMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(1000, 1, 1000),
+      new THREE.ShadowMaterial({ color: floorColor })
+    );
+    floorMesh.position.y = -0.5;
+    // floorMesh.rotateX(0.3);
+    floorMesh.receiveShadow = true;
+    this.scene.add(floorMesh);
+    this.physicsWorld.addMesh(floorMesh, 0, []);
 
     // Animate
     this.animate()
@@ -84,19 +87,20 @@ export class ThreeWorld implements ThreeInterface {
 
     if (residueInstMesh) {
       const index = ++residueInstMesh.index
-      console.log('index: ', index)
+      // console.log('residue instance index: ', index)
       residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
-      return new InstMeshInfo(residueInstMesh, index)
+      return residueInstMesh
     } else {
       residueInstMesh = new DynamicInstMesh(
         new THREE.SphereGeometry(info.radius),
         new THREE.MeshStandardMaterial({ map: getTextTexture(info.name, acidHexStr) }),
-        instanceCount
+        residueInstCnt
       )
       residueInstMesh.setMatrixAt(0, tempMatrix1.setPosition(info.pos))
       this.scene.add(residueInstMesh)
+      this.physicsWorld.addMesh(residueInstMesh, 1, [])
       this.residueInstMeshes.set(info.name, residueInstMesh)
-      return new InstMeshInfo(residueInstMesh, 0)
+      return residueInstMesh
     }
   }
 }

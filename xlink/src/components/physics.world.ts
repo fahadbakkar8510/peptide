@@ -1,5 +1,7 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
+import type { Residue } from './desc.world';
+import type { DynamicInstMesh } from './three.world';
 
 const meshes: any[] = []
 const meshMap: WeakMap<any, any> = new WeakMap<any, any>()
@@ -16,9 +18,12 @@ export interface PhysicsInterface {
   handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number>): Ammo.btRigidBody[]
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number): void
   step(): void
+  // addResidue(info: Residue, mesh: DynamicInstMesh, mass: number): Ammo.btRigidBody | Ammo.btRigidBody[] | undefined  
 }
 
 export class PhysicsWorld implements PhysicsInterface {
+  private residuePhysics: WeakMap<Residue, Ammo.btRigidBody | Ammo.btRigidBody[]> = new WeakMap<Residue, Ammo.btRigidBody | Ammo.btRigidBody[]>()
+
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       console.log('initial ammo: ', ammo)
@@ -95,7 +100,7 @@ export class PhysicsWorld implements PhysicsInterface {
     return shape
   }
 
-  addMesh(mesh: any, mass: number, individualMasses: Array<number>) {
+  addMesh(mesh: any, mass: number, individualMasses: Array<number> = []) {
     const shape = this.getShape(mesh.geometry)
 
     if (shape !== null) {
@@ -151,7 +156,7 @@ export class PhysicsWorld implements PhysicsInterface {
     return body
   }
 
-  handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number>) {
+  handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number> = []) {
     const array = mesh.instanceMatrix.array
     const bodies = []
 

@@ -8,6 +8,7 @@ import type { PhysicsInterface } from './physics.world'
 import { residueRadius, socketRadius, socketLength, ballRadius } from './constants';
 import { getAlphaOnly } from './common'
 import type * as THREE from 'three';
+import type { DynamicInstMesh } from './three.world';
 
 export class Residue {
   public id: string
@@ -82,12 +83,8 @@ export class DescWorld implements DescInterface {
   // reference to three world
   private threeWorld: ThreeInterface
 
-  // reference to physics world
-  private physicsWorld: PhysicsInterface
-
-  constructor(threeWorld: ThreeInterface, physicsWorld: PhysicsInterface) {
+  constructor(threeWorld: ThreeInterface) {
     this.threeWorld = threeWorld
-    this.physicsWorld = physicsWorld
   }
 
   public addPeptide(name: string, sequence: string, startPos: THREE.Vector3) {
@@ -97,7 +94,7 @@ export class DescWorld implements DescInterface {
 
     sequence.split('').forEach((c, i) => {
       const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(startPos.x + (2 * socketLength + residueRadius) * i))
-      this.threeWorld.addResidue(residue)
+      const residueDynamicMesh: DynamicInstMesh = this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {

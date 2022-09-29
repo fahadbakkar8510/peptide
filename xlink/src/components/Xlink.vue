@@ -18,10 +18,10 @@ onMounted(() => {
 
 async function init() {
   // first set up descriptions of the world
-  const threeWorld = new ThreeWorld(canvas)
   const physicsWorld = new PhysicsWorld()
   await physicsWorld.init()
-  const descWorld = new DescWorld(threeWorld, physicsWorld)
+  const threeWorld = new ThreeWorld(canvas, physicsWorld)
+  const descWorld = new DescWorld(threeWorld)
 
   // populate with insulin A and B chains.
   descWorld.addPeptide('A', 'GIVEQCCTSICSLYQNLENYCN', tempPos1.clone().set(-3, 1, 0.2))
