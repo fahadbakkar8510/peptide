@@ -26,6 +26,7 @@ export const backColor = new Color(0x666666)
 
 export const tempPos1 = new Vector3()
 export const tempPos2 = new Vector3()
+export const startPos = new Vector3(0, 1, 0)
 export const normalVecX = new Vector3(1, 0, 0)
 export const normalVecY = new Vector3(0, 1, 0)
 export const normalVecZ = new Vector3(0, 0, 1)
@@ -46,7 +47,6 @@ export const socketMass = 1
 
 export const textureLoader = new TextureLoader()
 export const maxTextureImageUnits = 15
-export const floatingHeight = 20
 export const gravity = 2
 export const fogDensity = 0.002
 export const residueRadius = 0.1 // for the moment, we'll just have a single common radius. we'll want at least the option to specify radii per amino acid later.

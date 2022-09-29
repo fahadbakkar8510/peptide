@@ -1,9 +1,22 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex } from './constants'
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1 } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import type { Residue } from './desc.world'
+import { getTextTexture } from './common';
+
+export class InstMeshInfo {
+  public instMesh: any
+  public index: number
+
+  constructor(instMesh: any, index: number) {
+    this.instMesh = instMesh
+    this.index = index
+  }
+}
 
 export interface ThreeInterface {
   animate(): void
+  addResidue(info: Residue): any
 }
 
 export class ThreeWorld implements ThreeInterface {
@@ -11,6 +24,7 @@ export class ThreeWorld implements ThreeInterface {
   private camera: THREE.PerspectiveCamera
   private renderer: THREE.WebGLRenderer
   private orbitControls: OrbitControls
+  private residueInstMeshes: Map<string, any>
 
   constructor(canvas: any) {
     // Scene
@@ -48,6 +62,8 @@ export class ThreeWorld implements ThreeInterface {
     // Axes Helper
     this.scene.add(new THREE.AxesHelper(100))
 
+    this.residueInstMeshes = new Map<string, any>()
+
     // Animate
     this.animate()
   }
@@ -57,5 +73,25 @@ export class ThreeWorld implements ThreeInterface {
       this.animate()
       this.renderer.render(this.scene, this.camera)
     })
+  }
+
+  addResidue(info: Residue) {
+    let residueInstMesh: THREE.InstancedMesh = this.residueInstMeshes.get(info.name)
+
+    if (residueInstMesh) {
+      const index = residueInstMesh.count++
+      residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
+      return new InstMeshInfo(residueInstMesh, index)
+    } else {
+      residueInstMesh = new THREE.InstancedMesh(
+        new THREE.SphereGeometry(info.radius),
+        new THREE.MeshStandardMaterial({ map: getTextTexture(info.name, acidHexStr) }),
+        1
+      )
+      residueInstMesh.setMatrixAt(0, tempMatrix1.setPosition(info.pos))
+      this.scene.add(residueInstMesh)
+      this.residueInstMeshes.set(info.name, residueInstMesh)
+      return new InstMeshInfo(residueInstMesh, 0)
+    }
   }
 }

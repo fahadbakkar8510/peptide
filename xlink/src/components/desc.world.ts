@@ -5,18 +5,21 @@
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { residueRadius, socketRadius, socketLength, ballRadius } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius, startPos } from './constants';
 import { getAlphaOnly } from './common'
+import type * as THREE from 'three';
 
 export class Residue {
   public id: string
   public name: string
   public radius: number
+  public pos: THREE.Vector3
 
-  constructor(id: string, name: string, radius: number) {
+  constructor(id: string, name: string, radius: number, pos: THREE.Vector3) {
     this.id = id
     this.name = name
     this.radius = radius
+    this.pos = pos
   }
 }
 
@@ -90,10 +93,11 @@ export class DescWorld implements DescInterface {
   public addPeptide(name: string, sequence: string) {
     let peptide = new Peptide()
     this.peptides.set(name, peptide)
-    let prevResidue
+    let prevResidue: Residue
 
-    for (const c of sequence) {
-      const residue = new Residue(this.newID(), c, residueRadius)
+    sequence.split('').forEach((c, i) => {
+      const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(startPos.x + (2 * socketLength + residueRadius) * i))
+      this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {
@@ -105,7 +109,7 @@ export class DescWorld implements DescInterface {
       }
 
       prevResidue = residue
-    }
+    })
   }
 
   public addCrossLinks(crossLinkStr: string) {
