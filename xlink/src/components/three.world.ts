@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex } from './constants'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import type { PhysicsInterface } from './physics.world'
 
 export interface ThreeInterface {
   animate(): void

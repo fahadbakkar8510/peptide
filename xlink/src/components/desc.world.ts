@@ -2,11 +2,10 @@
 // This is where we translate a textual description of a world into objects that should
 // be rendered in 3D and simulated in the physics engine.
 
-import * as THREE from 'three'
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { tempPos1, residueRadius, socketRadius, socketLength, ballRadius, frameRate } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius } from './constants';
 import { getAlphaOnly } from './common'
 
 export class Residue {
