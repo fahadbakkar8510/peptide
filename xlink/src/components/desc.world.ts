@@ -5,10 +5,10 @@
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { residueRadius, socketRadius, socketLength, ballRadius } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius } from './constants'
 import { getAlphaOnly } from './common'
-import type * as THREE from 'three';
-import type { DynamicInstMesh } from './three.world';
+import type * as THREE from 'three'
+import type { DynamicInstMesh } from './three.world'
 
 export class Residue {
   public id: string

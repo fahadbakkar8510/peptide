@@ -58,4 +58,4 @@ export const friction = 50
 export const linearDamping = .8
 export const rotationDamping = .8
 
-export const residueInstCnt = 3
+export const residueInstCnt = 10

@@ -7,8 +7,7 @@ import { ref, onMounted } from 'vue'
 import { DescWorld } from './desc.world'
 import { ThreeWorld } from './three.world'
 import { PhysicsWorld } from './physics.world'
-import * as THREE from 'three'
-import { tempPos1 } from './constants';
+import { tempPos1 } from './constants'
 
 const canvas = ref()
 

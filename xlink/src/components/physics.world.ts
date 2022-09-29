@@ -1,7 +1,7 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
-import type { Residue } from './desc.world';
-import type { DynamicInstMesh } from './three.world';
+import type { Residue } from './desc.world'
+import type { DynamicInstMesh } from './three.world'
 
 const meshes: any[] = []
 const meshMap: WeakMap<any, any> = new WeakMap<any, any>()
@@ -157,44 +157,35 @@ export class PhysicsWorld implements PhysicsInterface {
   }
 
   handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number> = []) {
+    console.log('mesh instance index: ', mesh.index)
     const array = mesh.instanceMatrix.array
-    const bodies = []
+    const bodies: Ammo.btRigidBody[] = meshMap.get(mesh) || []
+    console.log('bodies: ', bodies)
 
-    for (let i = 0; i < mesh.count; i++) {
-      const index = i * 16
-      const realMass =
-        individualMasses[i] === undefined ? mass : individualMasses[i]
-
-      const transform = new ammo!.btTransform()
-      transform.setFromOpenGLMatrix(array.slice(index, index + 16))
-
-      const motionState = new ammo!.btDefaultMotionState(transform)
-
-      const localInertia = new ammo!.btVector3(0, 0, 0)
-      shape.calculateLocalInertia(realMass, localInertia)
-
-      const rbInfo = new ammo!.btRigidBodyConstructionInfo(
-        realMass,
-        motionState,
-        shape,
-        localInertia
-      )
-
-      const body = new ammo!.btRigidBody(rbInfo)
-      body.setFriction(friction)
-      body.setDamping(linearDamping, rotationDamping)
-      physicsWorld!.addRigidBody(body)
-
-      bodies.push(body)
+    if (!bodies.length) {
+      meshes.push(mesh)
+      meshMap.set(mesh, bodies)
     }
 
+    const index = mesh.index * 16
+    const realMass = !individualMasses[mesh.index] ? mass : individualMasses[mesh.index]
+    const transform = new ammo!.btTransform()
+    transform.setFromOpenGLMatrix(array.slice(index, index + 16))
+    const motionState = new ammo!.btDefaultMotionState(transform)
+    const localInertia = new ammo!.btVector3(0, 0, 0)
+    shape.calculateLocalInertia(realMass, localInertia)
+    const rbInfo = new ammo!.btRigidBodyConstructionInfo(
+      realMass,
+      motionState,
+      shape,
+      localInertia
+    )
+    const body = new ammo!.btRigidBody(rbInfo)
+    body.setFriction(friction)
+    body.setDamping(linearDamping, rotationDamping)
+    physicsWorld!.addRigidBody(body)
+    bodies.push(body)
     mesh.userData.physicsBodies = bodies
-
-    // if (mass > 0) {
-    meshes.push(mesh)
-    meshMap.set(mesh, bodies)
-    // }
-
     return bodies
   }
 
