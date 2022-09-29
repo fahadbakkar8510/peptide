@@ -69,7 +69,7 @@ export class ThreeWorld implements ThreeInterface {
     // floorMesh.rotateX(0.3)
     floorMesh.receiveShadow = true
     this.scene.add(floorMesh)
-    this.physicsWorld.addMesh(floorMesh, 0, [])
+    this.physicsWorld.addMesh(floorMesh, 0)
 
     // Animate
     this.animate()
@@ -100,7 +100,7 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
-    this.physicsWorld.addMesh(residueInstMesh, 1, [])
+    this.physicsWorld.addMesh(residueInstMesh, 1)
     return residueInstMesh
   }
 }

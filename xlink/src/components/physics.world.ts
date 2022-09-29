@@ -1,7 +1,6 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
 import type { Residue } from './desc.world'
-import type { DynamicInstMesh } from './three.world'
 
 const meshes: any[] = []
 const meshMap: WeakMap<any, any> = new WeakMap<any, any>()
@@ -13,12 +12,11 @@ let lastTime: number = 0
 export interface PhysicsInterface {
   init(): Promise<void>
   getShape(geometry: any): any
-  addMesh(mesh: any, mass: number, individualMasses: Array<number>): Ammo.btRigidBody | Ammo.btRigidBody[] | undefined
+  addMesh(mesh: any, mass: number): Ammo.btRigidBody | Ammo.btRigidBody[] | undefined
   handleMesh(mesh: any, mass: number, shape: any): Ammo.btRigidBody
-  handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number>): Ammo.btRigidBody[]
+  handleInstancedMesh(mesh: any, mass: number, shape: any): Ammo.btRigidBody[]
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number): void
   step(): void
-  // addResidue(info: Residue, mesh: DynamicInstMesh, mass: number): Ammo.btRigidBody | Ammo.btRigidBody[] | undefined  
 }
 
 export class PhysicsWorld implements PhysicsInterface {
@@ -100,12 +98,12 @@ export class PhysicsWorld implements PhysicsInterface {
     return shape
   }
 
-  addMesh(mesh: any, mass: number, individualMasses: Array<number> = []) {
+  addMesh(mesh: any, mass: number) {
     const shape = this.getShape(mesh.geometry)
 
     if (shape !== null) {
       if (mesh.isInstancedMesh) {
-        return this.handleInstancedMesh(mesh, mass, shape, individualMasses)
+        return this.handleInstancedMesh(mesh, mass, shape)
       } else if (mesh.isMesh) {
         return this.handleMesh(mesh, mass, shape)
       }
@@ -156,11 +154,11 @@ export class PhysicsWorld implements PhysicsInterface {
     return body
   }
 
-  handleInstancedMesh(mesh: any, mass: number, shape: any, individualMasses: Array<number> = []) {
-    console.log('mesh instance index: ', mesh.index)
+  handleInstancedMesh(mesh: any, mass: number, shape: any) {
+    // console.log('mesh instance index: ', mesh.index)
     const array = mesh.instanceMatrix.array
     const bodies: Ammo.btRigidBody[] = meshMap.get(mesh) || []
-    console.log('bodies: ', bodies)
+    // console.log('bodies: ', bodies)
 
     if (!bodies.length) {
       meshes.push(mesh)
@@ -168,14 +166,13 @@ export class PhysicsWorld implements PhysicsInterface {
     }
 
     const index = mesh.index * 16
-    const realMass = !individualMasses[mesh.index] ? mass : individualMasses[mesh.index]
     const transform = new ammo!.btTransform()
     transform.setFromOpenGLMatrix(array.slice(index, index + 16))
     const motionState = new ammo!.btDefaultMotionState(transform)
     const localInertia = new ammo!.btVector3(0, 0, 0)
-    shape.calculateLocalInertia(realMass, localInertia)
+    shape.calculateLocalInertia(mass, localInertia)
     const rbInfo = new ammo!.btRigidBodyConstructionInfo(
-      realMass,
+      mass,
       motionState,
       shape,
       localInertia
