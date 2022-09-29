@@ -1,9 +1,10 @@
+import type * as THREE from 'three'
 import Ammo from 'ammojs-typed'
 import type { ThreeInterface } from './ThreeWorld'
 import type { DescWorld } from './DescWorld'
 
 export interface PhysicsInterface {
-  addResidue(id: string, radius: number, x: number, y: number, z: number, mass: number): void
+  addResidue(id: string, radius: number, pos: THREE.Vector3, mass: number): void
   addP2PConstraint(p2pId: string, id1: string, id2: string, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): void
   stepSimulation(deltaTime: number): void
   init(threeWorld: ThreeInterface): Promise<void>
@@ -43,7 +44,7 @@ export class PhysicsWorld implements PhysicsInterface {
     })
   }
 
-  addResidue(id: string, radius: number, x: number, y: number, z: number, mass: number): void {
+  addResidue(id: string, radius: number, pos: THREE.Vector3, mass: number): void {
     let ammo: typeof Ammo = this.ammo!
     const sphereShape = new ammo.btSphereShape(radius)
     const sphereBody = new ammo.btRigidBody(

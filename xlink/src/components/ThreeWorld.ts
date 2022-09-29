@@ -1,13 +1,13 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex } from './constants'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { PhysicsInterface } from './PhysicsWorld'
 
 export interface ThreeInterface {
-  addResidue(id: string, radius: number, x: number, y: number, z: number): void
+  addResidue(id: string, radius: number, pos: THREE.Vector3): void
   transform(id: string, pos_x: number, pos_y: number, pos_z: number, quat_x: number, quat_y: number, quat_z: number, quat_w: number): void
   transformP2P(id: string, x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): void
-  animate(physicsWorld: PhysicsInterface): void
+  animate(): void
 }
 
 export class ThreeWorld implements ThreeInterface {
@@ -28,16 +28,16 @@ export class ThreeWorld implements ThreeInterface {
     this.scene.fog = new THREE.FogExp2(fogHex, fogDensity)
 
     // Lights
-    const lightA = new THREE.DirectionalLight(lightAHex);
-    lightA.position.set(1, 1, 1);
-    this.scene.add(lightA);
+    const lightA = new THREE.DirectionalLight(lightAHex)
+    lightA.position.set(1, 1, 1)
+    this.scene.add(lightA)
 
-    const lightB = new THREE.DirectionalLight(lightBHex);
-    lightB.position.set(-1, -1, -1);
-    this.scene.add(lightB);
+    const lightB = new THREE.DirectionalLight(lightBHex)
+    lightB.position.set(-1, -1, -1)
+    this.scene.add(lightB)
 
-    const lightC = new THREE.AmbientLight(lightCHex);
-    this.scene.add(lightC);
+    const lightC = new THREE.AmbientLight(lightCHex)
+    this.scene.add(lightC)
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -53,11 +53,14 @@ export class ThreeWorld implements ThreeInterface {
 
     // Orbit Controls
     this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement)
+
+    // Axes Helper
+    this.scene.add(new THREE.AxesHelper(100))
   }
 
-  addResidue(id: string, radius: number, x: number, y: number, z: number): void {
+  addResidue(id: string, radius: number, pos: THREE.Vector3): void {
     const sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff0000 }))
-    sphere.position.set(x, y, z)
+    sphere.position.copy(pos.clone())
     this.meshMap.set(id, sphere)
     this.scene.add(sphere)
   }
