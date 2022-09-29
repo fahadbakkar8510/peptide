@@ -4,8 +4,8 @@
 
 import * as THREE from 'three'
 import { nanoid } from 'nanoid'
-import type { ThreeInterface } from './ThreeWorld'
-import type { PhysicsInterface } from './PhysicsWorld'
+import type { ThreeInterface } from './three.world'
+import type { PhysicsInterface } from './physics.world'
 import { tempPos1, residueRadius, socketRadius, socketLength, ballRadius } from './constants'
 import { getAlphaOnly } from './common'
 
@@ -87,6 +87,7 @@ export class DescWorld implements DescInterface {
   constructor(threeWorld: ThreeInterface, physicsWorld: PhysicsInterface) {
     this.threeWorld = threeWorld
     this.physicsWorld = physicsWorld
+    this.threeWorld.animate()
   }
 
   public async start(): Promise<void> {
@@ -107,8 +108,6 @@ export class DescWorld implements DescInterface {
     //   })
     //   y += 2 * residueRadius
     // })
-
-    // this.threeWorld.animate()
   }
 
   public addPeptide(name: string, sequence: string) {

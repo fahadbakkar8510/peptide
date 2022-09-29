@@ -1,7 +1,7 @@
 import type * as THREE from 'three'
 import Ammo from 'ammojs-typed'
-import type { ThreeInterface } from './ThreeWorld'
-import type { DescWorld } from './DescWorld'
+import type { ThreeInterface } from './three.world'
+import type { DescWorld } from './desc.world'
 
 export interface PhysicsInterface {
   addResidue(id: string, radius: number, pos: THREE.Vector3, mass: number): void
@@ -22,11 +22,11 @@ export class PhysicsWorld implements PhysicsInterface {
 
   }
 
-  public async init(threeWorld: ThreeInterface): Promise<void> {
+  async init(threeWorld: ThreeInterface): Promise<void> {
     let self = this
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.threeWorld = threeWorld
-      window.addEventListener('DOMContentLoaded', async () => {
+      window.addEventListener('DOMContentLoaded',  () => {
         Ammo.bind(window)().then((ammo) => {
           this.ammo = ammo
           let collisionConfiguration_ = new ammo.btDefaultCollisionConfiguration()
@@ -86,7 +86,7 @@ export class PhysicsWorld implements PhysicsInterface {
       let qy = quat.y()
       let qz = quat.z()
       let qw = quat.w()
-      this.threeWorld!.transform(id, x, y, z, qx, qy, qz, qw)
+      // this.threeWorld!.transform(id, x, y, z, qx, qy, qz, qw)
     })
     this.p2pMap.forEach((p2p, id) => {
       let pivotA = p2p.getPivotInA()
@@ -97,7 +97,7 @@ export class PhysicsWorld implements PhysicsInterface {
       let x2 = pivotB.x()
       let y2 = pivotB.y()
       let z2 = pivotB.z()
-      this.threeWorld!.transformP2P(id, x1, y1, z1, x2, y2, z2)
+      // this.threeWorld!.transformP2P(id, x1, y1, z1, x2, y2, z2)
     })
   }
 }

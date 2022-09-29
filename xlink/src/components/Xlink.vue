@@ -4,9 +4,9 @@
 
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue'
-import { DescWorld } from './DescWorld'
-import { ThreeWorld } from './ThreeWorld'
-import { PhysicsWorld } from './PhysicsWorld'
+import { DescWorld } from './desc.world'
+import { ThreeWorld } from './three.world'
+import { PhysicsWorld } from './physics.world'
 
 const canvas = ref()
 
@@ -17,8 +17,8 @@ onMounted(() => {
 async function init() {
   // first set up descriptions of the world
   const threeWorld = new ThreeWorld(canvas)
-  const phyWorld = new PhysicsWorld()
-  const descWorld = new DescWorld(threeWorld, phyWorld)
+  const physicsWorld = new PhysicsWorld()
+  const descWorld = new DescWorld(threeWorld, physicsWorld)
 
   // populate with insulin A and B chains.
   descWorld.addPeptide('A', 'GIVEQCCTSICSLYQNLENYCN')

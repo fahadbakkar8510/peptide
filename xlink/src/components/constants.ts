@@ -53,3 +53,8 @@ export const residueRadius = 0.1 // for the moment, we'll just have a single com
 export const socketRadius = residueRadius / 5
 export const socketLength = residueRadius
 export const ballRadius = residueRadius / 5 * 2
+
+export const frameRate = 60
+export const friction = 50
+export const linearDamping = .8
+export const rotationDamping = .8
