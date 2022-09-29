@@ -94,7 +94,7 @@ export class DescWorld implements DescInterface {
 
     sequence.split('').forEach((c, i) => {
       const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(startPos.x + (2 * socketLength + residueRadius) * i))
-      const residueDynamicMesh: DynamicInstMesh = this.threeWorld.addResidue(residue)
+      this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {
