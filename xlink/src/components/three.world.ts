@@ -241,6 +241,9 @@ export class ThreeWorld implements ThreeInterface {
     } else {
       console.log("can't add physics.")
     }
+
+    // Add constraint.
+    this.physicsWorld.generateConstraint(ball)
   }
 
   updateStartPos() {

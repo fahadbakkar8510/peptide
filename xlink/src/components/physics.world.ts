@@ -1,5 +1,6 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
+import type { Ball } from './desc.world';
 
 const meshes: any[] = []
 const bodyMap: Map<string, any> = new Map<string, any>()
@@ -18,6 +19,7 @@ export interface PhysicsInterface {
   handleInstancedMesh(id: string, mesh: any, mass: number, shape: any): void
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number): void
   step(): void
+  generateConstraint(ball: Ball): void
 }
 
 export class PhysicsWorld implements PhysicsInterface {
@@ -160,7 +162,6 @@ export class PhysicsWorld implements PhysicsInterface {
 
     if (!bodies.length) {
       meshes.push(mesh)
-      bodyMap.set(id, bodies)
       bodyWeakMap.set(mesh, bodies)
     } else {
       // console.log('The mesh exists in bodyWeakMap of the physics world.')
@@ -187,9 +188,10 @@ export class PhysicsWorld implements PhysicsInterface {
       body.setFriction(friction)
       body.setDamping(linearDamping, rotationDamping)
       physicsWorld!.addRigidBody(body)
+      bodyMap.set(id, body)
       bodies.push(body)
     } else {
-      console.log('The instance index exists in the bodyMap.')
+      // console.log('The instance index exists in the bodyMap.')
     }
   }
 
@@ -271,6 +273,81 @@ export class PhysicsWorld implements PhysicsInterface {
     }
 
     detectCollision()
+  }
+
+  generateConstraint(ball: Ball) {
+    const ballBody = bodyMap.get(ball.id)
+    const socket1Body = bodyMap.get(ball.socket1.id)
+    const residue1Body = bodyMap.get(ball.socket1.residue.id)
+    const socket2Body = bodyMap.get(ball.socket2.id)
+    const residue2Body = bodyMap.get(ball.socket2.residue.id)
+    let p2p;
+
+    if (ball.isBond) {
+      p2p = new ammo!.btPoint2PointConstraint(
+        ballBody,
+        socket1Body,
+        new ammo!.btVector3(-ball.radius, 0, 0),
+        new ammo!.btVector3(0, ball.socket1.length / 2, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        ballBody,
+        socket2Body,
+        new ammo!.btVector3(ball.radius, 0, 0),
+        new ammo!.btVector3(0, -ball.socket1.length / 2, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        socket1Body,
+        residue1Body,
+        new ammo!.btVector3(0, -ball.socket1.length / 2, 0),
+        new ammo!.btVector3(0, ball.socket1.residue.radius, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        socket2Body,
+        residue2Body,
+        new ammo!.btVector3(0, ball.socket2.length / 2, 0),
+        new ammo!.btVector3(0, ball.socket2.residue.radius, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+    } else {
+      p2p = new ammo!.btPoint2PointConstraint(
+        ballBody,
+        socket1Body,
+        new ammo!.btVector3(-ball.radius, 0, 0),
+        new ammo!.btVector3(0, ball.socket1.length / 2, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        ballBody,
+        socket2Body,
+        new ammo!.btVector3(ball.radius, 0, 0),
+        new ammo!.btVector3(0, -ball.socket1.length / 2, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        socket1Body,
+        residue1Body,
+        new ammo!.btVector3(0, -ball.socket1.length / 2, 0),
+        new ammo!.btVector3(ball.socket1.residue.radius, 0, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+
+      p2p = new ammo!.btPoint2PointConstraint(
+        socket2Body,
+        residue2Body,
+        new ammo!.btVector3(0, ball.socket2.length / 2, 0),
+        new ammo!.btVector3(-ball.socket2.residue.radius, 0, 0)
+      );
+      physicsWorld?.addConstraint(p2p, true)
+    }
   }
 }
 
