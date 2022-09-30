@@ -4,18 +4,20 @@
 
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, crossSocketLength } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius, crossSocketLength, commonResidueMass, commonSocketMass, commonBallMass } from './constants';
 import { getAlphaOnly } from './common'
 
 export class Residue {
   public id: string
   public name: string
   public radius: number
+  public mass: number
 
-  constructor(id: string, name: string, radius: number) {
+  constructor(id: string, name: string, radius: number, mass: number) {
     this.id = id
     this.name = name
     this.radius = radius
+    this.mass = mass
   }
 }
 
@@ -25,12 +27,14 @@ export class Socket {
   public radius: number
   public length: number
   public isBond: boolean = false
+  public mass: number
 
-  constructor(id: string, residue: Residue, radius: number, length: number) {
+  constructor(id: string, residue: Residue, radius: number, length: number, mass: number) {
     this.id = id
     this.residue = residue
     this.radius = radius
     this.length = length
+    this.mass = mass
   }
 }
 
@@ -41,12 +45,14 @@ export class Ball {
   public radius: number
   public hasConstraints: boolean = false
   public isBond: boolean = false
+  public mass: number
 
-  constructor(id: string, socket1: Socket, socket2: Socket, radius: number) {
+  constructor(id: string, socket1: Socket, socket2: Socket, radius: number, mass: number) {
     this.id = id
     this.socket1 = socket1
     this.socket2 = socket2
     this.radius = radius
+    this.mass = mass
   }
 }
 
@@ -79,16 +85,16 @@ export class DescWorld implements DescInterface {
     let prevResidue: Residue
 
     sequence.split('').forEach((c, i) => {
-      const residue = new Residue(this.newID(), c, residueRadius)
+      const residue = new Residue(this.newID(), c, residueRadius, i ? commonResidueMass : 0)
       this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {
-        const socket1 = new Socket(this.newID(), prevResidue, socketRadius, socketLength)
+        const socket1 = new Socket(this.newID(), prevResidue, socketRadius, socketLength, commonSocketMass)
         this.threeWorld.addSocket(socket1)
-        const socket2 = new Socket(this.newID(), residue, socketRadius, socketLength)
+        const socket2 = new Socket(this.newID(), residue, socketRadius, socketLength, commonSocketMass)
         this.threeWorld.addSocket(socket2)
-        const ball = new Ball(this.newID(), socket1, socket2, ballRadius)
+        const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass)
         this.threeWorld.addBall(ball)
         this.balls.push(ball)
       }
@@ -119,13 +125,13 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      const socket1 = new Socket(this.newID(), residue1, socketRadius, crossSocketLength)
+      const socket1 = new Socket(this.newID(), residue1, socketRadius, crossSocketLength, commonSocketMass)
       socket1.isBond = true
       this.threeWorld.addSocket(socket1)
-      const socket2 = new Socket(this.newID(), residue2, socketRadius, crossSocketLength)
+      const socket2 = new Socket(this.newID(), residue2, socketRadius, crossSocketLength, commonSocketMass)
       socket2.isBond = true
       this.threeWorld.addSocket(socket2)
-      const ball = new Ball(this.newID(), socket1, socket2, ballRadius)
+      const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass)
       ball.isBond = true
       this.threeWorld.addBall(ball)
       this.balls.push(ball)
