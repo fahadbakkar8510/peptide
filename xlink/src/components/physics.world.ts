@@ -166,8 +166,11 @@ export class PhysicsWorld implements PhysicsInterface {
       // console.log('The mesh exists in bodyWeakMap of the physics world.')
     }
 
+    // console.log('instIndexes: ', instIndexes)
+
     if (instIndexes.indexOf(mesh.index) === -1) {
       instIndexes.push(mesh.index)
+      instIndexWeakMap.set(mesh, instIndexes)
       const index = mesh.index * 16
       const transform = new ammo!.btTransform()
       transform.setFromOpenGLMatrix(array.slice(index, index + 16))
@@ -185,6 +188,8 @@ export class PhysicsWorld implements PhysicsInterface {
       body.setDamping(linearDamping, rotationDamping)
       physicsWorld!.addRigidBody(body)
       bodies.push(body)
+    } else {
+      console.log('The instance index exists in the bodyMap.')
     }
   }
 
