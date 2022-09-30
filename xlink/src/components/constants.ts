@@ -37,6 +37,7 @@ export const fogDensity = 0.002
 export const residueRadius = 0.1 // for the moment, we'll just have a single common radius. we'll want at least the option to specify radii per amino acid later.
 export const socketRadius = residueRadius / 5
 export const socketLength = residueRadius
+export const crossSocketLength = socketLength * 2
 export const ballRadius = residueRadius / 5 * 2
 
 export const cameraPosZ = 10

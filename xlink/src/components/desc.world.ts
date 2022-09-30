@@ -4,7 +4,7 @@
 
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1, tempMultiMatrix1, tempMatrix2, normalVecY, normalVecX, normalVecZ } from './constants'
+import { residueRadius, socketRadius, socketLength, ballRadius, crossSocketLength } from './constants';
 import { getAlphaOnly } from './common'
 
 export class Residue {
@@ -119,10 +119,10 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      const socket1 = new Socket(this.newID(), residue1, socketRadius, socketLength)
+      const socket1 = new Socket(this.newID(), residue1, socketRadius, crossSocketLength)
       socket1.isBond = true
       this.threeWorld.addSocket(socket1)
-      const socket2 = new Socket(this.newID(), residue2, socketRadius, socketLength)
+      const socket2 = new Socket(this.newID(), residue2, socketRadius, crossSocketLength)
       socket2.isBond = true
       this.threeWorld.addSocket(socket2)
       const ball = new Ball(this.newID(), socket1, socket2, ballRadius)
