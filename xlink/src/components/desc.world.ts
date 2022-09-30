@@ -4,7 +4,7 @@
 
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1, tempMultiMatrix1, tempMatrix2, normalVecY, normalVecX, normalVecZ } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1, tempMultiMatrix1, tempMatrix2, normalVecY, normalVecX, normalVecZ } from './constants'
 import { getAlphaOnly } from './common'
 import type * as THREE from 'three'
 
@@ -55,23 +55,11 @@ export class Ball {
   }
 }
 
-export class Joint {
-  public socket1: Socket
-  public ball: Ball
-  public socket2: Socket
-
-  constructor(socket1: Socket, ball: Ball, socket2: Socket) {
-    this.socket1 = socket1
-    this.ball = ball
-    this.socket2 = socket2
-  }
-}
-
 export class Peptide extends Array<Residue> { }
 
 export class Peptides extends Map<string, Peptide> { }
 
-export class Joints extends Array<Joint> { }
+export class Balls extends Array<Ball> { }
 
 export interface DescInterface {
   addPeptide(name: string, sequence: string, startPos: THREE.Vector3): void
@@ -81,7 +69,7 @@ export interface DescInterface {
 export class DescWorld implements DescInterface {
   // the peptide map
   private peptides: Peptides = new Peptides()
-  private joints: Joints = new Joints()
+  private balls: Balls = new Balls()
 
   // reference to three world
   private threeWorld: ThreeInterface
@@ -111,8 +99,7 @@ export class DescWorld implements DescInterface {
         const ballX = socket1X + socketLength / 2 + ballRadius
         const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1.setPosition(startPos.clone().setX(ballX)))
         this.threeWorld.addBall(ball)
-        const joint = new Joint(socket1, ball, socket2)
-        this.joints.push(joint)
+        this.balls.push(ball)
       }
 
       prevResidue = residue
@@ -145,8 +132,7 @@ export class DescWorld implements DescInterface {
       this.threeWorld.addSocket(socket2)
       const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1)
       this.threeWorld.addBall(ball)
-      const joint = new Joint(socket1, ball, socket2)
-      this.joints.push(joint)
+      this.balls.push(ball)
     })
   }
 
