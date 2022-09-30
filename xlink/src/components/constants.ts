@@ -53,15 +53,15 @@ export const socketRadius = residueRadius / 5
 export const socketLength = residueRadius
 export const ballRadius = residueRadius / 5 * 2
 
-export const cameraPosZ = 5
+export const cameraPosZ = 10
 export const frameRate = 60
 export const friction = 50
 export const linearDamping = .8
 export const rotationDamping = .8
 
 export const residueInstCnt = 10
-export const socketInstCnt = 100
-export const ballInstCnt = 100
+export const socketInstCnt = 1000
+export const ballInstCnt = 1000
 
 export const commonResidueMass = 0
 export const commonSocketMass = 0

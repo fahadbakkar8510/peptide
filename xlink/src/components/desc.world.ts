@@ -141,14 +141,14 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      // const socket1X = residue1.pos.x + residueRadius + socketLength / 2
-      // const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength, tempMatrix1.setPosition(residue1.pos.clone().setX(socket1X)))
-      // const socket2X = socket1X + socketLength
-      // const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength, tempMatrix1.setPosition(residue1.pos.clone().setX(socket2X)))
-      // const ballX = socket1X + socketLength / 2
-      // const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1.setPosition(residue1.pos.clone().setX(ballX)))
-      // const joint = new Joint(socket1, ball, socket2)
-      // this.joints.push(joint)
+      const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength, tempMatrix1)
+      this.threeWorld.addSocket(socket1)
+      const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength, tempMatrix1)
+      this.threeWorld.addSocket(socket2)
+      const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1)
+      this.threeWorld.addBall(ball)
+      const joint = new Joint(socket1, ball, socket2)
+      this.joints.push(joint)
     })
   }
 
