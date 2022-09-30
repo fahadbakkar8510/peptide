@@ -45,6 +45,8 @@ export class Ball {
   public socket2Id: string
   public radius: number
   public matrix: THREE.Matrix4
+  public hasConstraints: boolean = false
+  public isBond: boolean = false
 
   constructor(id: string, socket1Id: string, socket2Id: string, radius: number, matrix: THREE.Matrix4) {
     this.id = id
@@ -64,6 +66,7 @@ export class Balls extends Array<Ball> { }
 export interface DescInterface {
   addPeptide(name: string, sequence: string, startPos: THREE.Vector3): void
   addCrossLinks(crossLinkStr: string): void
+  generateConstraints(): void
 }
 
 export class DescWorld implements DescInterface {
@@ -127,12 +130,23 @@ export class DescWorld implements DescInterface {
       if (acid2Char !== residue2?.name) return
 
       const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength, tempMatrix1)
+      socket1.isBond = true
       this.threeWorld.addSocket(socket1)
       const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength, tempMatrix1)
+      socket2.isBond = true
       this.threeWorld.addSocket(socket2)
       const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1)
+      ball.isBond = true
       this.threeWorld.addBall(ball)
       this.balls.push(ball)
+    })
+  }
+
+  generateConstraints() {
+    this.balls.forEach(ball => {
+      if (!ball.hasConstraints) {
+
+      }
     })
   }
 
