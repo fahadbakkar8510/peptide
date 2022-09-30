@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ } from './constants'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
@@ -107,8 +107,6 @@ export class ThreeWorld implements ThreeInterface {
       this.residueInstMeshes.set(info.name, residueInstMesh)
       this.instIndexes.set(info.id, 0)
     }
-
-    // this.physicsWorld.addMesh(residueInstMesh, commonResidueMass)
   }
 
   addSocket(info: Socket) {
@@ -132,7 +130,6 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     socketInstMesh.setColorAt(index, tempColor1.setHex(info.isBond ? bondSocketHex : socketHex))
-    // this.physicsWorld.addMesh(socketInstMesh, commonSocketMass)
   }
 
   addBall(info: Ball) {
@@ -156,7 +153,6 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
-    // this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
 
     // update bond matrices.
     const ball = info
@@ -170,16 +166,18 @@ export class ThreeWorld implements ThreeInterface {
     if (!socketMesh || !residue1Mesh || !residue2Mesh) {
       console.log('meshes are not prepared.')
     }
+    const residue1InstIndex = this.instIndexes.get(residue1.id)
     !ball.isBond && residue1Mesh?.setMatrixAt(
-      this.instIndexes.get(residue1.id)!,
+      residue1InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone()),
         tempMatrix2.makeRotationAxis(normalVecZ, 0)
       )
     )
     const socket1X = this.startPos.x + residue1.radius + socket1.length / 2
+    const socket1InstIndex = this.instIndexes.get(socket1.id)
     socketMesh?.setMatrixAt(
-      this.instIndexes.get(socket1.id)!,
+      socket1InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone().setX(socket1X)),
         tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
@@ -194,22 +192,55 @@ export class ThreeWorld implements ThreeInterface {
       )
     )
     const socket2X = ballX + ball.radius + socket2.length / 2
+    const socket2InstIndex = this.instIndexes.get(socket2.id)
     socketMesh?.setMatrixAt(
-      this.instIndexes.get(socket2.id)!,
+      socket2InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone().setX(socket2X)),
         tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
       )
     )
     const residue2X = socket2X + socket2.length / 2 + residue2.radius
+    const residue2InstIndex = this.instIndexes.get(residue2.id)
     !ball.isBond && residue2Mesh?.setMatrixAt(
-      this.instIndexes.get(residue2.id)!,
+      residue2InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone().setX(residue2X)),
         tempMatrix2.makeRotationAxis(normalVecZ, 0)
       )
     )
     this.startPos.setX(this.startPos.x + residue1.radius + socket1.length + 2 * ball.radius + socket2.length + residue2.radius)
+
+    // Add physics.
+    if (residue1Mesh && residue1InstIndex !== undefined) {
+      residue1Mesh.index = residue1InstIndex
+      this.physicsWorld.addMesh(residue1Mesh, commonResidueMass)
+    } else {
+      console.log("can't add physics.")
+    }
+
+    if (socketMesh && socket1InstIndex !== undefined) {
+      socketMesh.index = socket1InstIndex
+      this.physicsWorld.addMesh(socketMesh, commonSocketMass)
+    } else {
+      console.log("can't add physics.")
+    }
+
+    this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
+
+    if (socketMesh && socket2InstIndex !== undefined) {
+      socketMesh.index = socket2InstIndex
+      this.physicsWorld.addMesh(socketMesh, commonSocketMass)
+    } else {
+      console.log("can't add physics.")
+    }
+
+    if (residue2Mesh && residue2InstIndex !== undefined) {
+      residue2Mesh.index = residue2InstIndex
+      this.physicsWorld.addMesh(residue2Mesh, commonResidueMass)
+    } else {
+      console.log("can't add physics.")
+    }
   }
 
   updateStartPos() {

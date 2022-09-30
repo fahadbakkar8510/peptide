@@ -49,6 +49,6 @@ export const residueInstCnt = 10
 export const socketInstCnt = 1000
 export const ballInstCnt = 1000
 
-export const commonResidueMass = 0
-export const commonSocketMass = 0
-export const commonBallMass = 0
+export const commonResidueMass = 1
+export const commonSocketMass = 1
+export const commonBallMass = 1
