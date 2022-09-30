@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
@@ -48,7 +48,7 @@ export class ThreeWorld implements ThreeInterface {
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
-    this.camera.position.z = 5
+    this.camera.position.z = cameraPosZ
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -104,7 +104,7 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
-    this.physicsWorld.addMesh(residueInstMesh, 1)
+    this.physicsWorld.addMesh(residueInstMesh, commonResidueMass)
     return residueInstMesh
   }
 
@@ -128,7 +128,7 @@ export class ThreeWorld implements ThreeInterface {
 
     socketInstMesh.setMatrixAt(index, info.matrix)
     socketInstMesh.setColorAt(index, tempColor1.setHex(info.isBond ? bondSocketHex : socketHex))
-    this.physicsWorld.addMesh(socketInstMesh, 1)
+    this.physicsWorld.addMesh(socketInstMesh, commonSocketMass)
     return socketInstMesh
   }
 
@@ -152,7 +152,7 @@ export class ThreeWorld implements ThreeInterface {
 
     ballInstMesh.setMatrixAt(index, info.matrix)
     ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
-    this.physicsWorld.addMesh(ballInstMesh, 1)
+    this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
     return ballInstMesh
   }
 }

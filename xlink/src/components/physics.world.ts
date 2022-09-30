@@ -89,7 +89,7 @@ export class PhysicsWorld implements PhysicsInterface {
           parameters.radiusBottom !== undefined ? parameters.radiusBottom : 1
         sy = parameters.height !== undefined ? parameters.height / 2 : 0.5
         shape = new ammo!.btCylinderShape(
-          new ammo!.btVector3(radiusTop, radiusBottom, sy)
+          new ammo!.btVector3(radiusTop, sy, radiusBottom)
         )
         shape.setMargin(0.05)
         break

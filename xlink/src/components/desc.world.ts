@@ -5,7 +5,7 @@
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
 import type { PhysicsInterface } from './physics.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1 } from './constants'
+import { residueRadius, socketRadius, socketLength, ballRadius, tempMatrix1, tempPos1, tempMultiMatrix1, tempMatrix2, normalVecY, normalVecX, normalVecZ } from './constants';
 import { getAlphaOnly } from './common'
 import type * as THREE from 'three'
 import type { DynamicInstMesh } from './three.world'
@@ -98,19 +98,19 @@ export class DescWorld implements DescInterface {
     let prevResidue: Residue
 
     sequence.split('').forEach((c, i) => {
-      const residueX = startPos.x + (socketLength + residueRadius) * 2 * i
+      const residueX = startPos.x + (socketLength + residueRadius + ballRadius) * 2 * i
       const residue = new Residue(this.newID(), c, residueRadius, startPos.clone().setX(residueX))
       this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
       if (prevResidue) {
         const socket1X = prevResidue.pos.x + residueRadius + socketLength / 2
-        const socket1 = new Socket(this.newID(), prevResidue.id, socketRadius, socketLength, tempMatrix1.setPosition(startPos.clone().setX(socket1X)))
+        const socket1 = new Socket(this.newID(), prevResidue.id, socketRadius, socketLength, tempMultiMatrix1.multiplyMatrices(tempMatrix1.setPosition(startPos.clone().setX(socket1X)), tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)))
         this.threeWorld.addSocket(socket1)
-        const socket2X = socket1X + socketLength
-        const socket2 = new Socket(this.newID(), residue.id, socketRadius, socketLength, tempMatrix1.setPosition(startPos.clone().setX(socket2X)))
+        const socket2X = socket1X + socketLength + ballRadius * 2
+        const socket2 = new Socket(this.newID(), residue.id, socketRadius, socketLength, tempMultiMatrix1.multiplyMatrices(tempMatrix1.setPosition(startPos.clone().setX(socket2X)), tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)))
         this.threeWorld.addSocket(socket2)
-        const ballX = socket1X + socketLength / 2
+        const ballX = socket1X + socketLength / 2 + ballRadius
         const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius, tempMatrix1.setPosition(startPos.clone().setX(ballX)))
         this.threeWorld.addBall(ball)
         const joint = new Joint(socket1, ball, socket2)
