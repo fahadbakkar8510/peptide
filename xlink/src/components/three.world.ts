@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass } from './constants'
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
@@ -14,6 +14,7 @@ export interface ThreeInterface {
   addResidue(info: Residue): void
   addSocket(info: Socket): void
   addBall(info: Ball): void
+  updateStartPos(): void
 }
 
 export class ThreeWorld implements ThreeInterface {
@@ -22,10 +23,11 @@ export class ThreeWorld implements ThreeInterface {
   private camera: THREE.PerspectiveCamera
   private renderer: THREE.WebGLRenderer
   private orbitControls: OrbitControls
-  private residueInstMeshes: Map<string, any> = new Map<string, any>()
-  private socketInstMeshes: Map<string, any> = new Map<string, any>()
-  private ballInstMeshes: Map<string, any> = new Map<string, any>()
+  private residueInstMeshes: Map<string, DynamicInstMesh> = new Map<string, DynamicInstMesh>()
+  private socketInstMeshes: Map<string, DynamicInstMesh> = new Map<string, DynamicInstMesh>()
+  private ballInstMeshes: Map<string, DynamicInstMesh> = new Map<string, DynamicInstMesh>()
   private instIndexes: Map<string, number> = new Map<string, number>()
+  private startPos: THREE.Vector3 = startPos.clone()
 
   constructor(canvas: any, physicsWorld: PhysicsInterface) {
     this.physicsWorld = physicsWorld
@@ -88,7 +90,7 @@ export class ThreeWorld implements ThreeInterface {
   }
 
   addResidue(info: Residue) {
-    let residueInstMesh: DynamicInstMesh = this.residueInstMeshes.get(info.name)
+    let residueInstMesh: DynamicInstMesh | undefined = this.residueInstMeshes.get(info.name)
     let index = 0
 
     if (residueInstMesh) {
@@ -106,12 +108,12 @@ export class ThreeWorld implements ThreeInterface {
       this.instIndexes.set(info.id, 0)
     }
 
-    this.physicsWorld.addMesh(residueInstMesh, commonResidueMass)
+    // this.physicsWorld.addMesh(residueInstMesh, commonResidueMass)
   }
 
   addSocket(info: Socket) {
     const socketName = 'temp'
-    let socketInstMesh: DynamicInstMesh = this.socketInstMeshes.get(socketName)
+    let socketInstMesh: DynamicInstMesh | undefined = this.socketInstMeshes.get(socketName)
     let index = 0
 
     if (socketInstMesh) {
@@ -130,12 +132,12 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     socketInstMesh.setColorAt(index, tempColor1.setHex(info.isBond ? bondSocketHex : socketHex))
-    this.physicsWorld.addMesh(socketInstMesh, commonSocketMass)
+    // this.physicsWorld.addMesh(socketInstMesh, commonSocketMass)
   }
 
   addBall(info: Ball) {
     const ballName = 'temp'
-    let ballInstMesh: DynamicInstMesh = this.ballInstMeshes.get(ballName)
+    let ballInstMesh: DynamicInstMesh | undefined = this.ballInstMeshes.get(ballName)
     let index = 0
 
     if (ballInstMesh) {
@@ -154,9 +156,63 @@ export class ThreeWorld implements ThreeInterface {
     }
 
     ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
-    this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
+    // this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
 
     // update bond matrices.
-    console.log('test: ', info)
+    const ball = info
+    const socket1 = ball.socket1
+    const residue1 = socket1.residue
+    const socket2 = ball.socket2
+    const residue2 = socket2.residue
+    const socketMesh = this.socketInstMeshes.get('temp')
+    const residue1Mesh = this.residueInstMeshes.get(residue1.name)
+    const residue2Mesh = this.residueInstMeshes.get(residue2.name)
+    if (!socketMesh || !residue1Mesh || !residue2Mesh) {
+      console.log('meshes are not prepared.')
+    }
+    !ball.isBond && residue1Mesh?.setMatrixAt(
+      this.instIndexes.get(residue1.id)!,
+      tempMultiMatrix1.multiplyMatrices(
+        tempMatrix1.setPosition(this.startPos.clone()),
+        tempMatrix2.makeRotationAxis(normalVecZ, 0)
+      )
+    )
+    const socket1X = this.startPos.x + residue1.radius + socket1.length / 2
+    socketMesh?.setMatrixAt(
+      this.instIndexes.get(socket1.id)!,
+      tempMultiMatrix1.multiplyMatrices(
+        tempMatrix1.setPosition(this.startPos.clone().setX(socket1X)),
+        tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
+      )
+    )
+    const ballX = socket1X + socket1.length / 2 + ball.radius
+    ballInstMesh?.setMatrixAt(
+      index,
+      tempMultiMatrix1.multiplyMatrices(
+        tempMatrix1.setPosition(this.startPos.clone().setX(ballX)),
+        tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
+      )
+    )
+    const socket2X = ballX + ball.radius + socket2.length / 2
+    socketMesh?.setMatrixAt(
+      this.instIndexes.get(socket2.id)!,
+      tempMultiMatrix1.multiplyMatrices(
+        tempMatrix1.setPosition(this.startPos.clone().setX(socket2X)),
+        tempMatrix2.makeRotationAxis(normalVecZ, Math.PI / 2)
+      )
+    )
+    const residue2X = socket2X + socket2.length / 2 + residue2.radius
+    !ball.isBond && residue2Mesh?.setMatrixAt(
+      this.instIndexes.get(residue2.id)!,
+      tempMultiMatrix1.multiplyMatrices(
+        tempMatrix1.setPosition(this.startPos.clone().setX(residue2X)),
+        tempMatrix2.makeRotationAxis(normalVecZ, 0)
+      )
+    )
+    this.startPos.setX(this.startPos.x + residue1.radius + socket1.length + 2 * ball.radius + socket2.length + residue2.radius)
+  }
+
+  updateStartPos() {
+    this.startPos.set(startPos.x, startPos.y, this.startPos.z + 0.4)
   }
 }

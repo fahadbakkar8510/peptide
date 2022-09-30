@@ -20,6 +20,7 @@ export const tempPos1 = new THREE.Vector3()
 export const normalVecX = new THREE.Vector3(1, 0, 0)
 export const normalVecY = new THREE.Vector3(0, 1, 0)
 export const normalVecZ = new THREE.Vector3(0, 0, 1)
+export const startPos = new THREE.Vector3(-8, 2, 0)
 
 export const tempQuat1 = new THREE.Quaternion()
 

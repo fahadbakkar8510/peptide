@@ -21,14 +21,14 @@ export class Residue {
 
 export class Socket {
   public id: string
-  public residueId: string
+  public residue: Residue
   public radius: number
   public length: number
   public isBond: boolean = false
 
-  constructor(id: string, residueId: string, radius: number, length: number) {
+  constructor(id: string, residue: Residue, radius: number, length: number) {
     this.id = id
-    this.residueId = residueId
+    this.residue = residue
     this.radius = radius
     this.length = length
   }
@@ -36,16 +36,16 @@ export class Socket {
 
 export class Ball {
   public id: string
-  public socket1Id: string
-  public socket2Id: string
+  public socket1: Socket
+  public socket2: Socket
   public radius: number
   public hasConstraints: boolean = false
   public isBond: boolean = false
 
-  constructor(id: string, socket1Id: string, socket2Id: string, radius: number) {
+  constructor(id: string, socket1: Socket, socket2: Socket, radius: number) {
     this.id = id
-    this.socket1Id = socket1Id
-    this.socket2Id = socket2Id
+    this.socket1 = socket1
+    this.socket2 = socket2
     this.radius = radius
   }
 }
@@ -84,17 +84,19 @@ export class DescWorld implements DescInterface {
       peptide.push(residue)
 
       if (prevResidue) {
-        const socket1 = new Socket(this.newID(), prevResidue.id, socketRadius, socketLength)
+        const socket1 = new Socket(this.newID(), prevResidue, socketRadius, socketLength)
         this.threeWorld.addSocket(socket1)
-        const socket2 = new Socket(this.newID(), residue.id, socketRadius, socketLength)
+        const socket2 = new Socket(this.newID(), residue, socketRadius, socketLength)
         this.threeWorld.addSocket(socket2)
-        const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius)
+        const ball = new Ball(this.newID(), socket1, socket2, ballRadius)
         this.threeWorld.addBall(ball)
         this.balls.push(ball)
       }
 
       prevResidue = residue
     })
+
+    this.threeWorld.updateStartPos()
   }
 
   addCrossLinks(crossLinkStr: string) {
@@ -117,13 +119,13 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      const socket1 = new Socket(this.newID(), residue1.id, socketRadius, socketLength)
+      const socket1 = new Socket(this.newID(), residue1, socketRadius, socketLength)
       socket1.isBond = true
       this.threeWorld.addSocket(socket1)
-      const socket2 = new Socket(this.newID(), residue2.id, socketRadius, socketLength)
+      const socket2 = new Socket(this.newID(), residue2, socketRadius, socketLength)
       socket2.isBond = true
       this.threeWorld.addSocket(socket2)
-      const ball = new Ball(this.newID(), socket1.id, socket2.id, ballRadius)
+      const ball = new Ball(this.newID(), socket1, socket2, ballRadius)
       ball.isBond = true
       this.threeWorld.addBall(ball)
       this.balls.push(ball)
