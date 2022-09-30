@@ -11,12 +11,13 @@ export class DynamicInstMesh extends THREE.InstancedMesh {
 
 export interface ThreeInterface {
   animate(): void
-  addResidue(info: Residue): DynamicInstMesh
-  addSocket(info: Socket): DynamicInstMesh
-  addBall(info: Ball): DynamicInstMesh
+  addResidue(info: Residue): void
+  addSocket(info: Socket): void
+  addBall(info: Ball): void
 }
 
 export class ThreeWorld implements ThreeInterface {
+  private physicsWorld: PhysicsInterface
   private scene: THREE.Scene
   private camera: THREE.PerspectiveCamera
   private renderer: THREE.WebGLRenderer
@@ -24,7 +25,7 @@ export class ThreeWorld implements ThreeInterface {
   private residueInstMeshes: Map<string, any> = new Map<string, any>()
   private socketInstMeshes: Map<string, any> = new Map<string, any>()
   private ballInstMeshes: Map<string, any> = new Map<string, any>()
-  private physicsWorld: PhysicsInterface
+  private instIndexes: Map<string, number> = new Map<string, number>()
 
   constructor(canvas: any, physicsWorld: PhysicsInterface) {
     this.physicsWorld = physicsWorld
@@ -93,6 +94,7 @@ export class ThreeWorld implements ThreeInterface {
     if (residueInstMesh) {
       index = ++residueInstMesh.index
       // console.log('residue instance index: ', index)
+      this.instIndexes.set(info.id, index)
     } else {
       residueInstMesh = new DynamicInstMesh(
         new THREE.SphereGeometry(info.radius),
@@ -101,11 +103,10 @@ export class ThreeWorld implements ThreeInterface {
       )
       this.scene.add(residueInstMesh)
       this.residueInstMeshes.set(info.name, residueInstMesh)
+      this.instIndexes.set(info.id, 0)
     }
 
-    residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
     this.physicsWorld.addMesh(residueInstMesh, commonResidueMass)
-    return residueInstMesh
   }
 
   addSocket(info: Socket) {
@@ -116,6 +117,7 @@ export class ThreeWorld implements ThreeInterface {
     if (socketInstMesh) {
       index = ++socketInstMesh.index
       // console.log('socket instance index: ', index)
+      this.instIndexes.set(info.id, index)
     } else {
       socketInstMesh = new DynamicInstMesh(
         new THREE.CylinderGeometry(info.radius, info.radius, info.length),
@@ -124,12 +126,11 @@ export class ThreeWorld implements ThreeInterface {
       )
       this.scene.add(socketInstMesh)
       this.socketInstMeshes.set(socketName, socketInstMesh)
+      this.instIndexes.set(info.id, 0)
     }
 
-    socketInstMesh.setMatrixAt(index, info.matrix)
     socketInstMesh.setColorAt(index, tempColor1.setHex(info.isBond ? bondSocketHex : socketHex))
     this.physicsWorld.addMesh(socketInstMesh, commonSocketMass)
-    return socketInstMesh
   }
 
   addBall(info: Ball) {
@@ -140,6 +141,7 @@ export class ThreeWorld implements ThreeInterface {
     if (ballInstMesh) {
       index = ++ballInstMesh.index
       // console.log('socket instance index: ', index)
+      this.instIndexes.set(info.id, index)
     } else {
       ballInstMesh = new DynamicInstMesh(
         new THREE.SphereGeometry(info.radius),
@@ -148,11 +150,13 @@ export class ThreeWorld implements ThreeInterface {
       )
       this.scene.add(ballInstMesh)
       this.ballInstMeshes.set(ballName, ballInstMesh)
+      this.instIndexes.set(info.id, 0)
     }
 
-    ballInstMesh.setMatrixAt(index, info.matrix)
     ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
     this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
-    return ballInstMesh
+
+    // update bond matrices.
+    console.log('test: ', info)
   }
 }

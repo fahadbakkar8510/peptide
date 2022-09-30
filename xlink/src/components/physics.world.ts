@@ -21,7 +21,7 @@ export interface PhysicsInterface {
 export class PhysicsWorld implements PhysicsInterface {
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      console.log('initial ammo: ', ammo)
+      // console.log('initial ammo: ', ammo)
 
       if (ammo) {
         resolve()
@@ -31,7 +31,7 @@ export class PhysicsWorld implements PhysicsInterface {
       window.addEventListener('DOMContentLoaded', () => {
         Ammo.bind(window)().then(newAmmo => {
           ammo = newAmmo
-          console.log('current ammo: ', ammo)
+          // console.log('current ammo: ', ammo)
           worldTransform = new ammo.btTransform()
           const collisionConfiguration = new ammo.btDefaultCollisionConfiguration()
           const physicsDispatcher = new ammo.btCollisionDispatcher(
