@@ -76,7 +76,7 @@ export class ThreeWorld implements ThreeInterface {
     // floorMesh.rotateX(0.3)
     floorMesh.receiveShadow = true
     this.scene.add(floorMesh)
-    this.physicsWorld.addMesh(floorMesh, 0)
+    this.physicsWorld.addMesh('floor', floorMesh, 0)
 
     // Animate
     this.animate()
@@ -139,7 +139,7 @@ export class ThreeWorld implements ThreeInterface {
 
     if (ballInstMesh) {
       index = ++ballInstMesh.index
-      // console.log('socket instance index: ', index)
+      // console.log('ball instance index: ', index)
       this.instIndexes.set(info.id, index)
     } else {
       ballInstMesh = new DynamicInstMesh(
@@ -154,7 +154,7 @@ export class ThreeWorld implements ThreeInterface {
 
     ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
 
-    // update bond matrices.
+    // Update all matrices.
     const ball = info
     const socket1 = ball.socket1
     const residue1 = socket1.residue
@@ -214,30 +214,30 @@ export class ThreeWorld implements ThreeInterface {
     // Add physics.
     if (residue1Mesh && residue1InstIndex !== undefined) {
       residue1Mesh.index = residue1InstIndex
-      this.physicsWorld.addMesh(residue1Mesh, commonResidueMass)
+      this.physicsWorld.addMesh(residue1.id, residue1Mesh, commonResidueMass)
     } else {
       console.log("can't add physics.")
     }
 
     if (socketMesh && socket1InstIndex !== undefined) {
       socketMesh.index = socket1InstIndex
-      this.physicsWorld.addMesh(socketMesh, commonSocketMass)
+      this.physicsWorld.addMesh(socket1.id, socketMesh, commonSocketMass)
     } else {
       console.log("can't add physics.")
     }
 
-    this.physicsWorld.addMesh(ballInstMesh, commonBallMass)
+    this.physicsWorld.addMesh(ball.id, ballInstMesh, commonBallMass)
 
     if (socketMesh && socket2InstIndex !== undefined) {
       socketMesh.index = socket2InstIndex
-      this.physicsWorld.addMesh(socketMesh, commonSocketMass)
+      this.physicsWorld.addMesh(socket2.id, socketMesh, commonSocketMass)
     } else {
       console.log("can't add physics.")
     }
 
     if (residue2Mesh && residue2InstIndex !== undefined) {
       residue2Mesh.index = residue2InstIndex
-      this.physicsWorld.addMesh(residue2Mesh, commonResidueMass)
+      this.physicsWorld.addMesh(residue2.id, residue2Mesh, commonResidueMass)
     } else {
       console.log("can't add physics.")
     }
