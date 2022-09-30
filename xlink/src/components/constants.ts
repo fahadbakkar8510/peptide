@@ -59,3 +59,5 @@ export const linearDamping = .8
 export const rotationDamping = .8
 
 export const residueInstCnt = 10
+export const socketInstCnt = 100
+export const ballInstCnt = 100

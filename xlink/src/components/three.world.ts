@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor } from './constants'
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import type { Residue } from './desc.world'
+import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
 import type { PhysicsInterface } from './physics.world'
 
@@ -11,7 +11,9 @@ export class DynamicInstMesh extends THREE.InstancedMesh {
 
 export interface ThreeInterface {
   animate(): void
-  addResidue(info: Residue): any
+  addResidue(info: Residue): DynamicInstMesh
+  addSocket(info: Socket): DynamicInstMesh
+  addBall(info: Ball): DynamicInstMesh
 }
 
 export class ThreeWorld implements ThreeInterface {
@@ -20,6 +22,8 @@ export class ThreeWorld implements ThreeInterface {
   private renderer: THREE.WebGLRenderer
   private orbitControls: OrbitControls
   private residueInstMeshes: Map<string, any> = new Map<string, any>()
+  private socketInstMeshes: Map<string, any> = new Map<string, any>()
+  private ballInstMeshes: Map<string, any> = new Map<string, any>()
   private physicsWorld: PhysicsInterface
 
   constructor(canvas: any, physicsWorld: PhysicsInterface) {
@@ -88,7 +92,7 @@ export class ThreeWorld implements ThreeInterface {
 
     if (residueInstMesh) {
       index = ++residueInstMesh.index
-      console.log('residue instance index: ', index)
+      // console.log('residue instance index: ', index)
     } else {
       residueInstMesh = new DynamicInstMesh(
         new THREE.SphereGeometry(info.radius),
@@ -102,5 +106,53 @@ export class ThreeWorld implements ThreeInterface {
     residueInstMesh.setMatrixAt(index, tempMatrix1.setPosition(info.pos))
     this.physicsWorld.addMesh(residueInstMesh, 1)
     return residueInstMesh
+  }
+
+  addSocket(info: Socket) {
+    const socketName = 'temp'
+    let socketInstMesh: DynamicInstMesh = this.socketInstMeshes.get(socketName)
+    let index = 0
+
+    if (socketInstMesh) {
+      index = ++socketInstMesh.index
+      // console.log('socket instance index: ', index)
+    } else {
+      socketInstMesh = new DynamicInstMesh(
+        new THREE.CylinderGeometry(info.radius, info.radius, info.length),
+        new THREE.MeshLambertMaterial(),
+        socketInstCnt
+      )
+      this.scene.add(socketInstMesh)
+      this.socketInstMeshes.set(socketName, socketInstMesh)
+    }
+
+    socketInstMesh.setMatrixAt(index, info.matrix)
+    socketInstMesh.setColorAt(index, tempColor1.setHex(info.isBond ? bondSocketHex : socketHex))
+    this.physicsWorld.addMesh(socketInstMesh, 1)
+    return socketInstMesh
+  }
+
+  addBall(info: Ball) {
+    const ballName = 'temp'
+    let ballInstMesh: DynamicInstMesh = this.ballInstMeshes.get(ballName)
+    let index = 0
+
+    if (ballInstMesh) {
+      index = ++ballInstMesh.index
+      // console.log('socket instance index: ', index)
+    } else {
+      ballInstMesh = new DynamicInstMesh(
+        new THREE.SphereGeometry(info.radius),
+        new THREE.MeshLambertMaterial(),
+        ballInstCnt
+      )
+      this.scene.add(ballInstMesh)
+      this.ballInstMeshes.set(ballName, ballInstMesh)
+    }
+
+    ballInstMesh.setMatrixAt(index, info.matrix)
+    ballInstMesh.setColorAt(index, tempColor1.setHex(ballHex))
+    this.physicsWorld.addMesh(ballInstMesh, 1)
+    return ballInstMesh
   }
 }
