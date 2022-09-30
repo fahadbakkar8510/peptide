@@ -79,7 +79,7 @@ export class ThreeWorld implements ThreeInterface {
     this.animate()
   }
 
-  public animate() {
+  animate() {
     requestAnimationFrame((t) => {
       this.animate()
       this.renderer.render(this.scene, this.camera)

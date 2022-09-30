@@ -1,6 +1,5 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
-import type { Residue } from './desc.world'
 
 const meshes: any[] = []
 const meshMap: WeakMap<any, any> = new WeakMap<any, any>()
@@ -20,8 +19,6 @@ export interface PhysicsInterface {
 }
 
 export class PhysicsWorld implements PhysicsInterface {
-  private residuePhysics: WeakMap<Residue, Ammo.btRigidBody | Ammo.btRigidBody[]> = new WeakMap<Residue, Ammo.btRigidBody | Ammo.btRigidBody[]>()
-
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       console.log('initial ammo: ', ammo)

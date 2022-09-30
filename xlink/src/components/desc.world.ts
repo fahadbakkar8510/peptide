@@ -78,7 +78,7 @@ export class DescWorld implements DescInterface {
     this.threeWorld = threeWorld
   }
 
-  public addPeptide(name: string, sequence: string, startPos: THREE.Vector3) {
+  addPeptide(name: string, sequence: string, startPos: THREE.Vector3) {
     let peptide = new Peptide()
     this.peptides.set(name, peptide)
     let prevResidue: Residue
@@ -106,7 +106,7 @@ export class DescWorld implements DescInterface {
     })
   }
 
-  public addCrossLinks(crossLinkStr: string) {
+  addCrossLinks(crossLinkStr: string) {
     // the syntax is "name:num-name:num"
     // where name is a peptide name and num is a residue number
     const crossLinks = crossLinkStr.split(";")
