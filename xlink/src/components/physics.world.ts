@@ -218,7 +218,6 @@ export class PhysicsWorld implements PhysicsInterface {
 
     if (lastTime > 0) {
       const delta = (time - lastTime) / 1000
-
       // console.time("physicsWorld.step")
       physicsWorld!.stepSimulation(delta, 10)
       // console.timeEnd("physicsWorld.step")
