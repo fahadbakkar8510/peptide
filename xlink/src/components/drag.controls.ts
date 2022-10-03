@@ -1,4 +1,5 @@
 import type Ammo from 'ammojs-typed';
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import {
   EventDispatcher,
   Matrix4,
@@ -27,7 +28,8 @@ let _objects: any[] = [],
   _prevPos: Vector3 | undefined = undefined,
   _intersections: any[] = [],
   _enabled: boolean = true,
-  _transformGroup: boolean = false
+  _transformGroup: boolean = false,
+  _orbitControls: OrbitControls | undefined = undefined
 
 class DragControls extends EventDispatcher {
   public activate: Function
@@ -37,7 +39,7 @@ class DragControls extends EventDispatcher {
   public getObjects: Function
   public getRaycaster: Function
 
-  constructor(camera: any, domElement: any, ammo: typeof Ammo) {
+  constructor(camera: any, domElement: any, ammo: typeof Ammo, _orbitControls: OrbitControls) {
     super();
     const scope = this
 
@@ -198,6 +200,7 @@ class DragControls extends EventDispatcher {
         _domElement.style.cursor = "move";
 
         scope.dispatchEvent({ type: "dragstart", object: _selected });
+        _orbitControls.enableRotate = false
       }
     }
 
@@ -212,6 +215,7 @@ class DragControls extends EventDispatcher {
       }
 
       _domElement.style.cursor = _hovered ? "pointer" : "auto";
+      _orbitControls.enableRotate = true
     }
 
     function updatePointer(event: any) {
