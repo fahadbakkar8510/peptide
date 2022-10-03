@@ -89,7 +89,7 @@ export class DescWorld implements DescInterface {
     let prevResidue: Residue
 
     sequence.split('').forEach((c, i) => {
-      const residue = new Residue(this.newID(), c, residueRadius, i ? commonResidueMass : 0)
+      const residue = new Residue(this.newID(), c, residueRadius, commonResidueMass)
       this.threeWorld.addResidue(residue)
       peptide.push(residue)
 
@@ -106,6 +106,7 @@ export class DescWorld implements DescInterface {
       prevResidue = residue
     })
 
+    this.threeWorld.updateDragControls()
     this.threeWorld.updateStartPos()
   }
 

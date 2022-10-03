@@ -12,17 +12,20 @@ let physicsWorld: Ammo.btDiscreteDynamicsWorld | undefined
 let lastTime: number = 0
 
 export interface PhysicsInterface {
+  ammo: typeof Ammo | undefined
   init(): Promise<void>
   getShape(geometry: any): any
-  addMesh(id: string, mesh: any, mass: number): void
-  handleMesh(id: string, mesh: any, mass: number, shape: any): void
-  handleInstancedMesh(id: string, mesh: any, mass: number, shape: any): void
+  addMesh(id: string, mesh: any, mass: number): Ammo.btRigidBody | Ammo.btRigidBody[] | undefined
+  handleMesh(id: string, mesh: any, mass: number, shape: any): Ammo.btRigidBody | Ammo.btRigidBody[]
+  handleInstancedMesh(id: string, mesh: any, mass: number, shape: any): Ammo.btRigidBody | Ammo.btRigidBody[]
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number): void
   step(): void
   generateConstraint(ball: Ball): void
 }
 
 export class PhysicsWorld implements PhysicsInterface {
+  public ammo: typeof Ammo | undefined
+
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // console.log('initial ammo: ', ammo)
@@ -34,7 +37,7 @@ export class PhysicsWorld implements PhysicsInterface {
 
       window.addEventListener('DOMContentLoaded', () => {
         Ammo.bind(window)().then(newAmmo => {
-          ammo = newAmmo
+          ammo = this.ammo = newAmmo
           // console.log('current ammo: ', ammo)
           worldTransform = new ammo.btTransform()
           const collisionConfiguration = new ammo.btDefaultCollisionConfiguration()
@@ -159,6 +162,7 @@ export class PhysicsWorld implements PhysicsInterface {
     const array = mesh.instanceMatrix.array
     const bodies: Ammo.btRigidBody[] = bodyWeakMap.get(mesh) || []
     const instIndexes = instIndexWeakMap.get(mesh) || []
+    // console.log('instIndexes: ', instIndexes)
 
     if (!bodies.length) {
       meshes.push(mesh)
@@ -193,6 +197,9 @@ export class PhysicsWorld implements PhysicsInterface {
     } else {
       // console.log('The instance index exists in the bodyMap.')
     }
+
+    // console.log('bodies: ', bodies, mesh)
+    return bodies
   }
 
   setMeshPosition(mesh: any, position: THREE.Vector3, index: number = 0) {

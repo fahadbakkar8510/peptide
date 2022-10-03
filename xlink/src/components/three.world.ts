@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
 import type { PhysicsInterface } from './physics.world'
+import { DragControls } from './drag.controls'
 
 export class DynamicInstMesh extends THREE.InstancedMesh {
   public index: number = 0
@@ -15,6 +16,7 @@ export interface ThreeInterface {
   addSocket(info: Socket): void
   addBall(info: Ball): void
   updateStartPos(): void
+  updateDragControls(): void
 }
 
 export class ThreeWorld implements ThreeInterface {
@@ -28,6 +30,7 @@ export class ThreeWorld implements ThreeInterface {
   private ballInstMeshes: Map<string, DynamicInstMesh> = new Map<string, DynamicInstMesh>()
   private instIndexes: Map<string, number> = new Map<string, number>()
   private startPos: THREE.Vector3 = startPos.clone()
+  private dragControls: DragControls | undefined
 
   constructor(canvas: any, physicsWorld: PhysicsInterface) {
     this.physicsWorld = physicsWorld
@@ -67,16 +70,16 @@ export class ThreeWorld implements ThreeInterface {
     // Axes Helper
     this.scene.add(new THREE.AxesHelper(100))
 
-    // // Add floor
-    // const floorMesh = new THREE.Mesh(
-    //   new THREE.BoxGeometry(1000, 1, 1000),
-    //   new THREE.ShadowMaterial({ color: floorColor })
-    // )
-    // floorMesh.position.y = -0.5
-    // // floorMesh.rotateX(0.3)
-    // floorMesh.receiveShadow = true
-    // this.scene.add(floorMesh)
-    // this.physicsWorld.addMesh('floor', floorMesh, 0)
+    // Add floor
+    const floorMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(1000, 1, 1000),
+      new THREE.ShadowMaterial({ color: floorColor })
+    )
+    floorMesh.position.y = -0.5
+    // floorMesh.rotateX(0.3)
+    floorMesh.receiveShadow = true
+    this.scene.add(floorMesh)
+    this.physicsWorld.addMesh('floor', floorMesh, 0)
 
     // Animate
     this.animate()
@@ -103,6 +106,7 @@ export class ThreeWorld implements ThreeInterface {
         new THREE.MeshStandardMaterial({ map: getTextTexture(info.name, acidHexStr) }),
         residueInstCnt
       )
+      residueInstMesh.name = info.name
       this.scene.add(residueInstMesh)
       this.residueInstMeshes.set(info.name, residueInstMesh)
       this.instIndexes.set(info.id, 0)
@@ -214,16 +218,16 @@ export class ThreeWorld implements ThreeInterface {
     // Add physics.
     if (residue1Mesh && residue1InstIndex !== undefined) {
       residue1Mesh.index = residue1InstIndex
-      this.physicsWorld.addMesh(residue1.id, residue1Mesh, residue1.mass)
+      residue1Mesh.userData.physicsBodies = this.physicsWorld.addMesh(residue1.id, residue1Mesh, residue1.mass)
     } else {
-      console.log("can't add physics.")
+      console.log("can't add physics for residue 1.")
     }
 
     if (socket1Mesh && socket1InstIndex !== undefined) {
       socket1Mesh.index = socket1InstIndex
       this.physicsWorld.addMesh(socket1.id, socket1Mesh, socket1.mass)
     } else {
-      console.log("can't add physics.")
+      console.log("can't add physics for socket 1.")
     }
 
     this.physicsWorld.addMesh(ball.id, ballInstMesh, ball.mass)
@@ -232,14 +236,14 @@ export class ThreeWorld implements ThreeInterface {
       socket2Mesh.index = socket2InstIndex
       this.physicsWorld.addMesh(socket2.id, socket2Mesh, socket2.mass)
     } else {
-      console.log("can't add physics.")
+      console.log("can't add physics for socket 2.")
     }
 
     if (residue2Mesh && residue2InstIndex !== undefined) {
       residue2Mesh.index = residue2InstIndex
-      this.physicsWorld.addMesh(residue2.id, residue2Mesh, residue2.mass)
+      residue1Mesh.userData.physicsBodies = this.physicsWorld.addMesh(residue2.id, residue2Mesh, residue2.mass)
     } else {
-      console.log("can't add physics.")
+      console.log("can't add physics for residue 2.")
     }
 
     // Add constraint.
@@ -248,5 +252,25 @@ export class ThreeWorld implements ThreeInterface {
 
   updateStartPos() {
     this.startPos.set(startPos.x, startPos.y, this.startPos.z + 0.4)
+  }
+
+  updateDragControls() {
+    const arrResidueInstMesh: Array<DynamicInstMesh> = []
+    this.residueInstMeshes.forEach(instMesh => {
+      arrResidueInstMesh.push(instMesh)
+    })
+    // console.log('updateDragControls: ', arrResidueInstMesh, this.camera, this.renderer.domElement, this.physicsWorld.ammo)
+
+    if (this.dragControls) {
+      this.dragControls.dispose()
+      this.dragControls = undefined
+    }
+
+    this.dragControls = new DragControls(
+      arrResidueInstMesh,
+      this.camera,
+      this.renderer.domElement,
+      this.physicsWorld.ammo!
+    )
   }
 }
