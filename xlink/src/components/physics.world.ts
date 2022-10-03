@@ -28,8 +28,6 @@ export class PhysicsWorld implements PhysicsInterface {
 
   async init(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      // console.log('initial ammo: ', ammo)
-
       if (ammo) {
         resolve()
         return
@@ -38,7 +36,6 @@ export class PhysicsWorld implements PhysicsInterface {
       window.addEventListener('DOMContentLoaded', () => {
         Ammo.bind(window)().then(newAmmo => {
           ammo = this.ammo = newAmmo
-          // console.log('current ammo: ', ammo)
           worldTransform = new ammo.btTransform()
           const collisionConfiguration = new ammo.btDefaultCollisionConfiguration()
           const physicsDispatcher = new ammo.btCollisionDispatcher(
@@ -162,7 +159,6 @@ export class PhysicsWorld implements PhysicsInterface {
     const array = mesh.instanceMatrix.array
     const bodies: Ammo.btRigidBody[] = bodyWeakMap.get(mesh) || []
     const instIndexes = instIndexWeakMap.get(mesh) || []
-    // console.log('instIndexes: ', instIndexes)
 
     if (!bodies.length) {
       meshes.push(mesh)
@@ -171,12 +167,10 @@ export class PhysicsWorld implements PhysicsInterface {
       // console.log('The mesh exists in bodyWeakMap of the physics world.')
     }
 
-    // console.log('instIndexes: ', instIndexes)
-
-    if (instIndexes.indexOf(mesh.index) === -1) {
-      instIndexes.push(mesh.index)
+    if (instIndexes.indexOf(mesh.physicsIndex) === -1) {
+      instIndexes.push(mesh.physicsIndex)
       instIndexWeakMap.set(mesh, instIndexes)
-      const index = mesh.index * 16
+      const index = mesh.physicsIndex * 16
       const transform = new ammo!.btTransform()
       transform.setFromOpenGLMatrix(array.slice(index, index + 16))
       const motionState = new ammo!.btDefaultMotionState(transform)
@@ -195,10 +189,9 @@ export class PhysicsWorld implements PhysicsInterface {
       bodyMap.set(id, body)
       bodies.push(body)
     } else {
-      // console.log('The instance index exists in the bodyMap.')
+      // console.log('The instance index exists in the bodyMap.', instIndexes, mesh.physicsIndex)
     }
 
-    // console.log('bodies: ', bodies, mesh)
     return bodies
   }
 

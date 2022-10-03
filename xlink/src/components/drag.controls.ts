@@ -94,7 +94,6 @@ class DragControls extends EventDispatcher {
             .sub(_offset)
             .applyMatrix4(_inverseMatrix);
           if (!_prevPos) {
-            // console.log("_prevPos");
             _prevPos = curPos.clone();
           }
 
@@ -104,9 +103,6 @@ class DragControls extends EventDispatcher {
               .clone()
               .sub(_prevPos)
               .clone();
-            // console.log("diffPos: ", diffPos);
-            // console.log("curPos: ", curPos);
-            // console.log("prevPos: ", _prevPos);
             _prevPos = curPos.clone();
             const resultantImpulse = new _ammo.btVector3(
               diffPos.x,
@@ -115,7 +111,6 @@ class DragControls extends EventDispatcher {
             );
             resultantImpulse.op_mul(scalingFactor);
             const physicsBody: Ammo.btRigidBody = _selected.userData.physicsBodies[_instanceId];
-            // console.log('physicsBody: ', physicsBody, _selected.userData.physicsBodies)
             physicsBody.setLinearVelocity(resultantImpulse);
           } else {
             _selected.position.copy(curPos);
@@ -183,7 +178,6 @@ class DragControls extends EventDispatcher {
             ? _objects[0]
             : _intersections[0].object;
         _instanceId = _intersections[0].instanceId;
-        // console.log('_instanceId: ', _instanceId)
 
         _plane.setFromNormalAndCoplanarPoint(
           _camera.getWorldDirection(_plane.normal),

@@ -7,7 +7,8 @@ import type { PhysicsInterface } from './physics.world'
 import { DragControls } from './drag.controls'
 
 export class DynamicInstMesh extends THREE.InstancedMesh {
-  public index: number = 0
+  public additionalIndex: number = 0
+  public physicsIndex: number = 0
 }
 
 export interface ThreeInterface {
@@ -105,8 +106,7 @@ export class ThreeWorld implements ThreeInterface {
     let index = 0
 
     if (residueInstMesh) {
-      index = ++residueInstMesh.index
-      // console.log('residue instance index: ', index)
+      index = ++residueInstMesh.additionalIndex
       this.instIndexes.set(info.id, index)
     } else {
       residueInstMesh = new DynamicInstMesh(
@@ -126,8 +126,7 @@ export class ThreeWorld implements ThreeInterface {
     let index = 0
 
     if (socketInstMesh) {
-      index = ++socketInstMesh.index
-      // console.log('socket instance index: ', index)
+      index = ++socketInstMesh.additionalIndex
       this.instIndexes.set(info.id, index)
     } else {
       socketInstMesh = new DynamicInstMesh(
@@ -148,8 +147,7 @@ export class ThreeWorld implements ThreeInterface {
     let index = 0
 
     if (ballInstMesh) {
-      index = ++ballInstMesh.index
-      // console.log('ball instance index: ', index)
+      index = ballInstMesh.physicsIndex = ++ballInstMesh.additionalIndex
       this.instIndexes.set(info.id, index)
     } else {
       ballInstMesh = new DynamicInstMesh(
@@ -225,14 +223,14 @@ export class ThreeWorld implements ThreeInterface {
 
     // Add physics.
     if (residue1Mesh && residue1InstIndex !== undefined) {
-      residue1Mesh.index = residue1InstIndex
+      residue1Mesh.physicsIndex = residue1InstIndex
       residue1Mesh.userData.physicsBodies = this.physicsWorld.addMesh(residue1.id, residue1Mesh, residue1.mass)
     } else {
       console.log("can't add physics for residue 1.")
     }
 
     if (socket1Mesh && socket1InstIndex !== undefined) {
-      socket1Mesh.index = socket1InstIndex
+      socket1Mesh.physicsIndex = socket1InstIndex
       this.physicsWorld.addMesh(socket1.id, socket1Mesh, socket1.mass)
     } else {
       console.log("can't add physics for socket 1.")
@@ -241,15 +239,15 @@ export class ThreeWorld implements ThreeInterface {
     this.physicsWorld.addMesh(ball.id, ballInstMesh, ball.mass)
 
     if (socket2Mesh && socket2InstIndex !== undefined) {
-      socket2Mesh.index = socket2InstIndex
+      socket2Mesh.physicsIndex = socket2InstIndex
       this.physicsWorld.addMesh(socket2.id, socket2Mesh, socket2.mass)
     } else {
       console.log("can't add physics for socket 2.")
     }
 
     if (residue2Mesh && residue2InstIndex !== undefined) {
-      residue2Mesh.index = residue2InstIndex
-      residue1Mesh.userData.physicsBodies = this.physicsWorld.addMesh(residue2.id, residue2Mesh, residue2.mass)
+      residue2Mesh.physicsIndex = residue2InstIndex
+      residue2Mesh.userData.physicsBodies = this.physicsWorld.addMesh(residue2.id, residue2Mesh, residue2.mass)
     } else {
       console.log("can't add physics for residue 2.")
     }
