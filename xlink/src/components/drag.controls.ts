@@ -19,17 +19,13 @@ const _worldPosition = new Vector3();
 const _inverseMatrix = new Matrix4();
 
 let _objects: any[] = [],
-  _camera: any = undefined,
-  _domElement: any = undefined,
-  _ammo: typeof Ammo | undefined = undefined,
   _selected: any = undefined,
   _hovered: any = undefined,
   _instanceId: number = 0,
   _prevPos: Vector3 | undefined = undefined,
   _intersections: any[] = [],
   _enabled: boolean = true,
-  _transformGroup: boolean = false,
-  _orbitControls: OrbitControls | undefined = undefined
+  _transformGroup: boolean = false
 
 class DragControls extends EventDispatcher {
   public activate: Function
@@ -39,13 +35,9 @@ class DragControls extends EventDispatcher {
   public getObjects: Function
   public getRaycaster: Function
 
-  constructor(camera: any, domElement: any, ammo: typeof Ammo, _orbitControls: OrbitControls) {
+  constructor(_camera: any, _domElement: any, _ammo: typeof Ammo, _orbitControls: OrbitControls) {
     super();
     const scope = this
-
-    _camera = camera
-    _domElement = domElement
-    _ammo = ammo
 
     _domElement.style.touchAction = "none"; // disable touch scroll
 
