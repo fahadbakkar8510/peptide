@@ -110,8 +110,7 @@ export class ThreeWorld implements ThreeInterface {
   }
 
   addSocket(info: Socket) {
-    const socketName = 'temp'
-    let socketInstMesh: DynamicInstMesh | undefined = this.socketInstMeshes.get(socketName)
+    let socketInstMesh: DynamicInstMesh | undefined = this.socketInstMeshes.get(info.name)
     let index = 0
 
     if (socketInstMesh) {
@@ -125,7 +124,7 @@ export class ThreeWorld implements ThreeInterface {
         socketInstCnt
       )
       this.scene.add(socketInstMesh)
-      this.socketInstMeshes.set(socketName, socketInstMesh)
+      this.socketInstMeshes.set(info.name, socketInstMesh)
       this.instIndexes.set(info.id, 0)
     }
 
@@ -133,8 +132,7 @@ export class ThreeWorld implements ThreeInterface {
   }
 
   addBall(info: Ball) {
-    const ballName = 'temp'
-    let ballInstMesh: DynamicInstMesh | undefined = this.ballInstMeshes.get(ballName)
+    let ballInstMesh: DynamicInstMesh | undefined = this.ballInstMeshes.get(info.name)
     let index = 0
 
     if (ballInstMesh) {
@@ -148,7 +146,7 @@ export class ThreeWorld implements ThreeInterface {
         ballInstCnt
       )
       this.scene.add(ballInstMesh)
-      this.ballInstMeshes.set(ballName, ballInstMesh)
+      this.ballInstMeshes.set(info.name, ballInstMesh)
       this.instIndexes.set(info.id, 0)
     }
 
@@ -160,11 +158,13 @@ export class ThreeWorld implements ThreeInterface {
     const residue1 = socket1.residue
     const socket2 = ball.socket2
     const residue2 = socket2.residue
-    const socketMesh = this.socketInstMeshes.get('temp')
+    const socket1Mesh = this.socketInstMeshes.get(socket1.name)
     const residue1Mesh = this.residueInstMeshes.get(residue1.name)
+    const socket2Mesh = this.socketInstMeshes.get(socket2.name)
     const residue2Mesh = this.residueInstMeshes.get(residue2.name)
-    if (!socketMesh || !residue1Mesh || !residue2Mesh) {
+    if (!socket1Mesh || !socket2Mesh || !residue1Mesh || !residue2Mesh) {
       console.log('meshes are not prepared.')
+      return
     }
     const residue1InstIndex = this.instIndexes.get(residue1.id)
     !ball.isBond && residue1Mesh?.setMatrixAt(
@@ -176,7 +176,7 @@ export class ThreeWorld implements ThreeInterface {
     )
     const socket1X = this.startPos.x + residue1.radius + socket1.length / 2
     const socket1InstIndex = this.instIndexes.get(socket1.id)
-    socketMesh?.setMatrixAt(
+    socket1Mesh?.setMatrixAt(
       socket1InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone().setX(socket1X)),
@@ -193,7 +193,7 @@ export class ThreeWorld implements ThreeInterface {
     )
     const socket2X = ballX + ball.radius + socket2.length / 2
     const socket2InstIndex = this.instIndexes.get(socket2.id)
-    socketMesh?.setMatrixAt(
+    socket2Mesh?.setMatrixAt(
       socket2InstIndex!,
       tempMultiMatrix1.multiplyMatrices(
         tempMatrix1.setPosition(this.startPos.clone().setX(socket2X)),
@@ -219,18 +219,18 @@ export class ThreeWorld implements ThreeInterface {
       console.log("can't add physics.")
     }
 
-    if (socketMesh && socket1InstIndex !== undefined) {
-      socketMesh.index = socket1InstIndex
-      this.physicsWorld.addMesh(socket1.id, socketMesh, socket1.mass)
+    if (socket1Mesh && socket1InstIndex !== undefined) {
+      socket1Mesh.index = socket1InstIndex
+      this.physicsWorld.addMesh(socket1.id, socket1Mesh, socket1.mass)
     } else {
       console.log("can't add physics.")
     }
 
     this.physicsWorld.addMesh(ball.id, ballInstMesh, ball.mass)
 
-    if (socketMesh && socket2InstIndex !== undefined) {
-      socketMesh.index = socket2InstIndex
-      this.physicsWorld.addMesh(socket2.id, socketMesh, socket2.mass)
+    if (socket2Mesh && socket2InstIndex !== undefined) {
+      socket2Mesh.index = socket2InstIndex
+      this.physicsWorld.addMesh(socket2.id, socket2Mesh, socket2.mass)
     } else {
       console.log("can't add physics.")
     }

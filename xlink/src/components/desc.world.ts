@@ -28,13 +28,15 @@ export class Socket {
   public length: number
   public isBond: boolean = false
   public mass: number
+  public name: string
 
-  constructor(id: string, residue: Residue, radius: number, length: number, mass: number) {
+  constructor(id: string, residue: Residue, radius: number, length: number, mass: number, name: string) {
     this.id = id
     this.residue = residue
     this.radius = radius
     this.length = length
     this.mass = mass
+    this.name = name
   }
 }
 
@@ -46,13 +48,15 @@ export class Ball {
   public hasConstraints: boolean = false
   public isBond: boolean = false
   public mass: number
+  public name: string
 
-  constructor(id: string, socket1: Socket, socket2: Socket, radius: number, mass: number) {
+  constructor(id: string, socket1: Socket, socket2: Socket, radius: number, mass: number, name: string) {
     this.id = id
     this.socket1 = socket1
     this.socket2 = socket2
     this.radius = radius
     this.mass = mass
+    this.name = name
   }
 }
 
@@ -90,11 +94,11 @@ export class DescWorld implements DescInterface {
       peptide.push(residue)
 
       if (prevResidue) {
-        const socket1 = new Socket(this.newID(), prevResidue, socketRadius, socketLength, commonSocketMass)
+        const socket1 = new Socket(this.newID(), prevResidue, socketRadius, socketLength, commonSocketMass, 'normal')
         this.threeWorld.addSocket(socket1)
-        const socket2 = new Socket(this.newID(), residue, socketRadius, socketLength, commonSocketMass)
+        const socket2 = new Socket(this.newID(), residue, socketRadius, socketLength, commonSocketMass, 'normal')
         this.threeWorld.addSocket(socket2)
-        const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass)
+        const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass, 'normal')
         this.threeWorld.addBall(ball)
         this.balls.push(ball)
       }
@@ -125,13 +129,13 @@ export class DescWorld implements DescInterface {
       const residue2 = this.peptides.get(chain2)?.[acid2Num - 1]
       if (acid2Char !== residue2?.name) return
 
-      const socket1 = new Socket(this.newID(), residue1, socketRadius, crossSocketLength, commonSocketMass)
+      const socket1 = new Socket(this.newID(), residue1, socketRadius, crossSocketLength, commonSocketMass, 'xlink')
       socket1.isBond = true
       this.threeWorld.addSocket(socket1)
-      const socket2 = new Socket(this.newID(), residue2, socketRadius, crossSocketLength, commonSocketMass)
+      const socket2 = new Socket(this.newID(), residue2, socketRadius, crossSocketLength, commonSocketMass, 'xlink')
       socket2.isBond = true
       this.threeWorld.addSocket(socket2)
-      const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass)
+      const ball = new Ball(this.newID(), socket1, socket2, ballRadius, commonBallMass, 'normal')
       ball.isBond = true
       this.threeWorld.addBall(ball)
       this.balls.push(ball)
