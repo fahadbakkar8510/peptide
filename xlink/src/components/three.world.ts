@@ -67,6 +67,13 @@ export class ThreeWorld implements ThreeInterface {
     // Orbit Controls
     this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement)
 
+    // Drag Controls
+    this.dragControls = new DragControls(
+      this.camera,
+      this.renderer.domElement,
+      this.physicsWorld.ammo!
+    )
+
     // Axes Helper
     this.scene.add(new THREE.AxesHelper(100))
 
@@ -259,18 +266,6 @@ export class ThreeWorld implements ThreeInterface {
     this.residueInstMeshes.forEach(instMesh => {
       arrResidueInstMesh.push(instMesh)
     })
-    // console.log('updateDragControls: ', arrResidueInstMesh, this.camera, this.renderer.domElement, this.physicsWorld.ammo)
-
-    if (this.dragControls) {
-      this.dragControls.dispose()
-      this.dragControls = undefined
-    }
-
-    this.dragControls = new DragControls(
-      arrResidueInstMesh,
-      this.camera,
-      this.renderer.domElement,
-      this.physicsWorld.ammo!
-    )
+    this.dragControls?.setObjects(arrResidueInstMesh)
   }
 }

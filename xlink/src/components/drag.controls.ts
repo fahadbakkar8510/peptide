@@ -17,28 +17,35 @@ const _intersection = new Vector3();
 const _worldPosition = new Vector3();
 const _inverseMatrix = new Matrix4();
 
+let _objects: any[] = [],
+  _camera: any = undefined,
+  _domElement: any = undefined,
+  _ammo: typeof Ammo | undefined = undefined,
+  _selected: any = undefined,
+  _hovered: any = undefined,
+  _instanceId: number = 0,
+  _prevPos: Vector3 | undefined = undefined,
+  _intersections: any[] = [],
+  _enabled: boolean = true,
+  _transformGroup: boolean = false
+
 class DragControls extends EventDispatcher {
-  private enabled: boolean
-  private transformGroup: boolean
   public activate: Function
   public deactivate: Function
   public dispose: Function
+  public setObjects: Function
   public getObjects: Function
   public getRaycaster: Function
 
-  constructor(_objects: Array<any>, _camera: any, _domElement: any, _ammo: typeof Ammo) {
+  constructor(camera: any, domElement: any, ammo: typeof Ammo) {
     super();
+    const scope = this
+
+    _camera = camera
+    _domElement = domElement
+    _ammo = ammo
 
     _domElement.style.touchAction = "none"; // disable touch scroll
-
-    let _selected: any = undefined,
-      _hovered: any = undefined,
-      _instanceId: number = 0,
-      _prevPos: Vector3 | undefined = undefined;
-
-    const _intersections: any[] = [];
-
-    const scope = this;
 
     function activate() {
       _domElement.addEventListener("pointermove", onPointerMove);
@@ -60,6 +67,10 @@ class DragControls extends EventDispatcher {
       deactivate();
     }
 
+    function setObjects(objects: Array<any>) {
+      _objects = objects
+    }
+
     function getObjects() {
       return _objects;
     }
@@ -69,7 +80,7 @@ class DragControls extends EventDispatcher {
     }
 
     function onPointerMove(event: any) {
-      if (scope.enabled === false) return;
+      if (_enabled === false) return;
 
       updatePointer(event);
 
@@ -116,7 +127,7 @@ class DragControls extends EventDispatcher {
 
       // hover support
 
-      if (event.pointerType === "mouse" || event.pointerType === "pen") {
+      if ((event.pointerType === "mouse" || event.pointerType === "pen") && _objects) {
         _intersections.length = 0;
 
         _raycaster.setFromCamera(_pointer, _camera);
@@ -155,7 +166,7 @@ class DragControls extends EventDispatcher {
     }
 
     function onPointerDown(event: any) {
-      if (scope.enabled === false) return;
+      if (_enabled === false || !_objects) return;
 
       updatePointer(event);
 
@@ -166,7 +177,7 @@ class DragControls extends EventDispatcher {
 
       if (_intersections.length > 0) {
         _selected =
-          scope.transformGroup === true
+          _transformGroup === true
             ? _objects[0]
             : _intersections[0].object;
         _instanceId = _intersections[0].instanceId;
@@ -191,7 +202,7 @@ class DragControls extends EventDispatcher {
     }
 
     function onPointerCancel() {
-      if (scope.enabled === false) return;
+      if (_enabled === false) return;
 
       if (_selected) {
         scope.dispatchEvent({ type: "dragend", object: _selected });
@@ -213,13 +224,10 @@ class DragControls extends EventDispatcher {
     activate();
 
     // API
-
-    this.enabled = true;
-    this.transformGroup = false;
-
     this.activate = activate;
     this.deactivate = deactivate;
     this.dispose = dispose;
+    this.setObjects = setObjects;
     this.getObjects = getObjects;
     this.getRaycaster = getRaycaster;
   }
