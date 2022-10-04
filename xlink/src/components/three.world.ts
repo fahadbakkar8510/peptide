@@ -83,21 +83,25 @@ export class ThreeWorld implements ThreeInterface {
 
     // Add terrain
     const heightData = generateHeight(terrainWidth, terrainDepth)
+    const realHeightData: number[] = []
+    heightData.map(val => realHeightData.push(val / 10))
+    // console.log('realHeightData: ', realHeightData)
 
     const terrainGeometry = new THREE.PlaneGeometry(100, 100, terrainWidth - 1, terrainDepth - 1)
     terrainGeometry.rotateX(-Math.PI / 2)
     let terrainVertices = terrainGeometry.attributes.position.array
+    // console.log('terrainVertices: ', terrainVertices)
     for (let i = 0, j = 0, l = terrainVertices.length; i < l; i++, j += 3) {
-      terrainVertices[j + 1] = heightData[i] / 10;
+      terrainVertices[j + 1] = realHeightData[i];
     }
     terrainGeometry.computeVertexNormals()
 
-    const terrainTexture = new THREE.CanvasTexture(generateTexture(heightData, terrainWidth, terrainDepth))
+    const terrainTexture = new THREE.CanvasTexture(generateTexture(realHeightData, terrainWidth, terrainDepth))
     terrainTexture.wrapS = terrainTexture.wrapT = THREE.ClampToEdgeWrapping
 
     const terrainMesh = new THREE.Mesh(terrainGeometry, new THREE.MeshPhongMaterial({ map: terrainTexture }))
-    terrainMesh.receiveShadow = true;
-    terrainMesh.castShadow = true;
+    terrainMesh.receiveShadow = true
+    terrainMesh.castShadow = true
 
     this.scene.add(terrainMesh)
     this.physicsWorld.addMesh('terrain', terrainMesh, 0)
@@ -297,7 +301,9 @@ const generateHeight = (width: number, depth: number) => {
   for (let j = 0; j < 4; j++) {
     for (let i = 0; i < size; i++) {
       const x = i % width, y = ~~(i / width);
-      data[i] += Math.abs(noise.noise(x / quality, y / quality, z) * quality * 1.75);
+      const noiseVal = noise.noise(x / quality, y / quality, z)
+      // console.log('noiseVal: ', noiseVal)
+      data[i] += Math.abs(noiseVal * quality * 1.75);
     }
     quality *= 5;
   }
@@ -305,7 +311,7 @@ const generateHeight = (width: number, depth: number) => {
   return data;
 }
 
-const generateTexture = (data: Uint8Array, width: number, height: number) => {
+const generateTexture = (data: number[], width: number, height: number) => {
   let context: CanvasRenderingContext2D | null, image: ImageData, imageData: Uint8ClampedArray, shade: number;
   const vector3 = new THREE.Vector3(0, 0, 0);
   const sun = new THREE.Vector3(1, 1, 1);

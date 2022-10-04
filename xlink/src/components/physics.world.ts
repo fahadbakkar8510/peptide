@@ -58,7 +58,6 @@ export class PhysicsWorld implements PhysicsInterface {
   }
 
   getShape(geometry: any) {
-    // console.log('geometry type: ', geometry.type, geometry)
     const parameters = geometry.parameters
     let shape = null,
       radius,
@@ -95,8 +94,57 @@ export class PhysicsWorld implements PhysicsInterface {
         )
         shape.setMargin(0.05)
         break
+
       case 'PlaneGeometry':
-        break
+        const heightData: number[] = []
+        const { width, height, widthSegments, heightSegments } = geometry.parameters
+        let vertices = geometry.attributes.position.array
+        for (let i = 0, j = 0, l = vertices.length; j < l; i++, j += 3) {
+          heightData[i] = vertices[j + 1];
+        }
+        // console.log('heightData: ', heightData)
+        // console.log('plane geometry: ', geometry)
+        // This parameter is not really used, since we are using PHY_FLOAT height data type and hence it is ignored
+        const heightScale = 1;
+        // Up axis = 0 for X, 1 for Y, 2 for Z. Normally 1 = Y is used.
+        const upAxis = 1;
+        // hdt, height data type. "PHY_FLOAT" is used. Possible values are "PHY_FLOAT", "PHY_UCHAR", "PHY_SHORT"
+        const hdt = 'PHY_FLOAT';
+        // Set this to your needs (inverts the triangles)
+        const flipQuadEdges = false;
+        // Creates height data buffer in Ammo heap
+        const ammoHeightData = ammo!._malloc(4 * (widthSegments + 1) * (heightSegments + 1));
+        // Copy the javascript height data array to the Ammo one.
+        let p = 0;
+        let p2 = 0;
+
+        for (let j = 0; j <= heightSegments; j++) {
+          for (let i = 0; i <= widthSegments; i++) {
+            // write 32-bit float data to memory
+            ammo!.HEAPF32[ammoHeightData + p2 >> 2] = heightData[p];
+            p++;
+            // 4 bytes/float
+            p2 += 4;
+          }
+        }
+
+        // Creates the heightfield physics shape
+        shape = new ammo!.btHeightfieldTerrainShape(
+          widthSegments + 1,
+          heightSegments + 1,
+          ammoHeightData,
+          heightScale,
+          0,
+          10,
+          upAxis,
+          hdt,
+          flipQuadEdges
+        );
+        // Set horizontal scale
+        const scaleX = width / widthSegments;
+        const scaleZ = height / heightSegments;
+        shape.setLocalScaling(new ammo!.btVector3(scaleX, 1, scaleZ));
+        shape.setMargin(0.05);
     }
 
     return shape
@@ -120,9 +168,15 @@ export class PhysicsWorld implements PhysicsInterface {
 
     const transform = new ammo!.btTransform()
     transform.setIdentity()
-    transform.setOrigin(
-      new ammo!.btVector3(position.x, position.y, position.z)
-    )
+
+    if (mesh.geometry.type === 'PlaneGeometry') {
+      console.log('test')
+    } else {
+      transform.setOrigin(
+        new ammo!.btVector3(position.x, position.y, position.z)
+      )
+    }
+
     transform.setRotation(
       new ammo!.btQuaternion(
         quaternion.x,
