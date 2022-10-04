@@ -1,10 +1,11 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, floorColor, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, cameraPosZ, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ } from './constants'
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ, terrainWidth, terrainDepth, cameraPos, zeroVec } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
 import type { PhysicsInterface } from './physics.world'
 import { DragControls } from './drag.controls'
+import { Noise } from './noise'
 
 export class DynamicInstMesh extends THREE.InstancedMesh {
   public additionalIndex: number = 0
@@ -55,7 +56,8 @@ export class ThreeWorld implements ThreeInterface {
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
-    this.camera.position.z = cameraPosZ
+    this.camera.position.copy(cameraPos)
+    this.camera.lookAt(zeroVec)
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -77,18 +79,27 @@ export class ThreeWorld implements ThreeInterface {
     )
 
     // Axes Helper
-    this.scene.add(new THREE.AxesHelper(100))
+    // this.scene.add(new THREE.AxesHelper(100))
 
-    // Add floor
-    const floorMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1000, 1, 1000),
-      new THREE.ShadowMaterial({ color: floorColor })
-    )
-    floorMesh.position.y = -0.5
-    // floorMesh.rotateX(0.3)
-    floorMesh.receiveShadow = true
-    this.scene.add(floorMesh)
-    this.physicsWorld.addMesh('floor', floorMesh, 0)
+    // Add terrain
+    const heightData = generateHeight(terrainWidth, terrainDepth)
+
+    const terrainGeometry = new THREE.PlaneGeometry(100, 100, terrainWidth - 1, terrainDepth - 1)
+    terrainGeometry.rotateX(-Math.PI / 2)
+    let terrainVertices = terrainGeometry.attributes.position.array
+    for (let i = 0, j = 0, l = terrainVertices.length; i < l; i++, j += 3) {
+      terrainVertices[j + 1] = heightData[i] / 10;
+    }
+    terrainGeometry.computeVertexNormals()
+
+    const terrainTexture = new THREE.CanvasTexture(generateTexture(heightData, terrainWidth, terrainDepth))
+    terrainTexture.wrapS = terrainTexture.wrapT = THREE.ClampToEdgeWrapping
+
+    const terrainMesh = new THREE.Mesh(terrainGeometry, new THREE.MeshPhongMaterial({ map: terrainTexture }))
+    terrainMesh.receiveShadow = true;
+    terrainMesh.castShadow = true;
+
+    this.scene.add(terrainMesh)
 
     // Animate
     this.animate()
@@ -267,4 +278,78 @@ export class ThreeWorld implements ThreeInterface {
     })
     this.dragControls?.setObjects(arrResidueInstMesh)
   }
+}
+
+const generateHeight = (width: number, depth: number) => {
+  let seed = Math.PI / 4;
+
+  window.Math.random = function () {
+    let x = Math.sin(seed++);
+    x -= Math.floor(x)
+    return x;
+  };
+
+  const size = width * depth, data = new Uint8Array(size);
+  const noise = new Noise(), z = Math.random() * 100;
+  let quality = 1;
+
+  for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < size; i++) {
+      const x = i % width, y = ~~(i / width);
+      data[i] += Math.abs(noise.noise(x / quality, y / quality, z) * quality * 1.75);
+    }
+    quality *= 5;
+  }
+
+  return data;
+}
+
+const generateTexture = (data: Uint8Array, width: number, height: number) => {
+  let context: CanvasRenderingContext2D, image: ImageData, imageData: Uint8ClampedArray, shade: number;
+  const vector3 = new THREE.Vector3(0, 0, 0);
+  const sun = new THREE.Vector3(1, 1, 1);
+  sun.normalize();
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  context = canvas.getContext('2d');
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, width, height);
+  image = context.getImageData(0, 0, canvas.width, canvas.height);
+  imageData = image.data;
+
+  for (let i = 0, j = 0, l = imageData.length; i < l; i += 4, j++) {
+    vector3.x = data[j - 2] - data[j + 2];
+    vector3.y = 2;
+    vector3.z = data[j - width * 2] - data[j + width * 2];
+    vector3.normalize();
+    shade = vector3.dot(sun);
+    imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
+    imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
+    imageData[i + 2] = (shade * 96) * (0.5 + data[j] * 0.007);
+  }
+
+  context.putImageData(image, 0, 0);
+
+  // Scaled 4x
+  const canvasScaled = document.createElement('canvas');
+  canvasScaled.width = width * 4;
+  canvasScaled.height = height * 4;
+
+  context = canvasScaled.getContext('2d');
+  context.scale(4, 4);
+  context.drawImage(canvas, 0, 0);
+
+  image = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
+  imageData = image.data;
+
+  for (let i = 0, l = imageData.length; i < l; i += 4) {
+    const v = ~~(Math.random() * 5);
+    imageData[i] += v;
+    imageData[i + 1] += v;
+    imageData[i + 2] += v;
+  }
+
+  context.putImageData(image, 0, 0);
+  return canvasScaled;
 }

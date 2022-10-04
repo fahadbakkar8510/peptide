@@ -13,14 +13,15 @@ export const hoverHexStr = '#2ecc40'
 export const activeHexStr = '#01ff70'
 
 export const tempColor1 = new THREE.Color()
-export const floorColor = new THREE.Color(0x111111)
 export const backColor = new THREE.Color(0x666666)
 
 export const tempPos1 = new THREE.Vector3()
 export const normalVecX = new THREE.Vector3(1, 0, 0)
 export const normalVecY = new THREE.Vector3(0, 1, 0)
 export const normalVecZ = new THREE.Vector3(0, 0, 1)
-export const startPos = new THREE.Vector3(-8, 2, 0)
+export const startPos = new THREE.Vector3(-8, 5, 0)
+export const cameraPos = new THREE.Vector3(2, 10, 10)
+export const zeroVec = new THREE.Vector3()
 
 export const tempQuat1 = new THREE.Quaternion()
 
@@ -40,7 +41,6 @@ export const socketLength = residueRadius
 export const crossSocketLength = socketLength * 2
 export const ballRadius = residueRadius / 5 * 2
 
-export const cameraPosZ = 10
 export const frameRate = 60
 export const friction = 50
 export const linearDamping = .8
@@ -55,3 +55,6 @@ export const commonSocketMass = 1
 export const commonBallMass = 1
 
 export const scalingFactor = 20
+
+export const terrainWidth = 100
+export const terrainDepth = 100
