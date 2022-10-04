@@ -72,7 +72,7 @@ export class ThreeWorld implements ThreeInterface {
     this.dragControls = new DragControls(
       this.camera,
       this.renderer.domElement,
-      this.physicsWorld.ammo!,
+      this.physicsWorld,
       this.orbitControls
     )
 

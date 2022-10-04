@@ -53,3 +53,5 @@ export const ballInstCnt = 1000
 export const commonResidueMass = 1
 export const commonSocketMass = 1
 export const commonBallMass = 1
+
+export const scalingFactor = 20

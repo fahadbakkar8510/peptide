@@ -1,5 +1,7 @@
 import type Ammo from 'ammojs-typed';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { scalingFactor } from './constants';
+import type { PhysicsInterface } from './physics.world';
 import {
   EventDispatcher,
   Matrix4,
@@ -35,7 +37,7 @@ class DragControls extends EventDispatcher {
   public getObjects: Function
   public getRaycaster: Function
 
-  constructor(_camera: any, _domElement: any, _ammo: typeof Ammo, _orbitControls: OrbitControls) {
+  constructor(_camera: any, _domElement: any, _physicsWorld: PhysicsInterface, _orbitControls: OrbitControls) {
     super();
     const scope = this
 
@@ -89,14 +91,13 @@ class DragControls extends EventDispatcher {
             _prevPos = curPos.clone();
           }
 
-          if (_ammo) {
-            const scalingFactor = 20;
+          if (_physicsWorld) {
             const diffPos = curPos
               .clone()
               .sub(_prevPos)
               .clone();
             _prevPos = curPos.clone();
-            const resultantImpulse = new _ammo.btVector3(
+            const resultantImpulse = new _physicsWorld.ammo!.btVector3(
               diffPos.x,
               diffPos.y,
               diffPos.z

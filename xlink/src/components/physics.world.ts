@@ -195,10 +195,10 @@ export class PhysicsWorld implements PhysicsInterface {
     return bodies
   }
 
-  setMeshPosition(mesh: any, position: THREE.Vector3, index: number = 0) {
+  setMeshPosition(mesh: any, position: THREE.Vector3, instIndex: number = 0) {
     if (mesh.isInstancedMesh) {
       const bodies = bodyWeakMap.get(mesh)
-      const body = bodies[index]
+      const body = bodies[instIndex]
 
       body.setAngularVelocity(new ammo!.btVector3(0, 0, 0))
       body.setLinearVelocity(new ammo!.btVector3(0, 0, 0))
