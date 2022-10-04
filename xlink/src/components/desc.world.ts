@@ -4,7 +4,7 @@
 
 import { nanoid } from 'nanoid'
 import type { ThreeInterface } from './three.world'
-import { residueRadius, socketRadius, socketLength, ballRadius, crossSocketLength, commonResidueMass, commonSocketMass, commonBallMass } from './constants';
+import { residueRadius, socketRadius, socketLength, ballRadius, crossSocketLength, commonResidueMass, commonSocketMass, commonBallMass } from './constants'
 import { getAlphaOnly } from './common'
 
 export class Residue {

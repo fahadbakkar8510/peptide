@@ -9,6 +9,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@repcomm/three.terrain": "^1.6.0",
     "ammojs-typed": "^1.0.6",
     "nanoid": "^4.0.0",
     "three": "^0.144.0",

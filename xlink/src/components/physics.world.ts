@@ -1,6 +1,6 @@
 import Ammo from 'ammojs-typed'
 import { gravity, frameRate, friction, linearDamping, rotationDamping } from './constants'
-import type { Ball } from './desc.world';
+import type { Ball } from './desc.world'
 
 const meshes: any[] = []
 const bodyMap: Map<string, any> = new Map<string, any>()
@@ -281,7 +281,7 @@ export class PhysicsWorld implements PhysicsInterface {
     const residue1Body = bodyMap.get(ball.socket1.residue.id)
     const socket2Body = bodyMap.get(ball.socket2.id)
     const residue2Body = bodyMap.get(ball.socket2.residue.id)
-    let p2p;
+    let p2p
 
     if (ball.isBond) {
       p2p = new ammo!.btPoint2PointConstraint(
@@ -289,7 +289,7 @@ export class PhysicsWorld implements PhysicsInterface {
         socket1Body,
         new ammo!.btVector3(-ball.radius, 0, 0),
         new ammo!.btVector3(0, ball.socket1.length / 2, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -297,7 +297,7 @@ export class PhysicsWorld implements PhysicsInterface {
         socket2Body,
         new ammo!.btVector3(ball.radius, 0, 0),
         new ammo!.btVector3(0, -ball.socket1.length / 2, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -305,7 +305,7 @@ export class PhysicsWorld implements PhysicsInterface {
         residue1Body,
         new ammo!.btVector3(0, -ball.socket1.length / 2, 0),
         new ammo!.btVector3(0, ball.socket1.residue.radius, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -313,7 +313,7 @@ export class PhysicsWorld implements PhysicsInterface {
         residue2Body,
         new ammo!.btVector3(0, ball.socket2.length / 2, 0),
         new ammo!.btVector3(0, ball.socket2.residue.radius, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
     } else {
       p2p = new ammo!.btPoint2PointConstraint(
@@ -321,7 +321,7 @@ export class PhysicsWorld implements PhysicsInterface {
         socket1Body,
         new ammo!.btVector3(-ball.radius, 0, 0),
         new ammo!.btVector3(0, ball.socket1.length / 2, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -329,7 +329,7 @@ export class PhysicsWorld implements PhysicsInterface {
         socket2Body,
         new ammo!.btVector3(ball.radius, 0, 0),
         new ammo!.btVector3(0, -ball.socket1.length / 2, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -337,7 +337,7 @@ export class PhysicsWorld implements PhysicsInterface {
         residue1Body,
         new ammo!.btVector3(0, -ball.socket1.length / 2, 0),
         new ammo!.btVector3(ball.socket1.residue.radius, 0, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
 
       p2p = new ammo!.btPoint2PointConstraint(
@@ -345,7 +345,7 @@ export class PhysicsWorld implements PhysicsInterface {
         residue2Body,
         new ammo!.btVector3(0, ball.socket2.length / 2, 0),
         new ammo!.btVector3(-ball.socket2.residue.radius, 0, 0)
-      );
+      )
       physicsWorld?.addConstraint(p2p, true)
     }
   }
