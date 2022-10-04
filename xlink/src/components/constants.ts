@@ -19,8 +19,8 @@ export const tempPos1 = new THREE.Vector3()
 export const normalVecX = new THREE.Vector3(1, 0, 0)
 export const normalVecY = new THREE.Vector3(0, 1, 0)
 export const normalVecZ = new THREE.Vector3(0, 0, 1)
-export const startPos = new THREE.Vector3(-8, 5, 0)
-export const cameraPos = new THREE.Vector3(2, 10, 10)
+export const startPos = new THREE.Vector3(-8, 10, 0)
+export const cameraPos = new THREE.Vector3(0, 15, 15)
 export const zeroVec = new THREE.Vector3()
 
 export const tempQuat1 = new THREE.Quaternion()
@@ -56,5 +56,11 @@ export const commonBallMass = 1
 
 export const scalingFactor = 20
 
-export const terrainWidth = 100
-export const terrainDepth = 100
+export const terrainWidthExtents = 100
+export const terrainDepthExtents = 100
+export const terrainWidth = 128
+export const terrainDepth = 128
+export const terrainMaxHeight = 5
+export const terrainMinHeight = - 5
+
+export const textureLoader = new THREE.TextureLoader()

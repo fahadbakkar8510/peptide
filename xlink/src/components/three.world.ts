@@ -1,11 +1,10 @@
 import * as THREE from 'three'
-import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, commonResidueMass, commonSocketMass, commonBallMass, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ, terrainWidth, terrainDepth, cameraPos, zeroVec } from './constants';
+import { backColor, fogHex, fogDensity, lightAHex, lightBHex, lightCHex, acidHexStr, tempMatrix1, residueInstCnt, socketInstCnt, tempColor1, bondSocketHex, socketHex, ballHex, ballInstCnt, startPos, tempMultiMatrix1, tempMatrix2, normalVecZ, cameraPos, zeroVec, terrainWidth, terrainDepth, terrainMinHeight, terrainMaxHeight, terrainWidthExtents, terrainDepthExtents, textureLoader } from './constants';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import type { Residue, Socket, Ball } from './desc.world'
 import { getTextTexture } from './common'
 import type { PhysicsInterface } from './physics.world'
 import { DragControls } from './drag.controls'
-import { Noise } from './noise'
 
 export class DynamicInstMesh extends THREE.InstancedMesh {
   public additionalIndex: number = 0
@@ -82,28 +81,27 @@ export class ThreeWorld implements ThreeInterface {
     // this.scene.add(new THREE.AxesHelper(100))
 
     // Add terrain
-    const heightData = generateHeight(terrainWidth, terrainDepth)
-    const realHeightData: number[] = []
-    heightData.map(val => realHeightData.push(val / 10))
-    // console.log('realHeightData: ', realHeightData)
-
-    const terrainGeometry = new THREE.PlaneGeometry(100, 100, terrainWidth - 1, terrainDepth - 1)
-    terrainGeometry.rotateX(-Math.PI / 2)
-    let terrainVertices = terrainGeometry.attributes.position.array
-    // console.log('terrainVertices: ', terrainVertices)
-    for (let i = 0, j = 0, l = terrainVertices.length; i < l; i++, j += 3) {
-      terrainVertices[j + 1] = realHeightData[i];
+    const heightData = generateHeight(terrainWidth, terrainDepth, terrainMinHeight, terrainMaxHeight);
+    const terrainGeometry = new THREE.PlaneGeometry(terrainWidthExtents, terrainDepthExtents, terrainWidth - 1, terrainDepth - 1);
+    terrainGeometry.rotateX(- Math.PI / 2);
+    const vertices = terrainGeometry.attributes.position.array;
+    for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
+      // j + 1 because it is the y component that we modify
+      vertices[j + 1] = heightData[i];
     }
-    terrainGeometry.computeVertexNormals()
-
-    const terrainTexture = new THREE.CanvasTexture(generateTexture(realHeightData, terrainWidth, terrainDepth))
-    terrainTexture.wrapS = terrainTexture.wrapT = THREE.ClampToEdgeWrapping
-
-    const terrainMesh = new THREE.Mesh(terrainGeometry, new THREE.MeshPhongMaterial({ map: terrainTexture }))
-    terrainMesh.receiveShadow = true
-    terrainMesh.castShadow = true
-
-    this.scene.add(terrainMesh)
+    terrainGeometry.computeVertexNormals();
+    const groundMaterial = new THREE.MeshPhongMaterial({ color: 0xC7C7C7 });
+    const terrainMesh = new THREE.Mesh(terrainGeometry, groundMaterial);
+    terrainMesh.receiveShadow = true;
+    terrainMesh.castShadow = true;
+    this.scene.add(terrainMesh);
+    textureLoader.load('grid.png', function (texture) {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(terrainWidth - 1, terrainDepth - 1);
+      groundMaterial.map = texture;
+      groundMaterial.needsUpdate = true;
+    });
     this.physicsWorld.addMesh('terrain', terrainMesh, 0)
 
     // Animate
@@ -285,78 +283,26 @@ export class ThreeWorld implements ThreeInterface {
   }
 }
 
-const generateHeight = (width: number, depth: number) => {
-  let seed = Math.PI / 4;
+const generateHeight = (width: number, depth: number, minHeight: number, maxHeight: number) => {
+  // Generates the height data (a sine wave)
+  const size = width * depth;
+  const data = new Float32Array(size);
+  const hRange = maxHeight - minHeight;
+  const w2 = width / 2;
+  const d2 = depth / 2;
+  const phaseMult = 12;
+  let p = 0;
 
-  window.Math.random = function () {
-    let x = Math.sin(seed++);
-    x -= Math.floor(x)
-    return x;
-  };
-
-  const size = width * depth, data = new Uint8Array(size);
-  const noise = new Noise(), z = Math.random() * 100;
-  let quality = 1;
-
-  for (let j = 0; j < 4; j++) {
-    for (let i = 0; i < size; i++) {
-      const x = i % width, y = ~~(i / width);
-      const noiseVal = noise.noise(x / quality, y / quality, z)
-      // console.log('noiseVal: ', noiseVal)
-      data[i] += Math.abs(noiseVal * quality * 1.75);
+  for (let j = 0; j < depth; j++) {
+    for (let i = 0; i < width; i++) {
+      const radius = Math.sqrt(
+        Math.pow((i - w2) / w2, 2.0) +
+        Math.pow((j - d2) / d2, 2.0));
+      const height = (Math.sin(radius * phaseMult) + 1) * 0.5 * hRange + minHeight;
+      data[p] = height;
+      p++;
     }
-    quality *= 5;
   }
 
   return data;
-}
-
-const generateTexture = (data: number[], width: number, height: number) => {
-  let context: CanvasRenderingContext2D | null, image: ImageData, imageData: Uint8ClampedArray, shade: number;
-  const vector3 = new THREE.Vector3(0, 0, 0);
-  const sun = new THREE.Vector3(1, 1, 1);
-  sun.normalize();
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  context = canvas.getContext('2d');
-  context!.fillStyle = '#000';
-  context!.fillRect(0, 0, width, height);
-  image = context!.getImageData(0, 0, canvas.width, canvas.height);
-  imageData = image.data;
-
-  for (let i = 0, j = 0, l = imageData.length; i < l; i += 4, j++) {
-    vector3.x = data[j - 2] - data[j + 2];
-    vector3.y = 2;
-    vector3.z = data[j - width * 2] - data[j + width * 2];
-    vector3.normalize();
-    shade = vector3.dot(sun);
-    imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
-    imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
-    imageData[i + 2] = (shade * 96) * (0.5 + data[j] * 0.007);
-  }
-
-  context!.putImageData(image, 0, 0);
-
-  // Scaled 4x
-  const canvasScaled = document.createElement('canvas');
-  canvasScaled.width = width * 4;
-  canvasScaled.height = height * 4;
-
-  context = canvasScaled.getContext('2d');
-  context!.scale(4, 4);
-  context!.drawImage(canvas, 0, 0);
-
-  image = context!.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
-  imageData = image.data;
-
-  for (let i = 0, l = imageData.length; i < l; i += 4) {
-    const v = ~~(Math.random() * 5);
-    imageData[i] += v;
-    imageData[i + 1] += v;
-    imageData[i + 2] += v;
-  }
-
-  context!.putImageData(image, 0, 0);
-  return canvasScaled;
 }

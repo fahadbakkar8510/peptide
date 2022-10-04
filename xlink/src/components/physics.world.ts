@@ -134,8 +134,8 @@ export class PhysicsWorld implements PhysicsInterface {
           heightSegments + 1,
           ammoHeightData,
           heightScale,
-          0,
-          10,
+          -5,
+          5,
           upAxis,
           hdt,
           flipQuadEdges
@@ -169,13 +169,9 @@ export class PhysicsWorld implements PhysicsInterface {
     const transform = new ammo!.btTransform()
     transform.setIdentity()
 
-    if (mesh.geometry.type === 'PlaneGeometry') {
-      console.log('test')
-    } else {
-      transform.setOrigin(
-        new ammo!.btVector3(position.x, position.y, position.z)
-      )
-    }
+    transform.setOrigin(
+      new ammo!.btVector3(position.x, position.y, position.z)
+    )
 
     transform.setRotation(
       new ammo!.btQuaternion(
