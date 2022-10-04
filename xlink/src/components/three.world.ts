@@ -100,6 +100,7 @@ export class ThreeWorld implements ThreeInterface {
     terrainMesh.castShadow = true;
 
     this.scene.add(terrainMesh)
+    this.physicsWorld.addMesh('terrain', terrainMesh, 0)
 
     // Animate
     this.animate()
@@ -305,7 +306,7 @@ const generateHeight = (width: number, depth: number) => {
 }
 
 const generateTexture = (data: Uint8Array, width: number, height: number) => {
-  let context: CanvasRenderingContext2D, image: ImageData, imageData: Uint8ClampedArray, shade: number;
+  let context: CanvasRenderingContext2D | null, image: ImageData, imageData: Uint8ClampedArray, shade: number;
   const vector3 = new THREE.Vector3(0, 0, 0);
   const sun = new THREE.Vector3(1, 1, 1);
   sun.normalize();
@@ -313,9 +314,9 @@ const generateTexture = (data: Uint8Array, width: number, height: number) => {
   canvas.width = width;
   canvas.height = height;
   context = canvas.getContext('2d');
-  context.fillStyle = '#000';
-  context.fillRect(0, 0, width, height);
-  image = context.getImageData(0, 0, canvas.width, canvas.height);
+  context!.fillStyle = '#000';
+  context!.fillRect(0, 0, width, height);
+  image = context!.getImageData(0, 0, canvas.width, canvas.height);
   imageData = image.data;
 
   for (let i = 0, j = 0, l = imageData.length; i < l; i += 4, j++) {
@@ -329,7 +330,7 @@ const generateTexture = (data: Uint8Array, width: number, height: number) => {
     imageData[i + 2] = (shade * 96) * (0.5 + data[j] * 0.007);
   }
 
-  context.putImageData(image, 0, 0);
+  context!.putImageData(image, 0, 0);
 
   // Scaled 4x
   const canvasScaled = document.createElement('canvas');
@@ -337,10 +338,10 @@ const generateTexture = (data: Uint8Array, width: number, height: number) => {
   canvasScaled.height = height * 4;
 
   context = canvasScaled.getContext('2d');
-  context.scale(4, 4);
-  context.drawImage(canvas, 0, 0);
+  context!.scale(4, 4);
+  context!.drawImage(canvas, 0, 0);
 
-  image = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
+  image = context!.getImageData(0, 0, canvasScaled.width, canvasScaled.height);
   imageData = image.data;
 
   for (let i = 0, l = imageData.length; i < l; i += 4) {
@@ -350,6 +351,6 @@ const generateTexture = (data: Uint8Array, width: number, height: number) => {
     imageData[i + 2] += v;
   }
 
-  context.putImageData(image, 0, 0);
+  context!.putImageData(image, 0, 0);
   return canvasScaled;
 }

@@ -58,6 +58,7 @@ export class PhysicsWorld implements PhysicsInterface {
   }
 
   getShape(geometry: any) {
+    // console.log('geometry type: ', geometry.type, geometry)
     const parameters = geometry.parameters
     let shape = null,
       radius,
@@ -93,6 +94,8 @@ export class PhysicsWorld implements PhysicsInterface {
           new ammo!.btVector3(radiusTop, sy, radiusBottom)
         )
         shape.setMargin(0.05)
+        break
+      case 'PlaneGeometry':
         break
     }
 
