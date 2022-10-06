@@ -60,7 +60,7 @@ export const terrainWidthExtents = 100
 export const terrainDepthExtents = 100
 export const terrainWidth = 128
 export const terrainDepth = 128
-export const terrainMaxHeight = 5
-export const terrainMinHeight = - 5
+export const terrainMaxHeight = 0
+export const terrainMinHeight = 0
 
 export const textureLoader = new THREE.TextureLoader()

@@ -134,8 +134,8 @@ export class PhysicsWorld implements PhysicsInterface {
           heightSegments + 1,
           ammoHeightData,
           heightScale,
-          -5,
-          5,
+          -100,
+          100,
           upAxis,
           hdt,
           flipQuadEdges
